@@ -1,0 +1,32 @@
+:root {
+  --color-bg: #ffffff;
+  --color-page: #f2f2f0;
+  --color-text: #1a1a1a;
+  --color-text-sub: #6b6b6b;
+  --color-border: #e3e3e0;
+  --color-primary: #2f6fed;
+
+  font-family:
+    'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  color: var(--color-text);
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-page);
+}
+
+/* 시연 기준인 폰 크기(390×844)로 화면을 가운데에 고정 */
+#root {
+  max-width: 390px;
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: var(--color-bg);
+}
