@@ -6,7 +6,7 @@ export default function ComponentTestPage() {
     <main className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.title}>컴포넌트 테스트</h1>
-        <p className={styles.sub}>로컬 개발에서만 보이는 페이지예요. 컴포넌트는 demos.tsx에 추가하세요.</p>
+        <p className={styles.sub}>로컬과 Vercel 미리보기에서만 보이는 페이지예요. 컴포넌트는 demos.tsx에 추가하세요.</p>
       </header>
 
       {componentDemos.length === 0 ? (
