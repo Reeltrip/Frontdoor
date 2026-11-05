@@ -1,0 +1,76 @@
+/* 작은 스피너: 79.5px 틀 안에 고리 이미지가 바깥으로 11.7%씩 번져 있음 */
+.spinner {
+  position: relative;
+  display: inline-block;
+  width: 79.492px;
+  height: 79.492px;
+}
+
+.spinnerRing {
+  position: absolute;
+  inset: -11.7%;
+  width: 98.092px;
+  height: 98.092px;
+  animation: spin 1.2s linear infinite;
+}
+
+/* 큰 로딩: 200px 틀. 바깥 원(Ellipse 18)과 안쪽 덩어리(Polygon 2)를 서로 다른 속도로 돌림 */
+.blob {
+  position: relative;
+  display: inline-block;
+  width: 200px;
+  height: 200px;
+}
+
+.blobRing,
+.blobCore {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+}
+
+.blobRing {
+  width: 266.785px;
+  height: 266.785px;
+  margin: -133.39px 0 0 -133.39px;
+  animation: spin-ring 2.4s linear infinite;
+}
+
+.blobCore {
+  width: 136.532px;
+  height: 136.405px;
+  margin: -68.27px 0 0 -68.2px;
+  animation: spin-core 1.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-ring {
+  from {
+    transform: rotate(58.73deg);
+  }
+  to {
+    transform: rotate(418.73deg);
+  }
+}
+
+@keyframes spin-core {
+  from {
+    transform: rotate(45deg);
+  }
+  to {
+    transform: rotate(-315deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinnerRing,
+  .blobRing,
+  .blobCore {
+    animation-duration: 6s;
+  }
+}
