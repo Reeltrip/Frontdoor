@@ -7,7 +7,7 @@ import PlaceCard from '@/features/place/ui/PlaceCard';
 import PlaceCardCompact from '@/features/place/ui/PlaceCardCompact';
 import CategoryChip from '@/features/place/ui/CategoryChip';
 import type { Place } from '@/features/place/model/place.types';
-import { ChipDemo, ColorScale, ModalDemo, TabBarDemo, TextFieldDemo } from './DemoWidgets';
+import { ChipDemo, ColorScale, LoadingSpeedDemo, ModalDemo, TabBarDemo, TextFieldDemo } from './DemoWidgets';
 import sampleFood from '@/shared/assets/images/sample-food.png';
 import sampleHotel from '@/shared/assets/images/sample-hotel.jpg';
 import sampleDonut from '@/shared/assets/images/sample-donut.jpg';
@@ -202,7 +202,9 @@ export const componentDemos: ComponentDemo[] = [
   {
     name: 'Loading',
     path: 'shared/components/Loading',
+    description: 'speed prop으로 회전 속도 배율 조절 (기본 1)',
     variants: [
+      { label: '속도 조절', render: () => <LoadingSpeedDemo /> },
       { label: '작은 스피너', render: () => <LoadingSpinner /> },
       { label: '분석 중 (큰 로딩)', render: () => <LoadingBlob /> },
     ],
