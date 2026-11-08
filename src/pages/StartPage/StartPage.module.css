@@ -1,0 +1,73 @@
+.page {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 100dvh;
+    overflow: hidden;
+    color: #fafafa;
+}
+
+
+.background {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+
+}
+
+.hero,
+.actions {
+    position: relative;
+}
+
+.hero {
+    padding-top: 155px;
+    text-align: center;
+}
+
+.logo {
+    width: 140px;
+}
+
+.tagline {
+    margin-top: 18px;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.actions {
+    padding: 0 24px calc(24px + env(safe-area-inset-bottom));
+}
+
+.loginButton {
+    width: 100%;
+    height: 60px;
+    border: none;
+    border-radius: 32px;
+    background: rgba(29, 29, 29, 0.53);
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: 500;
+    font-family: inherit;
+}
+
+.signupText {
+    margin-top: 4px;
+    font-size: 14px;
+    font-weight: 400;
+    text-align: center;
+}
+
+.signupLink {
+    color: inherit;
+    text-decoration: none;
+}
