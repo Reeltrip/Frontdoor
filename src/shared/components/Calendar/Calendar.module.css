@@ -1,4 +1,5 @@
-/* 피그마 글꼴은 Avenir Next LT Pro Demi. 앱에 없는 글꼴이라 Pretendard 600으로 대신함 */
+/* 피그마 글꼴은 Avenir Next Demi(600). 유료 폰트라 파일을 넣지 않고,
+   Mac·iPhone에 기본으로 있는 Avenir Next를 쓰고 없으면 Pretendard로 보여줌 */
 .calendar {
   display: flex;
   flex-direction: column;
@@ -8,7 +9,7 @@
   padding: 24px;
   border-radius: 8px;
   background: var(--color-gray-800);
-  font-family: var(--font-family);
+  font-family: 'Avenir Next', var(--font-family);
   font-weight: 600;
 }
 
