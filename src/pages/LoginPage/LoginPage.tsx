@@ -1,5 +1,5 @@
-import type { FormEvent } from "react";
-import { Link, useNavigate } from "react-router";
+import type { SyntheticEvent } from "react";
+import { Link, useLocation, useNavigate } from "react-router";
 import AuthLayout from "@/features/auth/ui/AuthLayout";
 import AuthInput from "@/features/auth/ui/AuthInput";
 import AuthButton from "@/features/auth/ui/AuthButton";
@@ -8,6 +8,9 @@ import styles from "./LoginPage.module.css";
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isAfterSignup =
+    (location.state as { fromSignup?: boolean } | null)?.fromSignup === true;
   const {
     email,
     setEmail,
@@ -16,9 +19,11 @@ export default function LoginPage() {
     errorMessage,
     canSubmit,
     handleSubmit,
-  } = useLoginForm(() => navigate("/home"));
+  } = useLoginForm(() =>
+    navigate(isAfterSignup ? "/signup/nickname" : "/home"),
+  );
 
-  const handleFormSubmit = (event: FormEvent) => {
+  const handleFormSubmit = (event: SyntheticEvent) => {
     event.preventDefault();
     handleSubmit();
   };
