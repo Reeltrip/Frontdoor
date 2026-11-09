@@ -18,17 +18,19 @@
   --color-gray-50: #ebebeb;
   --color-gray-100: #dadada;
   --color-gray-200: #c7c7c7;
-  --color-gray-300: #b3b3b3;
+  --color-gray-300: #bbb9b2;
   --color-gray-400: #999999;
   --color-gray-500: #808080;
   --color-gray-600: #666666;
   --color-gray-700: #4d4d4d;
   --color-gray-800: #333333;
   --color-gray-900: #1a1a1a;
-  /* 컴포넌트(탭 바 선택, 비활성 버튼, 칩)에서 쓰는 따뜻한 회색. 팔레트의 300과 다른 값 */
-  --color-gray-warm: #bbb9b2;
   --color-white: #fafafa;
   --color-surface: #fefefe;
+  /* 어두운 모달 배경 */
+  --color-surface-dark: #272727;
+  /* 캘린더 요일·화살표 */
+  --color-calendar-sub: #b5bec6;
 
   /* 지도 노드 마커 배경 */
   --color-marker-bg: #c9da8a;
@@ -47,7 +49,7 @@
   --font-h1: 700 26px/1.5 var(--font-family);
   --font-h2: 600 24px/1.67 var(--font-family);
   --font-h3: 500 18px/1.66 var(--font-family);
-  --font-body1: 400 16px/1.75 var(--font-family);
+  --font-body1: 400 16px/1.6 var(--font-family);
   --font-body2: 400 14px/1.71 var(--font-family);
   --font-button: 500 16px/1.75 var(--font-family);
   --font-caption: 400 12px/1.67 var(--font-family);

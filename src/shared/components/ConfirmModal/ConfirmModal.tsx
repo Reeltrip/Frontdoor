@@ -1,12 +1,15 @@
 import { useEffect, useId } from 'react';
 import linkIcon from '@/shared/assets/icons/modal-link.svg';
 import alertIcon from '@/shared/assets/icons/modal-alert.svg';
+import ticketIcon from '@/shared/assets/icons/modal-ticket.svg';
 import Button from '@/shared/components/Button';
 import styles from './ConfirmModal.module.css';
 
 type ConfirmModalProps = {
   isOpen: boolean;
-  icon: 'link' | 'alert';
+  icon: 'link' | 'alert' | 'ticket';
+  /** dark: 검은 배경 (여행 계획 완성 안내) */
+  theme?: 'light' | 'dark';
   title: string;
   description?: string;
   cancelLabel: string;
@@ -28,6 +31,7 @@ export default function ConfirmModal({
   onCancel,
   onConfirm,
   isInline = false,
+  theme = 'light',
 }: ConfirmModalProps) {
   const titleId = useId();
 
@@ -43,12 +47,17 @@ export default function ConfirmModal({
   if (!isOpen) return null;
 
   const dialog = (
-    <div className={styles.dialog} role="dialog" aria-modal={!isInline} aria-labelledby={titleId}>
+    <div
+      className={`${styles.dialog} ${theme === 'dark' ? styles.dark : ''}`}
+      role="dialog"
+      aria-modal={!isInline}
+      aria-labelledby={titleId}
+    >
       <div className={styles.iconBox}>
-        {icon === 'link' ? (
-          <img src={linkIcon} alt="" />
-        ) : (
+        {icon === 'alert' ? (
           <img src={alertIcon} alt="" className={styles.alertIcon} />
+        ) : (
+          <img src={icon === 'link' ? linkIcon : ticketIcon} alt="" />
         )}
       </div>
       <p id={titleId} className={styles.title}>
@@ -56,7 +65,7 @@ export default function ConfirmModal({
       </p>
       {description && <p className={styles.description}>{description}</p>}
       <div className={styles.actions}>
-        <Button variant="outline" size="md" onClick={onCancel}>
+        <Button variant="outline" size="md" className={styles.cancelButton} onClick={onCancel}>
           {cancelLabel}
         </Button>
         <Button variant="filled" size="md" onClick={onConfirm} autoFocus={!isInline}>

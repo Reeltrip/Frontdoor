@@ -16,6 +16,21 @@
   animation: spin calc(1.2s / var(--loading-speed, 1)) linear infinite;
 }
 
+/* 회색 호: 작은 스피너와 같은 79.5px 틀 */
+.arc {
+  position: relative;
+  display: inline-block;
+  width: 79.492px;
+  height: 79.492px;
+}
+
+.arcImage {
+  display: block;
+  width: 79.492px;
+  height: 79.492px;
+  animation: spin calc(1.2s / var(--loading-speed, 1)) linear infinite;
+}
+
 /* 큰 로딩: 200px 틀. 바깥 원(Ellipse 18)과 안쪽 덩어리(Polygon 2)를 서로 다른 속도로 돌림 */
 .blob {
   position: relative;
@@ -71,6 +86,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .spinnerRing,
+  .arcImage,
   .blobRing,
   .blobCore {
     animation-duration: 6s;

@@ -52,6 +52,25 @@
   color: var(--color-gray-500);
 }
 
+/* 어두운 모달: 배경·글자색과 왼쪽 버튼만 다름 */
+.dark {
+  background: var(--color-surface-dark);
+}
+
+.dark .title {
+  color: var(--color-white);
+}
+
+.dark .description {
+  color: var(--color-gray-400);
+}
+
+.dark .cancelButton {
+  border-color: transparent;
+  background: var(--color-gray-800);
+  color: var(--color-gray-300);
+}
+
 .actions {
   display: grid;
   grid-template-columns: 1fr 1fr;

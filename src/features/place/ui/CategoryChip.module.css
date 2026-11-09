@@ -33,3 +33,16 @@
 .iconBox img {
   display: block;
 }
+
+/* 피그마 아이콘 색: 기본 #4d4d4d(gray-700), 선택 #fafafa(white) */
+.tinted {
+  filter: brightness(0) invert(0.302);
+}
+
+.selected .tinted {
+  filter: brightness(0) invert(0.98);
+}
+
+.flipped {
+  transform: scaleY(-1);
+}

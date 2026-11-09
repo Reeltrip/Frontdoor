@@ -8,11 +8,12 @@ type PlaceCardProps = {
   place: Place;
   onOpen?: (place: Place) => void;
   onCopy?: (place: Place) => void;
+  onAddMemo?: (place: Place) => void;
   className?: string;
 };
 
 // 사진 위에 정보가 올라간 큰 요약 카드 (보관함 목록)
-export default function PlaceCard({ place, onOpen, onCopy, className }: PlaceCardProps) {
+export default function PlaceCard({ place, onOpen, onCopy, onAddMemo, className }: PlaceCardProps) {
   return (
     <article className={[styles.card, className].filter(Boolean).join(' ')}>
       <img src={place.imageUrl} alt="" className={styles.photo} />
@@ -49,14 +50,12 @@ export default function PlaceCard({ place, onOpen, onCopy, className }: PlaceCar
           ))}
         </p>
 
-        {(place.tag || place.reviewCount !== undefined) && (
-          <div className={styles.meta}>
-            {place.tag && <span className={styles.tag}>{place.tag}</span>}
-            {place.reviewCount !== undefined && (
-              <span className={styles.reviews}>{place.reviewCount.toLocaleString()} Reviews</span>
-            )}
-          </div>
-        )}
+        <div className={styles.meta}>
+          {place.tag && <span className={styles.tag}>{place.tag}</span>}
+          <button type="button" className={styles.memoButton} onClick={() => onAddMemo?.(place)}>
+            +메모추가
+          </button>
+        </div>
       </div>
     </article>
   );

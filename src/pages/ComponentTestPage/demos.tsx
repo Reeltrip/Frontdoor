@@ -1,13 +1,25 @@
 import type { ReactNode } from 'react';
 import Button from '@/shared/components/Button';
 import ConfirmModal from '@/shared/components/ConfirmModal';
-import { LoadingBlob, LoadingSpinner } from '@/shared/components/Loading';
+import { LoadingArc, LoadingBlob, LoadingSpinner } from '@/shared/components/Loading';
 import { MapMarker } from '@/shared/components/Map';
 import PlaceCard from '@/features/place/ui/PlaceCard';
 import PlaceCardCompact from '@/features/place/ui/PlaceCardCompact';
 import CategoryChip from '@/features/place/ui/CategoryChip';
 import type { Place } from '@/features/place/model/place.types';
-import { ChipDemo, ColorScale, LoadingSpeedDemo, ModalDemo, TabBarDemo, TextFieldDemo } from './DemoWidgets';
+import {
+  CalendarDemo,
+  CategoryFilterDemo,
+  ChipDemo,
+  ColorScale,
+  DarkBox,
+  LabeledInputDemo,
+  LoadingSpeedDemo,
+  ModalDemo,
+  SegmentedButtonsDemo,
+  TabBarDemo,
+  TextFieldDemo,
+} from './DemoWidgets';
 import sampleFood from '@/shared/assets/images/sample-food.png';
 import sampleHotel from '@/shared/assets/images/sample-hotel.jpg';
 import sampleDonut from '@/shared/assets/images/sample-donut.jpg';
@@ -108,7 +120,36 @@ export const componentDemos: ComponentDemo[] = [
           </div>
         ),
       },
+      {
+        label: '어두운 화면 (glass) · 비활성',
+        render: () => (
+          <DarkBox>
+            <Button variant="glass">생성하기</Button>
+            <Button variant="glass" disabled>
+              생성하기
+            </Button>
+          </DarkBox>
+        ),
+      },
     ],
+  },
+  {
+    name: 'SegmentedButtons',
+    path: 'shared/components/SegmentedButtons',
+    description: '둘 중 하나 고르기. 눌러서 바꾸기 확인',
+    variants: [{ label: '기본', render: () => <SegmentedButtonsDemo /> }],
+  },
+  {
+    name: 'LabeledInput',
+    path: 'shared/components/LabeledInput',
+    description: '어두운 화면용 제목 + 입력칸. 눌러서 입력 중 모양 확인',
+    variants: [{ label: '비어 있음 · 입력함', render: () => <LabeledInputDemo /> }],
+  },
+  {
+    name: 'Calendar',
+    path: 'shared/components/Calendar',
+    description: '여행 기간 선택. 시작일 → 종료일 순서로 눌러 보기',
+    variants: [{ label: '기간 선택', render: () => <CalendarDemo /> }],
   },
   {
     name: 'TextField',
@@ -154,6 +195,39 @@ export const componentDemos: ComponentDemo[] = [
           />
         ),
       },
+      {
+        label: '여행 계획 완성 (어두운 모달)',
+        render: () => (
+          <ConfirmModal
+            isOpen
+            isInline
+            theme="dark"
+            icon="ticket"
+            title="여행 계획이 만들어졌어요."
+            description="어떻게 만들까요?"
+            cancelLabel="AI 초안 만들기"
+            confirmLabel="직접 만들기"
+            onCancel={noop}
+            onConfirm={noop}
+          />
+        ),
+      },
+      {
+        label: '숙소 위치 묻기',
+        render: () => (
+          <ConfirmModal
+            isOpen
+            isInline
+            icon="alert"
+            title="숙소 위치가 어디인가요?"
+            description="선택한 주소가 메일의 출발지, 도착지가 돼요."
+            cancelLabel="건너뛰기"
+            confirmLabel="추가하기"
+            onCancel={noop}
+            onConfirm={noop}
+          />
+        ),
+      },
       { label: '화면 위에 띄우기', render: () => <ModalDemo /> },
     ],
   },
@@ -179,7 +253,8 @@ export const componentDemos: ComponentDemo[] = [
       { label: '선택 안 함', render: () => <CategoryChip category="food" isSelected={false} /> },
       { label: '선택함', render: () => <CategoryChip category="food" isSelected /> },
       { label: '눌러서 바꾸기', render: () => <ChipDemo /> },
-      { label: '아이콘 없는 카테고리', render: () => <CategoryChip category="cafe" isSelected={false} /> },
+      { label: '전체 필터 (눌러서 바꾸기)', render: () => <CategoryFilterDemo /> },
+      { label: '아이콘 없는 카테고리 (교통)', render: () => <CategoryChip category="transportation" isSelected={false} /> },
     ],
   },
   {
@@ -206,6 +281,7 @@ export const componentDemos: ComponentDemo[] = [
     variants: [
       { label: '속도 조절', render: () => <LoadingSpeedDemo /> },
       { label: '작은 스피너', render: () => <LoadingSpinner /> },
+      { label: '회색 호', render: () => <LoadingArc /> },
       { label: '분석 중 (큰 로딩)', render: () => <LoadingBlob /> },
     ],
   },

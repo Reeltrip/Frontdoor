@@ -6,6 +6,7 @@ export type PlaceCategory =
   | 'shopping'
   | 'attraction'
   | 'transportation'
+  | 'tip'
   | 'activity';
 
 export type Place = {
