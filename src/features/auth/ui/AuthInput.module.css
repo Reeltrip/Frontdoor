@@ -1,0 +1,32 @@
+.input {
+    width: 100%;
+    height: 56px;
+    padding: 0 16px;
+    border: 1px solid #EBEBEB;
+    border-radius: 15px;
+    background: #ffffff;
+    color: #1A1A1A;
+    font: inherit;
+    font-size: 14px;
+}
+
+.input::placeholder {
+    color: #C7C7C7;
+    font-size: 14px;
+}
+
+.input:focus {
+    outline: none;
+}
+
+.error,
+.error:focus {
+    border-color: #F37490;
+    background: #F374900D;
+}
+
+.errorMessage {
+    margin: 8px 0 0 0px;
+    color: #F37490;
+    font-size: 12px;
+}

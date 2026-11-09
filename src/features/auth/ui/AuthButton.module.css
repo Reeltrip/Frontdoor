@@ -1,0 +1,17 @@
+.button {
+    width: 100%;
+    height: 60px;
+    border: none;
+    border-radius: 32px;
+    background: #333333;
+    color: #fafafa;
+    font: inherit;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.button:disabled {
+    background: #c7c7c7;
+    cursor: default;
+}
