@@ -1,0 +1,81 @@
+/* 피그마 글꼴은 Avenir Next Demi(600). 유료 폰트라 파일을 넣지 않고,
+   Mac·iPhone에 기본으로 있는 Avenir Next를 쓰고 없으면 Pretendard로 보여줌 */
+.calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  width: 350px;
+  max-width: 100%;
+  padding: 24px;
+  border-radius: 8px;
+  background: var(--color-gray-800);
+  font-family: 'Avenir Next', var(--font-family);
+  font-weight: 600;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.arrow {
+  display: flex;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.month {
+  margin: 0;
+  font-size: 14px;
+  line-height: 14px;
+  color: var(--color-gray-0);
+}
+
+/* 7칸 × 30px, 칸 사이 8px */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(7, 30px);
+  justify-content: center;
+  column-gap: 8px;
+}
+
+.dates {
+  row-gap: 8px;
+}
+
+.weekday {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 20px;
+  font-size: 10px;
+  line-height: 12px;
+  letter-spacing: 1.5px;
+  color: var(--color-calendar-sub);
+}
+
+.date {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  border-radius: 29px;
+  background: none;
+  font: inherit;
+  font-size: 16px;
+  line-height: 18px;
+  color: var(--color-gray-0);
+  cursor: pointer;
+}
+
+.selected {
+  background: var(--color-lime-800);
+}

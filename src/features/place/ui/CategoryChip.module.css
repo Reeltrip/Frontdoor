@@ -1,0 +1,48 @@
+.chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 97px;
+  background: rgba(187, 185, 178, 0.5);
+  backdrop-filter: blur(0.5px);
+  font: var(--font-body1);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-700);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.selected {
+  gap: 10px;
+  background: var(--color-gray-900);
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.iconBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.iconBox img {
+  display: block;
+}
+
+/* 피그마 아이콘 색: 기본 #4d4d4d(gray-700), 선택 #fafafa(white) */
+.tinted {
+  filter: brightness(0) invert(0.302);
+}
+
+.selected .tinted {
+  filter: brightness(0) invert(0.98);
+}
+
+.flipped {
+  transform: scaleY(-1);
+}
