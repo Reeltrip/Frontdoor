@@ -56,7 +56,7 @@
 - 새 패키지를 설치하기 전에 무엇을 왜 설치하는지 먼저 물어봐요.
 - API 키는 코드에 직접 쓰지 않고 `.env`에만 둬요. `.env` 내용은 출력하지 않아요. `VITE_`로 시작하는 값은 브라우저에 그대로 노출된다는 점도 기억해요.
 - 화면을 만들면 390×844 크기에서 확인해요. 로딩·실패·빈 화면도 같이 만들어요 (MVP 필수, 본선 안정성·예외 처리 점수).
-- 공통 컴포넌트를 만들거나 고치면 `src/pages/ComponentTestPage/demos.tsx`에 상태별로 등록하고, `npm run dev` 후 `/dev/components`에서 확인해요. 이 페이지는 로컬 개발에서만 열리고 배포 URL에는 나오지 않아요.
+- 공통 컴포넌트를 만들거나 고치면 `src/pages/ComponentTestPage/demos.tsx`에 상태별로 등록하고, `npm run dev` 후 `/dev/components`에서 확인해요. 이 페이지는 로컬과 Vercel 미리보기 배포(PR·feature 브랜치)에서만 열리고, 제출용 main 배포에는 나오지 않아요.
 - API 형식은 금요일 전체 회의에서 BE와 정한 것을 따라요. 정해지지 않은 부분은 가짜 데이터로 먼저 만들고, 가짜라는 걸 코드에 표시해요.
 
 ## 커밋 메시지
@@ -93,7 +93,7 @@ fix: 플랜B 동선이 다음 노드에서 합쳐지지 않는 문제 수정 (#1
 | `feature/#이슈번호-작업내용` | 작업 브랜치. 예: `feature/#12-link-input` |
 
 - 작업 브랜치는 이슈 하나당 하나씩 만들어요.
-- PR을 올리면 Vercel이 미리보기 URL을 만들어 줘요. 거기서 확인한 뒤 `main`에 합쳐요.
+- 브랜치를 푸시하거나 PR을 올리면 Vercel이 미리보기 URL을 만들어 줘요(PR에는 봇이 링크를 댓글로 달아요). 거기서 화면과 `/dev/components`를 확인한 뒤 `main`에 합쳐요.
 - PR은 다른 FE 한 명이 확인하고 합쳐요. 합친 브랜치는 삭제해요.
 - 3주짜리 해커톤이라 `develop`, `release` 브랜치는 두지 않아요.
 
@@ -143,7 +143,7 @@ src/
 │   ├── PlanCreatePage/PlanCreatePage.tsx   # 여행계획 생성 (여행명·기간·장소)
 │   ├── PlanEditPage/PlanEditPage.tsx       # 여행계획 편집 (숙소·일자·구역 선택, 노드 확정)
 │   ├── PlanViewPage/PlanViewPage.tsx       # 계획 완성 보기 (일자별 동선)
-│   └── ComponentTestPage/                  # 컴포넌트 테스트 (/dev/components, 로컬 전용)
+│   └── ComponentTestPage/                  # 컴포넌트 테스트 (/dev/components, 로컬·미리보기 전용)
 │       ├── ComponentTestPage.tsx
 │       └── demos.tsx                       # 여기에 컴포넌트를 등록
 │

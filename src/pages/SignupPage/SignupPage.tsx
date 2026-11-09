@@ -2,7 +2,7 @@ import type { SyntheticEvent } from "react";
 import { useNavigate } from "react-router";
 import AuthLayout from "@/features/auth/ui/AuthLayout";
 import AuthInput from "@/features/auth/ui/AuthInput";
-import AuthButton from "@/features/auth/ui/AuthButton";
+import Button from "@/shared/components/Button";
 import { useSignupForm } from "@/features/auth/model/useSignupForm";
 
 export default function SignupPage() {
@@ -25,7 +25,7 @@ export default function SignupPage() {
 
   return (
     <form onSubmit={handleFormSubmit}>
-      <AuthLayout actions={<AuthButton>회원가입</AuthButton>}>
+      <AuthLayout actions={<Button type="submit">회원가입</Button>}>
         <AuthInput
           type="email"
           value={email}

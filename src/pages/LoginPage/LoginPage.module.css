@@ -1,8 +1,8 @@
 .signupText {
     margin-top: 4px;
-    color: #999999;
-    font-size: 14px;
-    font-weight: 400;
+    color: var(--color-gray-400);
+    font: var(--font-body2);
+    letter-spacing: var(--tracking);
     text-align: center;
 }
 

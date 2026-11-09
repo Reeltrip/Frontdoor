@@ -2,7 +2,7 @@ import type { SyntheticEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import AuthLayout from "@/features/auth/ui/AuthLayout";
 import AuthInput from "@/features/auth/ui/AuthInput";
-import AuthButton from "@/features/auth/ui/AuthButton";
+import Button from "@/shared/components/Button";
 import { useLoginForm } from "@/features/auth/model/useLoginForm";
 import styles from "./LoginPage.module.css";
 
@@ -33,7 +33,9 @@ export default function LoginPage() {
       <AuthLayout
         actions={
           <>
-            <AuthButton disabled={!canSubmit}>로그인</AuthButton>
+            <Button type="submit" disabled={!canSubmit}>
+              로그인
+            </Button>
             <p className={styles.signupText}>
               회원이 아니신가요?{" "}
               <Link to="/signup" className={styles.signupLink}>

@@ -1,7 +1,7 @@
 import type { SyntheticEvent } from "react";
 import { useNavigate } from "react-router";
 import AuthInput from "@/features/auth/ui/AuthInput";
-import AuthButton from "@/features/auth/ui/AuthButton";
+import Button from "@/shared/components/Button";
 import {
   NICKNAME_MAX_LENGTH,
   useNicknameForm,
@@ -35,7 +35,7 @@ export default function NicknamePage() {
       />
 
       <div className={styles.actions}>
-        <AuthButton>시작하기</AuthButton>
+        <Button type="submit">시작하기</Button>
       </div>
     </form>
   );

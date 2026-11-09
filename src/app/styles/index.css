@@ -1,13 +1,64 @@
+/* 디자인 토큰. 값은 피그마 '디자인시스템' 섹션(Typography, Sub/Gray COLORS)을 그대로 옮김 */
 :root {
-  --color-bg: #ffffff;
-  --color-page: #f2f2f0;
-  --color-text: #1a1a1a;
-  --color-text-sub: #6b6b6b;
-  --color-border: #e3e3e0;
-  --color-primary: #2f6fed;
+  /* 포인트 색 (라임) */
+  --color-lime-10: #f8ffe5;
+  --color-lime-50: #efffbe;
+  --color-lime-100: #e5ff99;
+  --color-lime-200: #dbff73;
+  --color-lime-300: #d3ff4d;
+  --color-lime-400: #ccff26;
+  --color-lime-500: #c6ff00;
+  --color-lime-600: #a5d600;
+  --color-lime-700: #84ad00;
+  --color-lime-800: #638400;
+  --color-lime-900: #425b00;
 
-  font-family:
-    'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  /* 회색 */
+  --color-gray-0: #ffffff;
+  --color-gray-50: #ebebeb;
+  --color-gray-100: #dadada;
+  --color-gray-200: #c7c7c7;
+  --color-gray-300: #bbb9b2;
+  --color-gray-400: #999999;
+  --color-gray-500: #808080;
+  --color-gray-600: #666666;
+  --color-gray-700: #4d4d4d;
+  --color-gray-800: #333333;
+  --color-gray-900: #1a1a1a;
+  --color-white: #fafafa;
+  --color-surface: #fefefe;
+  /* 어두운 모달 배경 */
+  --color-surface-dark: #272727;
+  /* 캘린더 요일·화살표 */
+  --color-calendar-sub: #b5bec6;
+
+  /* 지도 노드 마커 배경 */
+  --color-marker-bg: #c9da8a;
+
+  /* 기존 이름 유지 (다른 화면에서 쓰는 중) */
+  --color-bg: var(--color-gray-0);
+  --color-page: #f2f2f0;
+  --color-text: var(--color-gray-900);
+  --color-text-sub: var(--color-gray-500);
+  --color-border: var(--color-gray-50);
+  --color-primary: var(--color-gray-800);
+
+  /* 타이포그래피. 자간은 모두 -2.5% */
+  --tracking: -0.025em;
+  --font-display: 700 32px/1.5 var(--font-family);
+  --font-h1: 700 26px/1.5 var(--font-family);
+  --font-h2: 600 24px/1.67 var(--font-family);
+  --font-h3: 500 18px/1.66 var(--font-family);
+  --font-body1: 400 16px/1.6 var(--font-family);
+  --font-body2: 400 14px/1.71 var(--font-family);
+  --font-button: 500 16px/1.75 var(--font-family);
+  --font-caption: 400 12px/1.67 var(--font-family);
+
+  --font-family:
+    'Pretendard Variable', 'Pretendard', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
+    'Noto Sans KR', sans-serif;
+
+  font-family: var(--font-family);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
 }
@@ -23,6 +74,10 @@ body {
   background: var(--color-page);
 }
 
+button {
+  font-family: inherit;
+}
+
 /* 시연 기준인 폰 크기(390×844)로 화면을 가운데에 고정 */
 #root {
   max-width: 390px;
@@ -30,3 +85,12 @@ body {
   margin: 0 auto;
   background: var(--color-bg);
 }
+
+.text-display { font: var(--font-display); letter-spacing: var(--tracking); }
+.text-h1 { font: var(--font-h1); letter-spacing: var(--tracking); }
+.text-h2 { font: var(--font-h2); letter-spacing: var(--tracking); }
+.text-h3 { font: var(--font-h3); letter-spacing: var(--tracking); }
+.text-body1 { font: var(--font-body1); letter-spacing: var(--tracking); }
+.text-body2 { font: var(--font-body2); letter-spacing: var(--tracking); }
+.text-button { font: var(--font-button); letter-spacing: var(--tracking); }
+.text-caption { font: var(--font-caption); letter-spacing: var(--tracking); }

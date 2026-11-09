@@ -64,8 +64,14 @@
   color: var(--color-text-sub);
 }
 
+/* 350px 컴포넌트(탭 바, 모달)가 390px 화면 안에 들어가도록 좌우 여백을 줄임 */
 .preview {
-  padding: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 2px;
   border: 1px dashed var(--color-border);
   border-radius: 8px;
 }

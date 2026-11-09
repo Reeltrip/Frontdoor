@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router";
 import logo from "../../shared/assets/logo/wayvi-logo-white.svg";
 import startBg from "../../shared/assets/images/start-bg.png";
 import styles from "./StartPage.module.css";
+import Button from "@/shared/components/Button";
 
 export default function StartPage() {
   const navigate = useNavigate();
@@ -21,13 +22,13 @@ export default function StartPage() {
       </section>
 
       <section className={styles.actions}>
-        <button
-          type="button"
+        <Button
+          variant="glass"
           className={styles.loginButton}
           onClick={handleLoginClick}
         >
           로그인
-        </button>
+        </Button>
         <p className={styles.signupText}>
           회원이 아니신가요?{" "}
           <Link to="/signup" className={styles.signupLink}>

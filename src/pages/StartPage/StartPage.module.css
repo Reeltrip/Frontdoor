@@ -5,7 +5,7 @@
     justify-content: space-between;
     min-height: 100dvh;
     overflow: hidden;
-    color: #fafafa;
+    color: var(--color-white);
 }
 
 
@@ -47,23 +47,16 @@
     padding: 0 24px calc(24px + env(safe-area-inset-bottom));
 }
 
-.loginButton {
-    width: 100%;
-    height: 60px;
-    border: none;
-    border-radius: 32px;
+.actions .loginButton {
     background: rgba(29, 29, 29, 0.53);
-    color: #fff;
-    font-size: 16px;
-    cursor: pointer;
-    font-weight: 500;
-    font-family: inherit;
+    box-shadow: none;
+    backdrop-filter: none;
 }
 
 .signupText {
     margin-top: 4px;
-    font-size: 14px;
-    font-weight: 400;
+    font: var(--font-body2);
+    letter-spacing: var(--tracking);
     text-align: center;
 }
 

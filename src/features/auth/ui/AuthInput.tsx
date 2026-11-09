@@ -10,7 +10,6 @@ type AuthInputProps = {
   maxLength?: number;
 };
 
-// 공통 입력칸이 올라오면 shared 컴포넌트로 교체
 export default function AuthInput({
   type = "text",
   value,
@@ -18,6 +17,7 @@ export default function AuthInput({
   placeholder,
   autoComplete,
   errorMessage = "",
+  maxLength,
 }: AuthInputProps) {
   const hasError = errorMessage !== "";
 
@@ -30,6 +30,7 @@ export default function AuthInput({
         onChange={(event) => onChange(event.target.value)}
         placeholder={placeholder}
         autoComplete={autoComplete}
+        maxLength={maxLength}
         aria-invalid={hasError}
       />
       {hasError && <p className={styles.errorMessage}>{errorMessage}</p>}
