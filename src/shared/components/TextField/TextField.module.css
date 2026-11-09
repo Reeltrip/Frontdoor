@@ -12,7 +12,7 @@
   border: 1px solid var(--color-gray-50);
   border-radius: 15px;
   background: transparent;
-  font: 400 16px/1.6 var(--font-family);
+  font: var(--font-body1);
   letter-spacing: var(--tracking);
   color: var(--color-gray-900);
   outline: none;
@@ -28,7 +28,7 @@
 
 .counter {
   margin: 0;
-  font: 400 12px/18px var(--font-family);
+  font: var(--font-caption);
   letter-spacing: var(--tracking);
   color: var(--color-gray-200);
   text-align: right;

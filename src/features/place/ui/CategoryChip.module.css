@@ -8,7 +8,7 @@
   border-radius: 97px;
   background: rgba(187, 185, 178, 0.5);
   backdrop-filter: blur(0.5px);
-  font: 400 16px/1.75 var(--font-family);
+  font: var(--font-body1);
   letter-spacing: var(--tracking);
   color: var(--color-gray-700);
   white-space: nowrap;

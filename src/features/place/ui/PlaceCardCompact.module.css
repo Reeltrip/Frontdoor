@@ -49,7 +49,8 @@
   min-width: 0;
   margin: 0;
   overflow: hidden;
-  font: 600 16px/1.75 var(--font-family);
+  font: var(--font-body1);
+  font-weight: 600;
   letter-spacing: var(--tracking);
   color: var(--color-gray-900);
   white-space: nowrap;

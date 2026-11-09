@@ -40,14 +40,15 @@
 
 .title {
   margin: 0;
-  font: 600 16px/1.75 var(--font-family);
+  font: var(--font-body1);
+  font-weight: 600;
   letter-spacing: var(--tracking);
   color: var(--color-gray-900);
 }
 
 .description {
   margin: 1px 0 0;
-  font: 400 14px/23px var(--font-family);
+  font: var(--font-body2);
   letter-spacing: var(--tracking);
   color: var(--color-gray-500);
 }
