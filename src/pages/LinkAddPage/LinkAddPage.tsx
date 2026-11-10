@@ -1,22 +1,29 @@
 import { useRef, type SyntheticEvent } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 import Button from "@/shared/components/Button";
 import linkBg from "@/shared/assets/images/link-bg.svg";
 import plusIcon from "@/shared/assets/icons/plus-circle.svg";
 import LinkInput from "@/features/source/ui/LinkInput";
 import { useLinkForm } from "@/features/source/model/useLinkForm";
-import type { AnalyzingState } from "@/features/source/model/source.types";
+import {
+  isLinkAddState,
+  type AnalyzingState,
+} from "@/features/source/model/source.types";
 import styles from "./LinkAddPage.module.css";
 
 export default function LinkAddPage() {
+  const location = useLocation();
+  const initialLink = isLinkAddState(location.state)
+    ? location.state.initialLink
+    : "";
   const navigate = useNavigate();
   const fieldsRef = useRef<HTMLDivElement>(null);
   const { rows, filledLinks, canSubmit, changeRow, removeRow, addRow } =
-    useLinkForm();
+    useLinkForm(initialLink);
 
   const handleAddRow = () => {
     addRow();
-    // 새 칸이 그려진 다음 포커스를 옮기고, 아래 고정 버튼에 가리지 않게 화면 가운데로 내림
+
     requestAnimationFrame(() => {
       const inputs = fieldsRef.current?.querySelectorAll("input");
       const lastInput = inputs?.[inputs.length - 1];

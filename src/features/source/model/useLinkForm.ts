@@ -3,7 +3,6 @@ import type { LinkRow } from "./source.types";
 
 export const INITIAL_LINK_COUNT = 4;
 
-// http(s) 주소인지만 확인. 지원하는 사이트인지는 분석 단계에서 판단함
 export function isLinkValid(value: string): boolean {
   try {
     const { protocol } = new URL(value.trim());
@@ -13,11 +12,11 @@ export function isLinkValid(value: string): boolean {
   }
 }
 
-export function useLinkForm() {
+export function useLinkForm(initialLink = "") {
   const [rows, setRows] = useState<LinkRow[]>(() =>
     Array.from({ length: INITIAL_LINK_COUNT }, (_, index) => ({
       id: index,
-      value: "",
+      value: index === 0 ? initialLink : "",
     })),
   );
   const [nextId, setNextId] = useState(INITIAL_LINK_COUNT);

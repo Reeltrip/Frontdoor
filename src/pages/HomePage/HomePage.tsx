@@ -4,15 +4,35 @@ import linkBg from "@/shared/assets/images/link-bg.png";
 import RecentCollectionCard from "@/features/source/ui/RecentCollectionCard";
 import { FAKE_RECENT_COLLECTIONS } from "@/features/source/api/recentCollections";
 import styles from "./HomePage.module.css";
+import { useState } from "react";
+import ConfirmModal from "@/shared/components/ConfirmModal";
+import { readClipboardLink } from "@/features/source/lib/readClipboardLink";
+import type { LinkAddState } from "@/features/source/model/source.types";
 
 export default function HomePage() {
   const navigate = useNavigate();
   const recentCollections = FAKE_RECENT_COLLECTIONS;
   const hasRecentCollections = recentCollections.length > 0;
 
-  const handleLoadLinkClick = () => {
-    navigate("/links/new");
+  const [clipboardLink, setClipboardLink] = useState<string | null>(null);
+
+  // 클립보드에 링크가 있으면 팝업을 띄우고, 없으면 바로 링크 추가 화면으로 감
+  const handleLoadLinkClick = async () => {
+    const link = await readClipboardLink();
+    if (link === null) {
+      navigate("/links/new");
+      return;
+    }
+    setClipboardLink(link);
   };
+
+  const handleClipboardConfirm = () => {
+    if (clipboardLink === null) return;
+    const state: LinkAddState = { initialLink: clipboardLink };
+    navigate("/links/new", { state });
+  };
+
+  const handleClipboardCancel = () => navigate("/links/new");
 
   return (
     <main className={styles.page}>
@@ -51,7 +71,16 @@ export default function HomePage() {
           </ul>
         </section>
       )}
-
+      <ConfirmModal
+        isOpen={clipboardLink !== null}
+        icon="link"
+        title="클립보드에 링크가 있어요."
+        description="방금 복사한 이 링크를 가져올까요?"
+        cancelLabel="직접 입력하기"
+        confirmLabel="링크 추가하기"
+        onCancel={handleClipboardCancel}
+        onConfirm={handleClipboardConfirm}
+      />
       <TabBar activeTab="sources" className={styles.tabBar} />
     </main>
   );
