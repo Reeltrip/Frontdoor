@@ -11,6 +11,8 @@
   border-radius: 17.6px;
   overflow: hidden;
   isolation: isolate;
+  /* 사진을 추출하지 못했을 때 보이는 바탕 */
+  background: var(--color-gray-700);
 }
 
 .photo,

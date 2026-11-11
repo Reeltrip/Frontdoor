@@ -12,6 +12,8 @@
   height: 140px;
   border-radius: 12px;
   overflow: hidden;
+  /* 사진을 추출하지 못했을 때 보이는 바탕 */
+  background: var(--color-gray-50);
 }
 
 .photo {
