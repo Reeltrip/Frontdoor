@@ -17,6 +17,12 @@ export type PlanDay = {
   nodes: PlanNode[];
 };
 
+/**
+ * 가정: 계획에 상태 필드가 있어요. draft는 '작성 중인 계획'이에요.
+ * 빈 일차가 있거나 기간을 늘리면 draft가 돼요 (기능명세서 5-3, 5-4)
+ */
+export type PlanStatus = 'draft' | 'complete';
+
 export type Plan = {
   id: string;
   title: string;
@@ -24,10 +30,24 @@ export type Plan = {
   startDate: string;
   endDate: string;
   accommodationPlaceId?: string;
-  /** 작성 중인 계획이면 true (빈 일차가 있거나 기간을 늘렸을 때) */
-  isDraft: boolean;
+  status: PlanStatus;
   days: PlanDay[];
 };
 
 /** PUT /plans/{id}는 계획 전체를 보내서 덮어써요 */
 export type UpdatePlanRequest = Omit<Plan, 'id'>;
+
+// 가짜 형식: POST /plans. 서버가 기간의 날짜마다 빈 일차를 만들어 draft 계획을 돌려준다고 가정해요
+export type CreatePlanRequest = {
+  title: string;
+  /** YYYY-MM-DD */
+  startDate: string;
+  endDate: string;
+  /** 같은 기간에 다른 계획이 있어도 만들기 (기능명세서 5-3 같은 기간에 새 여행계획에서 '네') */
+  isForced?: boolean;
+};
+
+/** 가정: 409 PLAN_PERIOD_OVERLAP 응답의 details. 겹치는 계획을 알려 줘요 */
+export type PlanPeriodOverlapDetails = {
+  overlappingPlans: Pick<Plan, 'id' | 'title' | 'startDate' | 'endDate'>[];
+};

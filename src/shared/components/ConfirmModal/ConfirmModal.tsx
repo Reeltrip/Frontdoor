@@ -18,6 +18,8 @@ type ConfirmModalProps = {
   onConfirm: () => void;
   /** 화면 위에 띄우지 않고 그 자리에 그릴 때 (컴포넌트 테스트 페이지용) */
   isInline?: boolean;
+  /** false면 바깥을 누르거나 Esc를 눌러도 닫히지 않아요. '아니요'가 삭제·복구처럼 되돌리기 어려운 일을 할 때 써요 */
+  isDismissible?: boolean;
 };
 
 // 아이콘 + 제목 + 설명 + 버튼 두 개짜리 확인 창
@@ -31,18 +33,19 @@ export default function ConfirmModal({
   onCancel,
   onConfirm,
   isInline = false,
+  isDismissible = true,
   theme = 'light',
 }: ConfirmModalProps) {
   const titleId = useId();
 
   useEffect(() => {
-    if (!isOpen || isInline) return;
+    if (!isOpen || isInline || !isDismissible) return;
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onCancel();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, isInline, onCancel]);
+  }, [isOpen, isInline, isDismissible, onCancel]);
 
   if (!isOpen) return null;
 
@@ -78,7 +81,7 @@ export default function ConfirmModal({
   if (isInline) return dialog;
 
   return (
-    <div className={styles.overlay} onClick={onCancel}>
+    <div className={styles.overlay} onClick={isDismissible ? onCancel : undefined}>
       <div onClick={(event) => event.stopPropagation()}>{dialog}</div>
     </div>
   );

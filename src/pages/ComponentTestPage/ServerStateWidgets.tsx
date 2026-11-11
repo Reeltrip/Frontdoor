@@ -170,7 +170,7 @@ export function PlanDemo({ planId }: { planId: string }) {
         <>
           <p className={styles.status}>
             {plan.title} · {plan.startDate} ~ {plan.endDate}
-            {plan.isDraft && ' · 작성 중'}
+            {plan.status === 'draft' && ' · 작성 중'}
           </p>
           {viewStatus === 'success' && (
             <Button size="sm" variant="outline" isFullWidth={false} onClick={failNextFakePlanSave}>

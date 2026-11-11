@@ -3,6 +3,12 @@
 
 export type SourceStatus = 'analyzing' | 'done' | 'failed';
 
+/** 새로 만든 카드와 보관함에 이미 있던 같은 장소 카드 한 쌍 (기능명세서 5-2 보관함에 이미 있는 장소) */
+export type DuplicatePlacePair = {
+  newPlaceId: string;
+  existingPlaceId: string;
+};
+
 /** 링크 하나의 분석 결과 */
 export type Source = {
   id: string;
@@ -15,6 +21,11 @@ export type Source = {
   placeIds: string[];
   /** status가 failed일 때 이유 */
   failReason?: string;
+  /**
+   * 가정: 새 카드의 장소가 보관함에 이미 있으면 서버가 쌍으로 알려 줘요.
+   * 사용자가 답할 때까지 두 카드가 모두 보관함에 있고, 답하면 이 목록에서 빠져요.
+   */
+  duplicatePlaces?: DuplicatePlacePair[];
 };
 
 export type CreateSourceRequest = {
