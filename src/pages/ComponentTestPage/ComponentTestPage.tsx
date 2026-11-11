@@ -1,5 +1,8 @@
 import { componentDemos } from './demos';
+import { serverStateDemos } from './serverStateDemos';
 import styles from './ComponentTestPage.module.css';
+
+const allDemos = [...componentDemos, ...serverStateDemos];
 
 export default function ComponentTestPage() {
   return (
@@ -9,19 +12,19 @@ export default function ComponentTestPage() {
         <p className={styles.sub}>로컬과 Vercel 미리보기에서만 보이는 페이지예요. 컴포넌트는 demos.tsx에 추가하세요.</p>
       </header>
 
-      {componentDemos.length === 0 ? (
+      {allDemos.length === 0 ? (
         <p className={styles.empty}>아직 등록된 컴포넌트가 없어요.</p>
       ) : (
         <>
           <nav className={styles.nav}>
-            {componentDemos.map((demo) => (
+            {allDemos.map((demo) => (
               <a key={demo.name} href={`#${demo.name}`} className={styles.chip}>
                 {demo.name}
               </a>
             ))}
           </nav>
 
-          {componentDemos.map((demo) => (
+          {allDemos.map((demo) => (
             <section key={demo.name} id={demo.name} className={styles.section}>
               <h2 className={styles.name}>{demo.name}</h2>
               <p className={styles.sub}>

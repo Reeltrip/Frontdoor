@@ -22,3 +22,11 @@ export type Place = {
   tag?: string;
   reviewCount?: number;
 };
+
+/** GET /places 조건. 비우면 전체 */
+export type PlaceListParams = {
+  category?: PlaceCategory;
+};
+
+// 가짜 형식: PATCH /places/{id}에서 바꿀 수 있는 항목. BE와 정해지면 맞추기
+export type UpdatePlaceRequest = Partial<Pick<Place, 'name' | 'category' | 'summary' | 'address' | 'tag'>>;
