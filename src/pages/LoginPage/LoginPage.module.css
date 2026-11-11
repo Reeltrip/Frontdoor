@@ -1,0 +1,12 @@
+.signupText {
+    margin-top: 4px;
+    color: var(--color-gray-400);
+    font: var(--font-body2);
+    letter-spacing: var(--tracking);
+    text-align: center;
+}
+
+.signupLink {
+    color: inherit;
+    text-decoration: none;
+}
