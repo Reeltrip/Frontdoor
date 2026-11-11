@@ -1,8 +1,9 @@
 import { componentDemos } from './demos';
 import { serverStateDemos } from './serverStateDemos';
+import { exceptionDemos } from './exceptionDemos';
 import styles from './ComponentTestPage.module.css';
 
-const allDemos = [...componentDemos, ...serverStateDemos];
+const allDemos = [...componentDemos, ...serverStateDemos, ...exceptionDemos];
 
 export default function ComponentTestPage() {
   return (

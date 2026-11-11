@@ -46,3 +46,19 @@
   font: var(--font-body2);
   letter-spacing: var(--tracking);
 }
+
+.textButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: var(--font-caption);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-500);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.textButton:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
