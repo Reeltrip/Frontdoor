@@ -6,7 +6,7 @@ import {
   type PointerEvent,
   type WheelEvent,
 } from "react";
-import { CATEGORIES } from "../lib/categories";
+import { WHEEL_ICONS } from "../lib/wheelIcons";
 import type { ResultCategoryItem } from "../model/result.types";
 import styles from "./CategoryWheel.module.css";
 
@@ -17,16 +17,18 @@ type CategoryWheelProps = {
   onView: (item: ResultCategoryItem) => void;
 };
 
-const DRAG_STEP_PX = 64;
+const DRAG_STEP_PX = 110;
 
 const DRAG_START_PX = 6;
 
 const WHEEL_COOLDOWN_MS = 160;
 
-const WHEEL_RADIUS = 300;
-const STEP_ANGLE = 0.24;
+const WHEEL_RADIUS = 450;
+const STEP_ANGLE = 0.265;
 
-const FADE_DISTANCE = 3.5;
+const FADE_DISTANCE = 4.2;
+const BLUR_PER_STEP_PX = 0;
+const MAX_BLUR_PX = 2;
 
 function clampIndex(index: number, length: number): number {
   return Math.min(Math.max(index, 0), length - 1);
@@ -37,16 +39,16 @@ function getItemStyle(offset: number): CSSProperties {
   const x = WHEEL_RADIUS * (1 - Math.cos(angle));
   const y = WHEEL_RADIUS * Math.sin(angle);
   const distance = Math.abs(offset);
-  const scale = Math.max(0.6, 1 - distance * 0.1);
   const opacity = Math.max(0, 1 - distance / FADE_DISTANCE);
   const activeness = Math.max(0, 1 - distance);
 
   return {
-    transform: `translate(${x}px, ${y}px) scale(${scale})`,
+    transform: `translate(${x}px, ${y}px) rotate(${-angle}rad)`,
     opacity,
     zIndex: 100 - Math.round(distance * 10),
     pointerEvents: opacity === 0 ? "none" : undefined,
     "--active": activeness,
+    "--blur": `${Math.min(distance * BLUR_PER_STEP_PX, MAX_BLUR_PX)}px`,
   } as CSSProperties;
 }
 
@@ -141,7 +143,7 @@ export default function CategoryWheel({
     >
       {items.map((item, index) => {
         const isActive = index === activeIndex;
-        const categoryIcon = CATEGORIES[item.category].icon;
+        const categoryIcon = WHEEL_ICONS[item.category];
 
         return (
           <div
@@ -161,7 +163,16 @@ export default function CategoryWheel({
                   <img src={item.imageUrl} alt="" className={styles.photo} />
                 )}
                 {categoryIcon && (
-                  <img src={categoryIcon.src} alt="" className={styles.icon} />
+                  <img
+                    src={categoryIcon.src}
+                    alt=""
+                    className={[
+                      styles.icon,
+                      categoryIcon.isFlipped && styles.flipped,
+                    ]
+                      .filter(Boolean)
+                      .join(" ")}
+                  />
                 )}
               </span>
               <span className={styles.text}>
