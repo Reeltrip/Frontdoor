@@ -6,7 +6,12 @@ type UseDragStepperOptions = {
   onChange: (index: number) => void;
   stepPx: number;
   startPx?: number;
+  loop?: boolean;
 };
+
+function wrapIndex(value: number, count: number): number {
+  return ((value % count) + count) % count;
+}
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(Math.max(value, min), max);
@@ -18,17 +23,19 @@ export function useDragStepper({
   onChange,
   stepPx,
   startPx = 6,
+  loop = false,
 }: UseDragStepperOptions) {
   const [dragPx, setDragPx] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const startXRef = useRef<number | null>(null);
   const dragPxRef = useRef(0);
   const isDraggingRef = useRef(false);
-  // 끌고 난 뒤에 따라오는 click은 누르기로 치지 않음
   const hasDraggedRef = useRef(false);
 
   const maxIndex = Math.max(count - 1, 0);
-  const position = clamp(index - dragPx / stepPx, 0, maxIndex);
+  const position = loop
+    ? index - dragPx / stepPx
+    : clamp(index - dragPx / stepPx, 0, maxIndex);
 
   const handlePointerDown = (event: PointerEvent<HTMLElement>) => {
     if (event.pointerType === "mouse" && event.button !== 0) return;
@@ -57,11 +64,8 @@ export function useDragStepper({
     startXRef.current = null;
     if (!isDraggingRef.current) return;
 
-    const next = clamp(
-      Math.round(index - dragPxRef.current / stepPx),
-      0,
-      maxIndex,
-    );
+    const rounded = Math.round(index - dragPxRef.current / stepPx);
+    const next = loop ? wrapIndex(rounded, count) : clamp(rounded, 0, maxIndex);
     isDraggingRef.current = false;
     dragPxRef.current = 0;
     setIsDragging(false);

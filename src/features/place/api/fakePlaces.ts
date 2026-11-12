@@ -54,6 +54,15 @@ export const FAKE_PLACES_BY_CATEGORY: Partial<Record<PlaceCategory, Place[]>> =
         tag: "¥220~240",
         reviewCount: 1806,
       },
+      {
+        id: "fake-cafe-3",
+        category: "cafe",
+        name: "블루보틀 후쿠오카 텐진점",
+        imageUrl: sampleDonut,
+        summary: ["텐진역 도보 약 6분", "08:00~19:00"],
+        tag: "¥500~800",
+        reviewCount: 720,
+      },
     ],
     accommodation: [
       {

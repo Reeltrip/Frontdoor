@@ -1,3 +1,4 @@
+import handImage from "@/shared/assets/icons/tutorial-hand.svg";
 import styles from "./DialTutorial.module.css";
 
 type DialTutorialProps = {
@@ -26,13 +27,14 @@ export default function DialTutorial({ onClose }: DialTutorialProps) {
             >
               <path className={styles.headWhite} d="M1 1L6 4L1 7" />
             </marker>
+            {}
             <marker
               id="tutorial-head-green"
               markerWidth="8"
               markerHeight="8"
               refX="6"
               refY="4"
-              orient="auto"
+              orient="auto-start-reverse"
             >
               <path className={styles.headGreen} d="M1 1L6 4L1 7" />
             </marker>
@@ -40,36 +42,23 @@ export default function DialTutorial({ onClose }: DialTutorialProps) {
           {}
           <path
             className={styles.dotted}
-            d="M252 392C258 372 296 372 301 408"
+            d="M301 415C302 394 280 381 254 391"
             markerEnd="url(#tutorial-head-white)"
           />
           {}
           <path
             className={styles.green}
-            d="M213 512C170 516 120 528 86 548"
-            markerEnd="url(#tutorial-head-green)"
-          />
-          <path
-            className={styles.green}
-            d="M225 512C262 514 288 522 304 538"
+            d="M84 552C120 528 175 512 217 509C257 512 285 526 302 543"
+            markerStart="url(#tutorial-head-green)"
             markerEnd="url(#tutorial-head-green)"
           />
         </svg>
 
         <div className={styles.touch}>
+          <span className={styles.touchRing} />
           <span className={styles.dot} />
-          <svg
-            className={styles.hand}
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden
-          >
-            <path d="M18 11V10a2 2 0 0 0-2-2a2 2 0 0 0-2 2" />
-            <path d="M14 10V9a2 2 0 0 0-2-2a2 2 0 0 0-2 2v1" />
-            <path d="M10 9.5V4a2 2 0 0 0-2-2a2 2 0 0 0-2 2v10" />
-            <path d="M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
-          </svg>
         </div>
+        <img className={styles.hand} src={handImage} alt="" />
       </div>
     </div>
   );

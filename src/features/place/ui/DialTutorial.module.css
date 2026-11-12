@@ -66,42 +66,30 @@
 
 .touch {
     position: absolute;
-    top: 486px;
-    left: 199px;
-    width: 40px;
-    height: 40px;
-    animation: sway 1.8s ease-in-out infinite alternate;
+    top: 481px;
+    left: 189.5px;
+    width: 56px;
+    height: 56px;
 }
 
-@keyframes sway {
-    from {
-        transform: translateX(-34px);
-    }
-
-    to {
-        transform: translateX(34px);
-    }
+.touchRing {
+    position: absolute;
+    inset: 0;
+    border: 1.5px solid var(--color-lime-600);
+    border-radius: 50%;
 }
 
 .dot {
     position: absolute;
-    inset: 8px;
+    inset: 12.5px;
     border-radius: 50%;
     background: var(--color-lime-600);
-    box-shadow: 0 0 0 8px rgba(165, 214, 0, 0.35);
 }
 
 .hand {
     position: absolute;
-    top: 12px;
-    left: 12px;
-    width: 104px;
-    height: 104px;
-    stroke: var(--color-gray-0);
-    stroke-width: 1;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    transform: rotate(-18deg);
-    transform-origin: 12% 20%;
-    filter: drop-shadow(0 2px 6px rgba(26, 26, 26, 0.3));
+    top: 414px;
+    left: 218px;
+    width: 126px;
+    height: auto;
 }

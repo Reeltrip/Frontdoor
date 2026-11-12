@@ -4,7 +4,7 @@
   bottom: 0;
   left: 0;
   z-index: 5;
-  height: 325px;
+  height: 315px;
   overflow: hidden;
   touch-action: pan-y;
   user-select: none;
@@ -30,9 +30,9 @@
   position: absolute;
   top: 25px;
   left: 50%;
-  width: 524px;
+  width: 504px;
   height: 524px;
-  margin-left: -262px;
+  margin-left: -252px;
   stroke: var(--color-gray-200);
   stroke-width: 1.4;
   stroke-linecap: round;
@@ -60,7 +60,7 @@
 
 .bowl {
   position: absolute;
-  top: 79px;
+  top: 69px;
   left: 50%;
   width: 416px;
   height: 416px;
@@ -97,7 +97,7 @@
 
 .content {
   position: absolute;
-  top: 131px;
+  top: 121px;
   left: 50%;
   display: flex;
   flex-direction: column;
@@ -136,7 +136,7 @@
 
 .arrow {
   position: absolute;
-  top: 191px;
+  top: 181px;
   width: 28px;
   height: 28px;
   padding: 0;
