@@ -1,0 +1,107 @@
+.overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    background: rgba(26, 26, 26, 0.66);
+    cursor: pointer;
+}
+
+.guide {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    width: 390px;
+    height: 844px;
+    margin-left: -195px;
+    pointer-events: none;
+}
+
+.text {
+    position: absolute;
+    top: 361px;
+    left: 55px;
+    margin: 0;
+    font: var(--font-body2);
+    line-height: 28px;
+    letter-spacing: var(--tracking);
+    color: var(--color-gray-0);
+}
+
+.arrows {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    fill: none;
+}
+
+.dotted {
+    stroke: var(--color-gray-0);
+    stroke-width: 1.4;
+    stroke-dasharray: 1 5;
+    stroke-linecap: round;
+}
+
+.green {
+    stroke: var(--color-lime-600);
+    stroke-width: 2;
+    stroke-linecap: round;
+}
+
+.headWhite,
+.headGreen {
+    fill: none;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.headWhite {
+    stroke: var(--color-gray-0);
+}
+
+.headGreen {
+    stroke: var(--color-lime-600);
+}
+
+.touch {
+    position: absolute;
+    top: 486px;
+    left: 199px;
+    width: 40px;
+    height: 40px;
+    animation: sway 1.8s ease-in-out infinite alternate;
+}
+
+@keyframes sway {
+    from {
+        transform: translateX(-34px);
+    }
+
+    to {
+        transform: translateX(34px);
+    }
+}
+
+.dot {
+    position: absolute;
+    inset: 8px;
+    border-radius: 50%;
+    background: var(--color-lime-600);
+    box-shadow: 0 0 0 8px rgba(165, 214, 0, 0.35);
+}
+
+.hand {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 104px;
+    height: 104px;
+    stroke: var(--color-gray-0);
+    stroke-width: 1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transform: rotate(-18deg);
+    transform-origin: 12% 20%;
+    filter: drop-shadow(0 2px 6px rgba(26, 26, 26, 0.3));
+}

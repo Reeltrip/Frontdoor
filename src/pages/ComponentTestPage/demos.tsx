@@ -14,6 +14,8 @@ import type { Place } from "@/features/place/model/place.types";
 import {
   CalendarDemo,
   CategoryFilterDemo,
+  CategoryDialDemo,
+  PlaceCarouselDemo,
   ChipDemo,
   ColorScale,
   DarkBox,
@@ -331,6 +333,22 @@ export const componentDemos: ComponentDemo[] = [
         ),
       },
     ],
+  },
+
+  {
+    name: "PlaceCarousel",
+    path: "features/place/ui/PlaceCarousel",
+    description:
+      "요약카드를 좌우로 끌어서 넘겨 보는 목록. 양옆 카드는 기울어져 보임",
+    variants: [
+      { label: "기본 (카드 3장)", render: () => <PlaceCarouselDemo /> },
+    ],
+  },
+  {
+    name: "CategoryDial",
+    path: "features/place/ui/CategoryDial",
+    description: "좌우로 끌어서 돌리는 카테고리 다이얼. 눈금이 같이 돌아감",
+    variants: [{ label: "기본", render: () => <CategoryDialDemo /> }],
   },
   {
     name: "RecentCollectionCard",
