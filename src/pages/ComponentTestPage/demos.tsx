@@ -16,6 +16,8 @@ import {
   CategoryFilterDemo,
   CategoryDialDemo,
   PlaceCarouselDemo,
+  PlaceEditCardDemo,
+  ToastDemo,
   ChipDemo,
   ColorScale,
   DarkBox,
@@ -344,6 +346,24 @@ export const componentDemos: ComponentDemo[] = [
       { label: "기본 (카드 3장)", render: () => <PlaceCarouselDemo /> },
     ],
   },
+
+  {
+    name: "PlaceEditCard",
+    path: "features/place/ui/PlaceEditCard",
+    description: "요약카드를 편집하는 모양. 이름·위치·가격 칸을 눌러 바로 고침",
+    variants: [
+      { label: "기본 (눌러서 입력)", render: () => <PlaceEditCardDemo /> },
+    ],
+  },
+
+  {
+    name: "Toast",
+    path: "shared/components/Toast",
+    description:
+      "화면 아래에 잠깐 떴다 사라지는 안내 (사라지는 시간은 쓰는 쪽에서 정함)",
+    variants: [{ label: "저장 안내", render: () => <ToastDemo /> }],
+  },
+
   {
     name: "CategoryDial",
     path: "features/place/ui/CategoryDial",

@@ -1,0 +1,98 @@
+.sizer {
+    display: inline-grid;
+    flex: 0 1 auto;
+    min-width: 0;
+    padding-right: 1px;
+    overflow: hidden;
+    letter-spacing: var(--tracking);
+}
+
+.sizer::after {
+    grid-area: 1 / 1;
+    content: attr(data-value);
+    visibility: hidden;
+    white-space: pre;
+    pointer-events: none;
+    font: inherit;
+}
+
+.sizer>.input {
+    grid-area: 1 / 1;
+    width: 0;
+    min-width: 100%;
+}
+
+.underline:focus-within {
+    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.input {
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+    caret-color: var(--color-gray-0);
+    outline: none;
+}
+
+.input::placeholder {
+    color: var(--color-gray-300);
+}
+
+.title {
+    font: var(--font-h3);
+    color: var(--color-gray-0);
+}
+
+.summaryRow {
+    display: flex;
+    align-items: center;
+    margin-top: 2px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.summaryRow>span {
+    white-space: pre;
+}
+
+.location {
+    font: var(--font-body2);
+    color: var(--color-gray-100);
+}
+
+.restPart {
+    font: var(--font-body2);
+    letter-spacing: var(--tracking);
+    color: var(--color-gray-100);
+}
+
+.tagField {
+    transition: background-color 0.15s;
+}
+
+.tagField:focus-within {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.tagInput {
+    font: var(--font-caption);
+    color: var(--color-gray-100);
+}
+
+.reviews {
+    font: var(--font-caption);
+    letter-spacing: var(--tracking);
+    color: var(--color-gray-500);
+    white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tagField {
+        transition: none;
+    }
+}
