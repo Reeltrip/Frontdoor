@@ -2,6 +2,7 @@
 // - fake-plan-1: 후쿠오카 2일 계획 / fake-plan-empty: 노드가 하나도 없는 계획 / 그 외 id: 404
 // - fake-plan-3days: 기간 변경(기능명세서 5-4)을 볼 때 쓰는 3일 계획
 // - POST /plans: 기간이 다른 계획과 겹치면 409 PLAN_PERIOD_OVERLAP (isForced면 통과)
+// - POST /plans: 여행 이름에 'fail'이 들어 있으면 500 (생성 실패 화면을 볼 때 씀)
 import { ApiError } from '@/shared/api/client';
 import { fakeResponse } from '@/shared/api/fake';
 import { listDates } from '../model/planDays';
@@ -66,6 +67,9 @@ const fakePlans = new Map<string, Plan>([
   ],
 ]);
 
+/** 여행 이름에 이 글자가 있으면 계획 만들기가 500으로 실패해요 */
+export const FAKE_PLAN_FAIL_KEYWORD = 'fail';
+
 let nextPlanNumber = 1;
 
 let shouldFailNextSave = false;
@@ -82,8 +86,12 @@ const findPlan = (id: string) => {
 };
 
 export const fakePlansApi = {
-  create: ({ title, startDate, endDate, isForced = false }: CreatePlanRequest) =>
+  create: ({ title, startDate, endDate, destination, isForced = false }: CreatePlanRequest) =>
     fakeResponse(() => {
+      if (title.includes(FAKE_PLAN_FAIL_KEYWORD)) {
+        throw new ApiError({ status: 500, code: 'SERVER_ERROR', message: '계획을 만들지 못했어요.' });
+      }
+
       const dates = listDates(startDate, endDate);
       if (dates.length === 0) {
         throw new ApiError({ status: 400, code: 'BAD_REQUEST', message: '여행 기간을 다시 확인해 주세요.' });
@@ -118,6 +126,7 @@ export const fakePlansApi = {
         title,
         startDate,
         endDate,
+        ...(destination ? { destination } : {}),
         status: 'draft',
         days: dates.map((date) => ({ date, nodes: [] })),
       };

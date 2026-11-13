@@ -1,0 +1,63 @@
+/* 임시 화면용 스타일. 편집 화면을 만들 때 같이 교체해요 */
+.page {
+  min-height: 100dvh;
+  padding: 74px 20px 44px;
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  min-height: 100dvh;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.title {
+  margin: 0;
+  font: var(--font-h1);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-900);
+}
+
+.summary,
+.message {
+  margin: 4px 0 0;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-500);
+}
+
+.notice {
+  margin: 24px 0 0;
+  font: var(--font-body1);
+  font-weight: 500;
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-900);
+}
+
+.days {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.day {
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border: 1px solid var(--color-gray-50);
+  border-radius: 12px;
+  font: var(--font-body1);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-900);
+}
+
+.dayDate {
+  color: var(--color-gray-500);
+}

@@ -29,6 +29,8 @@ export type Plan = {
   /** YYYY-MM-DD */
   startDate: string;
   endDate: string;
+  /** 가정: 여행 장소(예: 후쿠오카). 생성 화면에서 입력해요. 형식이 정해지면 필수로 바꾸기 */
+  destination?: string;
   accommodationPlaceId?: string;
   status: PlanStatus;
   days: PlanDay[];
@@ -43,6 +45,8 @@ export type CreatePlanRequest = {
   /** YYYY-MM-DD */
   startDate: string;
   endDate: string;
+  /** 가정: 여행 장소. 지금은 입력한 글자 그대로 보내요 (장소 검색이 붙으면 장소 id로 바뀔 수 있음) */
+  destination?: string;
   /** 같은 기간에 다른 계획이 있어도 만들기 (기능명세서 5-3 같은 기간에 새 여행계획에서 '네') */
   isForced?: boolean;
 };
