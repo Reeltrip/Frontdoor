@@ -3,13 +3,14 @@
 // 예외 상황(기능명세서 5-2)용 가정:
 // - 삭제는 deletedAt만 채우고 남겨 둬요. 목록에는 안 나오고, 복구하면 다시 나와요
 // - 링크에 'same-place'가 있으면 보관함에 이미 있는 '하카타 잇소' 카드를 또 만들어요
-// - 링크에 'partial'이 있으면 이름만 추출된 카드를 만들어요 (빈 항목 '-' 표시 확인용)
+// - 링크에 'partial'이 있으면 이름만 추출된 카드를 만들어요 (빈 항목 '-' 표시 확인용). 좌표도 없어서 지도에 안 나와요
+// 좌표는 일본 국토지리원 주소 검색으로 찾은 후쿠오카 실제 위치예요
 import { ApiError } from '@/shared/api/client';
 import { fakeResponse } from '@/shared/api/fake';
 import sampleFood from '@/shared/assets/images/sample-food.png';
 import sampleHotel from '@/shared/assets/images/sample-hotel.jpg';
 import sampleDonut from '@/shared/assets/images/sample-donut.jpg';
-import type { Place, PlaceListParams, UpdatePlaceRequest } from '../model/place.types';
+import type { Place, PlaceListParams, PlaceLocation, UpdatePlaceRequest } from '../model/place.types';
 
 export const FAKE_SAME_PLACE_KEYWORD = 'same-place';
 export const FAKE_PARTIAL_KEYWORD = 'partial';
@@ -23,6 +24,7 @@ const RAMEN_PLACE: Omit<Place, 'id'> = {
   category: 'food',
   name: '하카타 잇소 (博多一双)',
   imageUrl: sampleFood,
+  location: { lat: 33.586388, lng: 130.425186 },
   summary: ['하카타역 동쪽 도보 약 6~7분', '11:00~24:00'],
   tag: '¥960~980',
   reviewCount: 6500,
@@ -35,6 +37,7 @@ const fakePlaces: FakePlaceRecord[] = [
     category: 'accommodation',
     name: 'JR 큐슈 호텔 블라썸 하카타 센트럴',
     imageUrl: sampleHotel,
+    location: { lat: 33.589813, lng: 130.417984 },
     summary: ['하카타역 도보 약 2분'],
     tag: '공식 홈페이지 확인',
   },
@@ -43,6 +46,7 @@ const fakePlaces: FakePlaceRecord[] = [
     category: 'cafe',
     name: "I'm donut? 후쿠오카 텐진점",
     imageUrl: sampleDonut,
+    location: { lat: 33.588314, lng: 130.402252 },
     summary: [],
     address: '후쿠오카시 주오구 와타나베도리 5-24-30, 1층',
     tag: '¥220~240',
@@ -51,6 +55,16 @@ const fakePlaces: FakePlaceRecord[] = [
 ];
 
 let nextPlaceNumber = fakePlaces.length + 1;
+
+// 가짜 링크 분석으로 만든 카드에 차례로 붙이는 좌표 (캐널시티 하카타, 구시다 신사, 도초지, 스미요시 신사, 오호리 공원, 후쿠오카 타워)
+const FAKE_COLLECTED_LOCATIONS: PlaceLocation[] = [
+  { lat: 33.589874, lng: 130.411911 },
+  { lat: 33.593357, lng: 130.411011 },
+  { lat: 33.594616, lng: 130.414169 },
+  { lat: 33.58569, lng: 130.411972 },
+  { lat: 33.589401, lng: 130.373947 },
+  { lat: 33.593754, lng: 130.351791 },
+];
 
 /** 새 카드로 대체돼 없어진 카드 id → 남은 카드 id */
 const replacedPlaceIds = new Map<string, string>();
@@ -119,7 +133,13 @@ const buildFakePlace = (sourceUrl: string): Omit<Place, 'id'> => {
   if (sourceUrl.includes(FAKE_PARTIAL_KEYWORD)) {
     return { category: 'food', name: `이름만 찾은 장소 ${nextPlaceNumber}`, imageUrl: sampleFood, summary: [] };
   }
-  return { category: 'food', name: `수집한 장소 ${nextPlaceNumber}`, imageUrl: sampleFood, summary: [sourceUrl] };
+  return {
+    category: 'food',
+    name: `수집한 장소 ${nextPlaceNumber}`,
+    imageUrl: sampleFood,
+    location: FAKE_COLLECTED_LOCATIONS[nextPlaceNumber % FAKE_COLLECTED_LOCATIONS.length],
+    summary: [sourceUrl],
+  };
 };
 
 /**

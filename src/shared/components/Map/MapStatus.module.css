@@ -1,0 +1,44 @@
+.status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  height: 100%;
+  padding: 24px;
+  background: var(--color-page);
+  text-align: center;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+}
+
+.title {
+  margin: 0;
+  font: var(--font-h3);
+  letter-spacing: var(--tracking);
+  color: var(--color-text);
+}
+
+.description {
+  margin: 0;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-text-sub);
+}
+
+.hint {
+  margin: 8px 0 0;
+  font: var(--font-caption);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-400);
+  word-break: keep-all;
+}
+
+.retry {
+  margin-top: 12px;
+  color: var(--color-gray-700);
+}

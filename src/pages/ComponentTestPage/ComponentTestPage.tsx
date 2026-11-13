@@ -1,9 +1,10 @@
 import { componentDemos } from './demos';
 import { serverStateDemos } from './serverStateDemos';
 import { exceptionDemos } from './exceptionDemos';
+import { mapDemos } from './mapDemos';
 import styles from './ComponentTestPage.module.css';
 
-const allDemos = [...componentDemos, ...serverStateDemos, ...exceptionDemos];
+const allDemos = [...componentDemos, ...mapDemos, ...serverStateDemos, ...exceptionDemos];
 
 export default function ComponentTestPage() {
   return (
