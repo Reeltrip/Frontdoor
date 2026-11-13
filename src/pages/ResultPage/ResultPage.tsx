@@ -9,11 +9,17 @@ import {
   FAKE_RESULT_REGION,
 } from "@/features/place/api/fakeResult";
 import styles from "./ResultPage.module.css";
+import type { ResultCategoryItem } from "@/features/place/model/result.types";
 
 export default function ResultPage() {
   const navigate = useNavigate();
   const [activeIndex, setActiveIndex] = useState(FAKE_RESULT_INITIAL_INDEX);
-  const handleView = () => {};
+  const handleView = (item?: ResultCategoryItem) => {
+    const categoryIndex = item
+      ? FAKE_RESULT_CATEGORIES.indexOf(item)
+      : activeIndex;
+    navigate("/cards", { state: { categoryIndex } });
+  };
 
   return (
     <main className={styles.page}>
@@ -29,7 +35,7 @@ export default function ResultPage() {
       </div>
 
       <div className={styles.actions}>
-        <Button onClick={handleView}>자세히 보기</Button>
+        <Button onClick={() => handleView()}>자세히 보기</Button>
       </div>
     </main>
   );
