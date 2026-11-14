@@ -91,7 +91,13 @@ export default function CardAddPage() {
     setIsTutorialOpen(true);
   };
 
-  const handleSearch = () => setResults(searchFakeAddresses(address));
+  const handleSearch = () => {
+    if (address.trim() === "") {
+      setResults(null);
+      return;
+    }
+    setResults(searchFakeAddresses(address));
+  };
 
   const handlePickAddress = (picked: string) => {
     setAddress(picked);

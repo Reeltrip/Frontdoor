@@ -9,6 +9,6 @@ const FAKE_ADDRESSES = [
 
 export function searchFakeAddresses(query: string): string[] {
   const keyword = query.trim();
-  if (!keyword) return FAKE_ADDRESSES;
+  if (!keyword) return [];
   return FAKE_ADDRESSES.filter((address) => address.includes(keyword));
 }
