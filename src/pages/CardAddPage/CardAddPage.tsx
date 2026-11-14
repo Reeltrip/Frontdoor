@@ -1,8 +1,7 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import backIcon from "@/shared/assets/icons/back-arrow.svg";
 import Button from "@/shared/components/Button";
-import TextField from "@/shared/components/TextField";
 import ConfirmModal from "@/shared/components/ConfirmModal";
 import CategoryDial from "@/features/place/ui/CategoryDial";
 import DialTutorial from "@/features/place/ui/DialTutorial";
@@ -23,6 +22,12 @@ const STEP_TITLES: Record<CardAddStep, string | null> = {
   address: "여행 장소의 주소는 어느 곳인가요?",
 };
 
+const STEP_SUBTITLES: Record<CardAddStep, string | null> = {
+  category: null,
+  name: "최대 50자까지 적을 수 있어요.",
+  address: "지도에서 찾아볼 수 있어요.",
+};
+
 const INITIAL_CATEGORY_INDEX = Math.max(
   FAKE_RESULT_CATEGORIES.findIndex((item) => item.category === "food"),
   0,
@@ -39,6 +44,15 @@ export default function CardAddPage() {
   const [results, setResults] = useState<string[] | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(true);
   const [isTutorialOpen, setIsTutorialOpen] = useState(false);
+
+  const nameRef = useRef<HTMLTextAreaElement>(null);
+
+  useLayoutEffect(() => {
+    const element = nameRef.current;
+    if (!element) return;
+    element.style.height = "auto";
+    element.style.height = `${element.scrollHeight}px`;
+  }, [name, step]);
 
   const stepIndex = CARD_ADD_STEPS.indexOf(step);
   const canGoNext =
@@ -115,18 +129,33 @@ export default function CardAddPage() {
       </div>
 
       {STEP_TITLES[step] && (
-        <h1 className={styles.title}>{STEP_TITLES[step]}</h1>
+        <header className={styles.heading}>
+          <h1 className={styles.title}>{STEP_TITLES[step]}</h1>
+          {STEP_SUBTITLES[step] && (
+            <p className={styles.subtitle}>{STEP_SUBTITLES[step]}</p>
+          )}
+        </header>
       )}
 
       {step === "name" && (
-        <TextField
-          className={styles.field}
-          value={name}
-          onChange={setName}
-          maxLength={PLACE_NAME_MAX_LENGTH}
-          placeholder="장소 이름을 입력해 주세요"
-          autoFocus
-        />
+        <div className={styles.field}>
+          <textarea
+            ref={nameRef}
+            className={styles.nameInput}
+            value={name}
+            rows={1}
+            maxLength={PLACE_NAME_MAX_LENGTH}
+            placeholder="장소를 입력해주세요."
+            onChange={(event) => setName(event.target.value.replace(/\n/g, ""))}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") event.preventDefault();
+            }}
+            autoFocus
+          />
+          <p className={styles.counter} aria-live="polite">
+            ({name.length}/{PLACE_NAME_MAX_LENGTH})
+          </p>
+        </div>
       )}
 
       {step === "address" && (
@@ -136,7 +165,7 @@ export default function CardAddPage() {
               className={styles.addressInput}
               value={address}
               onChange={(event) => setAddress(event.target.value)}
-              placeholder="주소를 입력해 주세요"
+              placeholder="주소를 검색해주세요."
               autoFocus
             />
             <button
@@ -172,7 +201,7 @@ export default function CardAddPage() {
         className={`${styles.next} ${step === "category" ? styles.nextOnDial : ""}`}
       >
         <Button onClick={handleNext} disabled={!canGoNext}>
-          {step === "address" ? "완료" : "다음"}
+          다음
         </Button>
       </div>
 
