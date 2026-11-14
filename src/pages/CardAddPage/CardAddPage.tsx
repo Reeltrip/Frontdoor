@@ -186,6 +186,8 @@ export default function CardAddPage() {
               setIsTutorialOpen(false);
             }}
             isRaised={isTutorialOpen}
+            isTickHidden={isTutorialOpen}
+            hasGlow={isTutorialOpen}
           />
         </div>
       )}
