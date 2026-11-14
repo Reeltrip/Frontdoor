@@ -1,0 +1,49 @@
+.page {
+    position: relative;
+    min-height: 100dvh;
+    overflow: hidden;
+    background: var(--color-bg);
+}
+
+.stage {
+    position: absolute;
+    top: max(95px, calc(100dvh - 749px));
+    right: 0;
+    left: 0;
+}
+
+.empty {
+    margin: 120px 0 0;
+    text-align: center;
+    font: var(--font-body2);
+    letter-spacing: var(--tracking);
+    color: var(--color-text-sub);
+}
+
+.roundButton {
+    position: absolute;
+    bottom: 44px;
+    z-index: 6;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: var(--color-gray-50);
+    cursor: pointer;
+}
+
+.roundButton:disabled {
+    cursor: default;
+}
+
+.saveButton {
+    left: 21px;
+}
+
+.editButton {
+    right: 21px;
+}

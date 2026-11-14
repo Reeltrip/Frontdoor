@@ -1,0 +1,170 @@
+.dial {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 5;
+  height: 315px;
+  overflow: hidden;
+  touch-action: pan-y;
+  user-select: none;
+  outline: none;
+  background: linear-gradient(180deg, rgba(235, 235, 235, 0) 0%, rgba(235, 235, 235, 0.9) 100%);
+}
+
+.raised {
+  z-index: 11;
+}
+
+.ringMask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  mask-image: linear-gradient(90deg, transparent 0%, #000 24%, #000 76%, transparent 100%);
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 24%, #000 76%, transparent 100%);
+}
+
+.ring {
+  position: absolute;
+  top: 25px;
+  left: 50%;
+  width: 504px;
+  height: 524px;
+  margin-left: -252px;
+  stroke: var(--color-gray-200);
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  overflow: visible;
+}
+
+.raised .ringMask {
+  opacity: 0.45;
+}
+
+.animated {
+  transition: transform 0.3s ease-out;
+}
+
+.indicator {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1.6px;
+  height: 55px;
+  margin-left: -0.8px;
+  border-radius: 0.8px;
+  background: linear-gradient(180deg, rgba(255, 77, 84, 0.67) 0%, rgba(255, 77, 84, 0) 100%);
+}
+
+.bowl {
+  position: absolute;
+  top: 69px;
+  left: 50%;
+  width: 416px;
+  height: 416px;
+  margin-left: -208px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  box-shadow:
+    0 -4px 24px rgba(26, 26, 26, 0.06),
+    inset 0 2px 0 #fafafa;
+  overflow: hidden;
+}
+
+.bowl::after {
+  content: '';
+  position: absolute;
+  inset: 16px;
+  border-radius: 50%;
+  background: conic-gradient(from 305deg at 194px 180px,
+      rgba(187, 185, 178, 0) 0deg,
+      #bbb9b2 118deg,
+      rgba(187, 185, 178, 0) 118deg 360deg);
+  opacity: 0.3;
+  filter: blur(3px);
+  pointer-events: none;
+}
+
+.raised .bowl {
+  background: #ffffff;
+}
+
+.raised .bowl::after {
+  display: none;
+}
+
+.content {
+  position: absolute;
+  top: 121px;
+  left: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 22px;
+  width: 140px;
+  margin-left: -70px;
+  pointer-events: none;
+  animation: fade-in 0.25s ease-out;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+  filter: brightness(0) invert(0.302);
+}
+
+.flipped {
+  transform: scaleY(-1);
+}
+
+.label {
+  margin: 0;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-700);
+  white-space: nowrap;
+}
+
+.arrow {
+  position: absolute;
+  top: 181px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow img {
+  width: 14px;
+  height: 14px;
+}
+
+.arrowPrev {
+  left: calc(50% - 93px);
+}
+
+
+.arrowNext {
+  right: calc(50% - 93px);
+}
+
+
+
+.arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}

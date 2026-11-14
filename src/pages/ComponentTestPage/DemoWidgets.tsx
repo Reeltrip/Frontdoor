@@ -1,34 +1,54 @@
 // demos.tsx에서 쓰는 상태가 있는 데모 조각들
-import { useState, type ReactNode } from 'react';
-import Button from '@/shared/components/Button';
-import TextField from '@/shared/components/TextField';
-import TabBar, { type TabKey } from '@/shared/components/TabBar';
-import ConfirmModal from '@/shared/components/ConfirmModal';
-import CategoryChip from '@/features/place/ui/CategoryChip';
-import { LoadingArc, LoadingBlob, LoadingSpinner } from '@/shared/components/Loading';
-import LabeledInput from '@/shared/components/LabeledInput';
-import Calendar from '@/shared/components/Calendar';
-import SegmentedButtons from '@/shared/components/SegmentedButtons';
-import { FILTER_CATEGORY_KEYS } from '@/features/place/lib/categories';
-import type { PlaceCategory } from '@/features/place/model/place.types';
+import { useState, type ReactNode } from "react";
+import Button from "@/shared/components/Button";
+import TextField from "@/shared/components/TextField";
+import TabBar, { type TabKey } from "@/shared/components/TabBar";
+import ConfirmModal from "@/shared/components/ConfirmModal";
+import CategoryWheel from "@/features/place/ui/CategoryWheel";
+import CategoryChip from "@/features/place/ui/CategoryChip";
+import {
+  LoadingArc,
+  LoadingBlob,
+  LoadingSpinner,
+} from "@/shared/components/Loading";
+import LabeledInput from "@/shared/components/LabeledInput";
+import Calendar from "@/shared/components/Calendar";
+import SegmentedButtons from "@/shared/components/SegmentedButtons";
+import { FILTER_CATEGORY_KEYS } from "@/features/place/lib/categories";
+import type { PlaceCategory } from "@/features/place/model/place.types";
+import {
+  FAKE_RESULT_CATEGORIES,
+  FAKE_RESULT_INITIAL_INDEX,
+} from "@/features/place/api/fakeResult";
+import CategoryDial from "@/features/place/ui/CategoryDial";
+import PlaceCarousel from "@/features/place/ui/PlaceCarousel";
+import { FAKE_PLACES_BY_CATEGORY } from "@/features/place/api/fakePlaces";
+import Toast from "@/shared/components/Toast";
+import PlaceEditCard from "@/features/place/ui/PlaceEditCard";
+import { toDraft, type PlaceDraft } from "@/features/place/model/placeEdit";
 
 export function ColorScale({ name, steps }: { name: string; steps: string[] }) {
   return (
-    <div style={{ width: '100%' }}>
+    <div style={{ width: "100%" }}>
       {steps.map((step) => (
         <div
           key={step}
           className="text-caption"
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            padding: '6px 12px',
+            display: "flex",
+            justifyContent: "space-between",
+            padding: "6px 12px",
             background: `var(--color-${name}-${step})`,
-            color: Number(step) >= 600 ? 'var(--color-white)' : 'var(--color-gray-900)',
+            color:
+              Number(step) >= 600
+                ? "var(--color-white)"
+                : "var(--color-gray-900)",
           }}
         >
           <span>{step}</span>
-          <span>--color-{name}-{step}</span>
+          <span>
+            --color-{name}-{step}
+          </span>
         </div>
       ))}
     </div>
@@ -42,12 +62,92 @@ export function TabBarDemo({ initialTab }: { initialTab: TabKey }) {
 
 export function TextFieldDemo({ initialValue }: { initialValue: string }) {
   const [value, setValue] = useState(initialValue);
-  return <TextField value={value} onChange={setValue} placeholder="장소를 입력해주세요." />;
+  return (
+    <TextField
+      value={value}
+      onChange={setValue}
+      placeholder="장소를 입력해주세요."
+    />
+  );
+}
+export function PlaceCarouselDemo() {
+  const [activeIndex, setActiveIndex] = useState(1);
+  const places = FAKE_PLACES_BY_CATEGORY.food ?? [];
+  return (
+    <div style={{ width: 390, height: 360, overflow: "hidden" }}>
+      <PlaceCarousel
+        places={places}
+        activeIndex={activeIndex}
+        onChange={setActiveIndex}
+      />
+    </div>
+  );
+}
+
+export function PlaceEditCardDemo() {
+  const place = (FAKE_PLACES_BY_CATEGORY.food ?? [])[0];
+  const [draft, setDraft] = useState<PlaceDraft>(() => toDraft(place));
+  return <PlaceEditCard place={place} draft={draft} onDraftChange={setDraft} />;
+}
+
+export function ToastDemo() {
+  return (
+    <div
+      style={{
+        position: "relative",
+        width: 390,
+        height: 180,
+        overflow: "hidden",
+      }}
+    >
+      <Toast message="편집하신 내용이 저장되었습니다." />
+    </div>
+  );
+}
+
+export function CategoryDialDemo() {
+  const [activeIndex, setActiveIndex] = useState(FAKE_RESULT_INITIAL_INDEX);
+  return (
+    <div
+      style={{
+        position: "relative",
+        width: 390,
+        height: 319,
+        overflow: "hidden",
+      }}
+    >
+      <CategoryDial
+        items={FAKE_RESULT_CATEGORIES}
+        activeIndex={activeIndex}
+        onChange={setActiveIndex}
+      />
+    </div>
+  );
+}
+
+export function CategoryWheelDemo() {
+  const [activeIndex, setActiveIndex] = useState(FAKE_RESULT_INITIAL_INDEX);
+  return (
+    <div style={{ height: 640 }}>
+      <CategoryWheel
+        items={FAKE_RESULT_CATEGORIES}
+        activeIndex={activeIndex}
+        onChange={setActiveIndex}
+        onView={() => {}}
+      />
+    </div>
+  );
 }
 
 export function ChipDemo() {
   const [isSelected, setIsSelected] = useState(false);
-  return <CategoryChip category="food" isSelected={isSelected} onClick={() => setIsSelected(!isSelected)} />;
+  return (
+    <CategoryChip
+      category="food"
+      isSelected={isSelected}
+      onClick={() => setIsSelected(!isSelected)}
+    />
+  );
 }
 
 export function ModalDemo() {
@@ -75,9 +175,19 @@ export function ModalDemo() {
 export function LoadingSpeedDemo() {
   const [speed, setSpeed] = useState(1);
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%' }}>
-      <label className="text-caption" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <span style={{ whiteSpace: 'nowrap' }}>속도</span>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        gap: 16,
+        width: "100%",
+      }}
+    >
+      <label
+        className="text-caption"
+        style={{ display: "flex", alignItems: "center", gap: 12 }}
+      >
+        <span style={{ whiteSpace: "nowrap" }}>속도</span>
         <input
           type="range"
           min={0.25}
@@ -85,18 +195,35 @@ export function LoadingSpeedDemo() {
           step={0.05}
           value={speed}
           onChange={(event) => setSpeed(Number(event.target.value))}
-          style={{ flex: 1, accentColor: 'var(--color-lime-500)' }}
+          style={{ flex: 1, accentColor: "var(--color-lime-500)" }}
         />
-        <span style={{ minWidth: 44, textAlign: 'right' }}>{speed.toFixed(2)}배</span>
-        <button type="button" className="text-caption" onClick={() => setSpeed(1)}>
+        <span style={{ minWidth: 44, textAlign: "right" }}>
+          {speed.toFixed(2)}배
+        </span>
+        <button
+          type="button"
+          className="text-caption"
+          onClick={() => setSpeed(1)}
+        >
           초기화
         </button>
       </label>
-      <p className="text-caption" style={{ margin: 0, color: 'var(--color-gray-500)' }}>
-        한 바퀴: 스피너·회색 호 {(1.2 / speed).toFixed(2)}초 · 큰 로딩 바깥 {(2.4 / speed).toFixed(2)}초 / 안쪽{' '}
-        {(1.6 / speed).toFixed(2)}초
+      <p
+        className="text-caption"
+        style={{ margin: 0, color: "var(--color-gray-500)" }}
+      >
+        한 바퀴: 스피너·회색 호 {(1.2 / speed).toFixed(2)}초 · 큰 로딩 바깥{" "}
+        {(2.4 / speed).toFixed(2)}초 / 안쪽 {(1.6 / speed).toFixed(2)}초
       </p>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-around', gap: 24, flexWrap: 'wrap' }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-around",
+          gap: 24,
+          flexWrap: "wrap",
+        }}
+      >
         <LoadingSpinner speed={speed} />
         <LoadingArc speed={speed} />
         <LoadingBlob speed={speed} />
@@ -110,13 +237,13 @@ export function DarkBox({ children }: { children: ReactNode }) {
   return (
     <div
       style={{
-        display: 'flex',
-        flexDirection: 'column',
+        display: "flex",
+        flexDirection: "column",
         gap: 20,
-        width: '100%',
+        width: "100%",
         padding: 20,
         borderRadius: 12,
-        background: 'var(--color-gray-900)',
+        background: "var(--color-gray-900)",
       }}
     >
       {children}
@@ -125,10 +252,10 @@ export function DarkBox({ children }: { children: ReactNode }) {
 }
 
 export function CategoryFilterDemo() {
-  const [selected, setSelected] = useState<PlaceCategory | 'all'>('cafe');
+  const [selected, setSelected] = useState<PlaceCategory | "all">("cafe");
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-      {(['all', ...FILTER_CATEGORY_KEYS] as const).map((category) => (
+    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+      {(["all", ...FILTER_CATEGORY_KEYS] as const).map((category) => (
         <CategoryChip
           key={category}
           category={category}
@@ -141,12 +268,22 @@ export function CategoryFilterDemo() {
 }
 
 export function LabeledInputDemo() {
-  const [name, setName] = useState('');
-  const [filledName, setFilledName] = useState('후쿠오카 3박 4일');
+  const [name, setName] = useState("");
+  const [filledName, setFilledName] = useState("후쿠오카 3박 4일");
   return (
     <DarkBox>
-      <LabeledInput label="여행 이름" value={name} onChange={setName} placeholder="이름을 입력해주세요." />
-      <LabeledInput label="여행 이름" value={filledName} onChange={setFilledName} placeholder="이름을 입력해주세요." />
+      <LabeledInput
+        label="여행 이름"
+        value={name}
+        onChange={setName}
+        placeholder="이름을 입력해주세요."
+      />
+      <LabeledInput
+        label="여행 이름"
+        value={filledName}
+        onChange={setFilledName}
+        placeholder="이름을 입력해주세요."
+      />
     </DarkBox>
   );
 }
@@ -167,7 +304,7 @@ export function CalendarDemo() {
     <DarkBox>
       <LabeledInput
         label="여행 기간"
-        value={range.map(formatDate).join(' ~ ')}
+        value={range.map(formatDate).join(" ~ ")}
         placeholder="날짜를 선택해주세요."
         readOnly
       />
@@ -177,13 +314,13 @@ export function CalendarDemo() {
 }
 
 export function SegmentedButtonsDemo() {
-  const [mode, setMode] = useState<'stop' | 'readOnly'>('readOnly');
+  const [mode, setMode] = useState<"stop" | "readOnly">("readOnly");
   return (
     <SegmentedButtons
       label="편집 방식"
       options={[
-        { value: 'stop', label: '그만두기' },
-        { value: 'readOnly', label: '읽기 전용' },
+        { value: "stop", label: "그만두기" },
+        { value: "readOnly", label: "읽기 전용" },
       ]}
       value={mode}
       onChange={setMode}

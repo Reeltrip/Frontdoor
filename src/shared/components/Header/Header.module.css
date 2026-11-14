@@ -1,0 +1,28 @@
+.header {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 56px;
+    padding: env(safe-area-inset-top) 20px 0 12px;
+}
+
+.backButton {
+    display: flex;
+    padding: 4px;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.backButton img {
+    width: 26px;
+    height: 26px;
+}
+
+.title {
+    margin: 0;
+    font: var(--font-h1);
+    font-weight: 700;
+    letter-spacing: var(--tracking);
+    color: var(--color-gray-900);
+}
