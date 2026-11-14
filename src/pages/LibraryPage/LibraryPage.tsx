@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
+import Toast from "@/shared/components/Toast";
 import kebabIcon from "@/shared/assets/icons/kebab.svg";
 import plusIcon from "@/shared/assets/icons/plus.svg";
 import trashOutlineIcon from "@/shared/assets/icons/trash-outline.svg";
@@ -21,6 +22,10 @@ import styles from "./LibraryPage.module.css";
 
 export default function LibraryPage() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [toastMessage, setToastMessage] = useState<string | null>(
+    () => (location.state as { toast?: string } | null)?.toast ?? null,
+  );
   const [category, setCategory] = useState<PlaceCategory | "all">("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [center, setCenter] = useState<MapPosition>(DEFAULT_MAP_CENTER);
@@ -89,6 +94,12 @@ export default function LibraryPage() {
   };
 
   const hasSelection = Boolean(selectedPlace);
+
+  useEffect(() => {
+    if (!toastMessage) return;
+    const timer = window.setTimeout(() => setToastMessage(null), 2000);
+    return () => window.clearTimeout(timer);
+  }, [toastMessage]);
 
   return (
     <main className={styles.page}>
@@ -175,7 +186,7 @@ export default function LibraryPage() {
         <button
           type="button"
           className={styles.addButton}
-          onClick={() => navigate("/home")}
+          onClick={() => navigate("/cards/new")}
           aria-label="카드 추가"
         >
           <img src={plusIcon} alt="" />
@@ -197,7 +208,7 @@ export default function LibraryPage() {
           className={styles.tabBar}
         />
       </div>
-
+      {toastMessage && <Toast message={toastMessage} />}
       <ConfirmModal
         isOpen={deleteTarget !== null}
         icon="alert"
