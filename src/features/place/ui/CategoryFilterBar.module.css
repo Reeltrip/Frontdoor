@@ -1,0 +1,15 @@
+.bar {
+  display: flex;
+  gap: 8px;
+  padding: 0 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.bar::-webkit-scrollbar {
+  display: none;
+}
+
+.bar>* {
+  flex-shrink: 0;
+}
