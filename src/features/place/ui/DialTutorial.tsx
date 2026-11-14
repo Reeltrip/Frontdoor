@@ -3,16 +3,24 @@ import styles from "./DialTutorial.module.css";
 
 type DialTutorialProps = {
   onClose: () => void;
+  lines?: [string, string];
 };
+const DEFAULT_LINES: [string, string] = [
+  "다이얼을 돌려",
+  "카테고리 항목들을 살펴보세요!",
+];
 
-export default function DialTutorial({ onClose }: DialTutorialProps) {
+export default function DialTutorial({
+  onClose,
+  lines = DEFAULT_LINES,
+}: DialTutorialProps) {
   return (
     <div className={styles.overlay} onClick={onClose} role="presentation">
       <div className={styles.guide}>
         <p className={styles.text}>
-          다이얼을 돌려
+          {lines[0]}
           <br />
-          카테고리 항목들을 살펴보세요!
+          {lines[1]}
         </p>
 
         <svg className={styles.arrows} viewBox="0 0 390 844" aria-hidden>

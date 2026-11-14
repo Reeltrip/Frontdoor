@@ -1,0 +1,151 @@
+.page {
+  position: relative;
+  min-height: 100dvh;
+  overflow: hidden;
+  padding: 0 20px;
+  background: var(--color-bg);
+}
+
+.top {
+  padding-top: calc(env(safe-area-inset-top) + 74px);
+}
+
+.backButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 4px 4px 0;
+  border: none;
+  background: none;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-600);
+  cursor: pointer;
+}
+
+.backButton img {
+  width: 20px;
+  height: 20px;
+}
+
+.progress {
+  height: 4px;
+  margin-top: 18px;
+  border-radius: 2px;
+  background: var(--color-gray-50);
+}
+
+.progressFill {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--color-lime-300);
+  transition: width 0.25s ease-out;
+}
+
+.title {
+  margin: 40px 0 32px;
+  font: var(--font-h2);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-900);
+  white-space: pre-line;
+}
+
+.field {
+  width: 100%;
+}
+
+.addressArea {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.addressRow {
+  display: flex;
+  gap: 8px;
+}
+
+.addressInput {
+  flex: 1;
+  min-width: 0;
+  padding: 17px 20px;
+  border: 1px solid var(--color-gray-50);
+  border-radius: 15px;
+  background: transparent;
+  font: var(--font-body1);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-900);
+  outline: none;
+}
+
+.addressInput:focus-visible {
+  border-color: var(--color-gray-200);
+}
+
+.searchButton {
+  flex-shrink: 0;
+  padding: 0 16px;
+  border: none;
+  border-radius: 15px;
+  background: var(--color-gray-800);
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-white);
+  cursor: pointer;
+}
+
+.results {
+  max-height: 280px;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  border: 1px solid var(--color-gray-50);
+  border-radius: 15px;
+}
+
+.resultItem {
+  width: 100%;
+  padding: 14px 20px;
+  border: none;
+  background: none;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-800);
+  text-align: left;
+  cursor: pointer;
+}
+
+.resultItem:hover {
+  background: var(--color-page);
+}
+
+.noResult {
+  padding: 14px 20px;
+  font: var(--font-body2);
+  color: var(--color-text-sub);
+}
+
+.next {
+  position: absolute;
+  right: 20px;
+  bottom: 24px;
+  left: 20px;
+}
+
+.nextOnDial {
+  z-index: 12;
+  bottom: 44px;
+}
+
+.screenTitle {
+  font: var(--font-h1);
+  font-weight: 700;
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-900);
+}
+
+.dialArea>* {
+  height: 363px;
+}
