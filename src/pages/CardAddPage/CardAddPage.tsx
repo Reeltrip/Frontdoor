@@ -3,6 +3,7 @@ import { useNavigate } from "react-router";
 import backIcon from "@/shared/assets/icons/back-arrow.svg";
 import Button from "@/shared/components/Button";
 import ConfirmModal from "@/shared/components/ConfirmModal";
+import PlaceFeatureForm from "@/features/place/ui/PlaceFeatureForm";
 import CategoryDial from "@/features/place/ui/CategoryDial";
 import DialTutorial from "@/features/place/ui/DialTutorial";
 import { readClipboardLink } from "@/features/source/lib/readClipboardLink";
@@ -11,8 +12,10 @@ import { FAKE_RESULT_CATEGORIES } from "@/features/place/api/fakeResult";
 import { searchFakeAddresses } from "@/features/place/api/fakeAddressSearch";
 import {
   CARD_ADD_STEPS,
+  EMPTY_CARD_FEATURES,
   PLACE_NAME_MAX_LENGTH,
   type CardAddStep,
+  type CardFeatures,
 } from "@/features/place/model/cardAdd.types";
 import styles from "./CardAddPage.module.css";
 
@@ -20,12 +23,14 @@ const STEP_TITLES: Record<CardAddStep, string | null> = {
   category: null,
   name: "여행 장소는 어디인가요?",
   address: "여행 장소의 주소는 어느 곳인가요?",
+  features: "여행 장소의 특징을 알려주세요",
 };
 
 const STEP_SUBTITLES: Record<CardAddStep, string | null> = {
   category: null,
   name: "최대 50자까지 적을 수 있어요.",
   address: "지도에서 찾아볼 수 있어요.",
+  features: "사진과 가격, 대표특징을 알아보아요.",
 };
 
 const INITIAL_CATEGORY_INDEX = Math.max(
@@ -33,7 +38,12 @@ const INITIAL_CATEGORY_INDEX = Math.max(
   0,
 );
 
-const PROGRESS_TOTAL = 5;
+const PROGRESS_PERCENTS: Record<CardAddStep, number> = {
+  category: 20,
+  name: 40,
+  address: 60,
+  features: 80,
+};
 
 export default function CardAddPage() {
   const navigate = useNavigate();
@@ -41,6 +51,7 @@ export default function CardAddPage() {
   const [categoryIndex, setCategoryIndex] = useState(INITIAL_CATEGORY_INDEX);
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
+  const [features, setFeatures] = useState<CardFeatures>(EMPTY_CARD_FEATURES);
   const [results, setResults] = useState<string[] | null>(null);
   const [isImportModalOpen, setIsImportModalOpen] = useState(true);
   const [isTutorialOpen, setIsTutorialOpen] = useState(false);
@@ -55,9 +66,17 @@ export default function CardAddPage() {
   }, [name, step]);
 
   const stepIndex = CARD_ADD_STEPS.indexOf(step);
-  const canGoNext =
-    step === "category" ||
-    (step === "name" ? name.trim() !== "" : address.trim() !== "");
+  const hasFeatures =
+    features.photoUrl !== null ||
+    features.tags.length > 0 ||
+    features.price.trim() !== "" ||
+    features.memo.trim() !== "";
+  const canGoNext = {
+    category: true,
+    name: name.trim() !== "",
+    address: address.trim() !== "",
+    features: hasFeatures,
+  }[step];
 
   const handleBack = () => {
     if (stepIndex === 0) navigate(-1);
@@ -65,14 +84,13 @@ export default function CardAddPage() {
   };
 
   const handleNext = () => {
-    if (step !== "address") {
+    setIsTutorialOpen(false);
+    if (step !== "features") {
       setStep(CARD_ADD_STEPS[stepIndex + 1]);
       return;
     }
-    navigate("/library", {
-      replace: true,
-      state: { toast: "카드가 추가되었어요." },
-    });
+    const state: AnalyzingState = { links: ["manual-card"] };
+    navigate("/links/analyzing", { replace: true, state });
   };
 
   const handleImportLink = async () => {
@@ -123,19 +141,21 @@ export default function CardAddPage() {
         <div
           className={styles.progress}
           role="progressbar"
-          aria-valuemin={1}
-          aria-valuemax={PROGRESS_TOTAL}
-          aria-valuenow={stepIndex + 1}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={PROGRESS_PERCENTS[step]}
         >
           <span
             className={styles.progressFill}
-            style={{ width: `${((stepIndex + 1) / PROGRESS_TOTAL) * 100}%` }}
+            style={{ width: `${PROGRESS_PERCENTS[step]}%` }}
           />
         </div>
       </div>
 
       {STEP_TITLES[step] && (
-        <header className={styles.heading}>
+        <header
+          className={`${styles.heading} ${step === "features" ? styles.headingTight : ""}`}
+        >
           <h1 className={styles.title}>{STEP_TITLES[step]}</h1>
           {STEP_SUBTITLES[step] && (
             <p className={styles.subtitle}>{STEP_SUBTITLES[step]}</p>
@@ -182,11 +202,8 @@ export default function CardAddPage() {
               주소 찾기
             </button>
           </div>
-          {results !== null && (
+          {results !== null && results.length > 0 && (
             <ul className={styles.results}>
-              {results.length === 0 && (
-                <li className={styles.noResult}>검색 결과가 없어요</li>
-              )}
               {results.map((result) => (
                 <li key={result}>
                   <button
@@ -201,6 +218,10 @@ export default function CardAddPage() {
             </ul>
           )}
         </div>
+      )}
+
+      {step === "features" && (
+        <PlaceFeatureForm value={features} onChange={setFeatures} />
       )}
 
       <div
@@ -227,7 +248,7 @@ export default function CardAddPage() {
         </div>
       )}
 
-      {isTutorialOpen && (
+      {isTutorialOpen && isTutorialOpen && (
         <DialTutorial
           onClose={() => setIsTutorialOpen(false)}
           lines={["다이얼을 돌려", "카드 카테고리를 정해보세요!"]}
