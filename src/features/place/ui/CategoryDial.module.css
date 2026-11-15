@@ -91,6 +91,16 @@
   background: #ffffff;
 }
 
+.tickHidden .ringMask,
+.tickHidden .indicator {
+  display: none;
+}
+
+.glow .bowl {
+  background: #fafafa;
+  box-shadow: 0 0 25px #ffffff;
+}
+
 .raised .bowl::after {
   display: none;
 }

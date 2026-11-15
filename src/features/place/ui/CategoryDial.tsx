@@ -11,6 +11,8 @@ type CategoryDialProps = {
   activeIndex: number;
   onChange: (index: number) => void;
   isRaised?: boolean;
+  isTickHidden?: boolean;
+  hasGlow?: boolean;
 };
 
 const DRAG_STEP_PX = 90;
@@ -32,6 +34,8 @@ export default function CategoryDial({
   activeIndex,
   onChange,
   isRaised = false,
+  isTickHidden = false,
+  hasGlow = false,
 }: CategoryDialProps) {
   const { position, isDragging, handlers } = useDragStepper({
     count: items.length,
@@ -51,7 +55,14 @@ export default function CategoryDial({
 
   return (
     <div
-      className={`${styles.dial} ${isRaised ? styles.raised : ""}`}
+      className={[
+        styles.dial,
+        isRaised && styles.raised,
+        isTickHidden && styles.tickHidden,
+        hasGlow && styles.glow,
+      ]
+        .filter(Boolean)
+        .join(" ")}
       role="group"
       aria-label="카테고리 다이얼"
       tabIndex={0}

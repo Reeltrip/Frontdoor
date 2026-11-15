@@ -1,0 +1,32 @@
+.strip {
+  display: flex;
+  gap: 12px;
+  padding: 0 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-padding-left: 20px;
+  scrollbar-width: none;
+}
+
+.strip::-webkit-scrollbar {
+  display: none;
+}
+
+.item {
+  position: relative;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+
+.deleteButton {
+  position: absolute;
+  top: 22px;
+  right: 60.8px;
+  display: flex;
+  width: 30.8px;
+  height: 30.8px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
