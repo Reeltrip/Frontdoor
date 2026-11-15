@@ -1,0 +1,40 @@
+.wrapper {
+  position: relative;
+}
+
+.wrapper::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 56px;
+  background: linear-gradient(to right, rgba(255, 255, 255, 0), var(--color-bg));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.hasMore::after {
+  opacity: 1;
+}
+
+.bar {
+  display: flex;
+  gap: 8px;
+  padding: 0 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.bar::-webkit-scrollbar {
+  display: none;
+}
+
+.bar>* {
+  flex-shrink: 0;
+}
+
+.bar button:not([aria-pressed='true']) {
+  background: rgba(187, 185, 178, 0.3);
+}
