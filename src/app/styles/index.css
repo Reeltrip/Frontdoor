@@ -31,6 +31,8 @@
   --color-surface-dark: #272727;
   /* 캘린더 요일·화살표 */
   --color-calendar-sub: #b5bec6;
+  /* 에러 문구 (피그마 로그인 오류 화면의 색) */
+  --color-error: #f37490;
 
   /* 지도 노드 마커 배경 */
   --color-marker-bg: #c9da8a;
