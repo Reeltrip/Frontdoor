@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router";
 import { LoadingBlob } from "@/shared/components/Loading";
 import AnalysisSteps from "@/features/source/ui/AnalysisSteps";
@@ -9,7 +10,7 @@ import {
 import { isAnalyzingState } from "@/features/source/model/source.types";
 import styles from "./LinkAnalyzingPage.module.css";
 
-// 가짜 데이터: 닉네임을 저장하는 곳이 정해지면 교체
+const RESULT_DELAY_MS = 600;
 const FAKE_NICKNAME = "여행자";
 
 export default function LinkAnalyzingPage() {
@@ -26,6 +27,15 @@ export default function LinkAnalyzingPage() {
 function AnalyzingView({ links }: { links: string[] }) {
   const navigate = useNavigate();
   const { status, currentStep } = useAnalysis(links);
+
+  useEffect(() => {
+    if (status !== "done") return;
+    const timer = window.setTimeout(
+      () => navigate("/result", { replace: true }),
+      RESULT_DELAY_MS,
+    );
+    return () => window.clearTimeout(timer);
+  }, [status, navigate]);
 
   if (status === "failed") {
     return (
@@ -44,11 +54,7 @@ function AnalyzingView({ links }: { links: string[] }) {
           <br />
           만들어지고 있어요 !
         </h1>
-        <p className={styles.description}>
-          {status === "done"
-            ? "잠시만 기다려주세요..."
-            : "잠시만 기다려주세요..."}
-        </p>
+        <p className={styles.description}>잠시만 기다려주세요...</p>
       </header>
 
       <div className={styles.loading}>
