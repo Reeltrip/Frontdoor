@@ -1,7 +1,10 @@
-/* 임시 화면용 스타일. 편집 화면을 만들 때 같이 교체해요 */
 .page {
-  min-height: 100dvh;
-  padding: 74px 20px 44px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--color-white);
 }
 
 .center {
@@ -9,55 +12,141 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 16px;
+  gap: 8px;
   min-height: 100dvh;
   padding: 0 20px;
   text-align: center;
 }
 
-.title {
+.statusTitle {
   margin: 0;
-  font: var(--font-h1);
+  font: var(--font-h3);
   letter-spacing: var(--tracking);
   color: var(--color-gray-900);
 }
 
-.summary,
-.message {
-  margin: 4px 0 0;
+.statusText {
+  margin: 0 0 8px;
   font: var(--font-body2);
   letter-spacing: var(--tracking);
   color: var(--color-gray-500);
 }
 
-.notice {
-  margin: 24px 0 0;
-  font: var(--font-body1);
-  font-weight: 500;
-  letter-spacing: var(--tracking);
-  color: var(--color-gray-900);
+/* 피그마: 제목 줄이 위에서 84px, 일자·칩 줄이 141px */
+.top {
+  position: relative;
+  z-index: 3;
+  flex-shrink: 0;
+  padding: calc(env(safe-area-inset-top) + 64px) 0 8px;
+  background: var(--color-white);
 }
 
-.days {
+.toolbar {
+  display: flex;
+  align-items: center;
+  margin-top: 4px;
+  padding-left: 20px;
+}
+
+.filter {
+  flex: 1;
+  min-width: 0;
+}
+
+.mapArea {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.map {
+  position: absolute;
+  inset: 0;
+}
+
+.notice,
+.errorBanner {
+  position: absolute;
+  top: 12px;
+  left: 20px;
+  right: 20px;
+  z-index: 1;
+  margin: 0;
+  font: var(--font-caption);
+  letter-spacing: var(--tracking);
+  text-align: center;
+}
+
+.notice {
+  left: 50%;
+  right: auto;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: var(--color-gray-0);
+  box-shadow: 0 0 10.6px 0 rgba(26, 26, 26, 0.2);
+  color: var(--color-gray-500);
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+/* 피그마 '일자 · 구역 선택_예외'의 붉은 안내 띠. 디자인 토큰에 맞는 빨강이 없어 --color-error를 써요 */
+.errorBanner {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-error) 18%, transparent);
+  color: var(--color-error);
+  text-align: left;
+}
+
+.placesLoading {
+  position: absolute;
+  top: 12px;
+  right: 20px;
+  z-index: 1;
+}
+
+.bottom {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin: 16px 0 0;
-  padding: 0;
-  list-style: none;
+  gap: 12px;
+  pointer-events: none;
 }
 
-.day {
+.bottom > * {
+  pointer-events: auto;
+}
+
+.strip {
+  width: 100%;
+}
+
+/* 피그마: 아래쪽은 흰색 그라데이션 위에 버튼 */
+.actions {
   display: flex;
-  justify-content: space-between;
-  padding: 16px 20px;
-  border: 1px solid var(--color-gray-50);
-  border-radius: 12px;
-  font: var(--font-body1);
-  letter-spacing: var(--tracking);
-  color: var(--color-gray-900);
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 20px calc(24px + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--color-white) 64%, rgba(250, 250, 250, 0));
 }
 
-.dayDate {
-  color: var(--color-gray-500);
+.bottom > section + .actions {
+  margin-top: -12px;
+  padding-top: 0;
+  background: var(--color-surface);
+}
+
+.textButton {
+  padding: 4px 8px;
+  border: 0;
+  background: none;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-400);
+  cursor: pointer;
 }
