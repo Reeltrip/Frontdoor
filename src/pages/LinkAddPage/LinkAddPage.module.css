@@ -1,0 +1,102 @@
+.page {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+    padding: 0 20px;
+    background: linear-gradient(180deg, var(--color-lime-50) 0%, var(--color-lime-10) 28%, var(--color-bg) 62%);
+}
+
+.background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    width: 100%;
+    height: auto;
+    pointer-events: none;
+}
+
+.header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 100px 0 56px;
+    text-align: center;
+}
+
+.title {
+    margin: 0;
+    font: var(--font-h1);
+    letter-spacing: var(--tracking);
+    color: #1e1e1e;
+}
+
+.description {
+    margin: 3px 0 0;
+    font: var(--font-body2);
+    font-weight: 700;
+    letter-spacing: var(--tracking);
+    color: var(--color-gray-500);
+}
+
+.addButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    width: 127px;
+    height: 36px;
+    margin-top: 19px;
+    padding: 6px 4px 6px 14px;
+    border: none;
+    border-radius: 41px;
+    background: var(--color-gray-700);
+    font: var(--font-body2);
+    letter-spacing: var(--tracking);
+    color: var(--color-white);
+    cursor: pointer;
+}
+
+.addIcon {
+    width: 26px;
+    height: 26px;
+}
+
+.fields {
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.fields>* {
+    position: relative;
+}
+
+
+.fields>*:focus-within {
+    z-index: 3;
+}
+
+
+.actions {
+    position: sticky;
+    bottom: 0;
+    margin-top: auto;
+    padding: 32px 0 calc(24px + env(safe-area-inset-bottom));
+    background: linear-gradient(180deg, transparent 0, var(--color-bg) 32px);
+}
+
+.dim {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    background: rgba(26, 26, 26, 0.45);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s;
+}
+
+.page:has(input:focus) .dim {
+    opacity: 1;
+}

@@ -1,0 +1,52 @@
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font: var(--font-body1);
+    font-weight: 700;
+    letter-spacing: var(--tracking);
+    color: var(--color-gray-500);
+}
+
+.waiting {
+    color: var(--color-gray-300);
+}
+
+.icon {
+    flex: none;
+    width: 16px;
+    height: 16px;
+}
+
+.dot {
+    border: 1.5px solid var(--color-gray-100);
+    border-radius: 50%;
+}
+
+.spinner {
+    border: 1.5px solid var(--color-gray-100);
+    border-top-color: var(--color-gray-700);
+    border-radius: 50%;
+    animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .spinner {
+        animation-duration: 3s;
+    }
+}
