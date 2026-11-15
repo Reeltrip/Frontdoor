@@ -36,6 +36,10 @@
     cursor: pointer;
 }
 
+.roundButton:disabled {
+    cursor: default;
+}
+
 .saveButton {
     left: 21px;
 }

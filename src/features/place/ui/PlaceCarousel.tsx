@@ -1,4 +1,4 @@
-import { type CSSProperties, type KeyboardEvent } from "react";
+import { type CSSProperties, type KeyboardEvent, type ReactNode } from "react";
 import { useDragStepper } from "@/shared/hooks/useDragStepper";
 import type { Place } from "../model/place.types";
 import PlaceCard from "./PlaceCard";
@@ -11,6 +11,8 @@ type PlaceCarouselProps = {
   onOpen?: (place: Place) => void;
   onCopy?: (place: Place) => void;
   onAddMemo?: (place: Place) => void;
+  renderCard?: (place: Place, isActive: boolean) => ReactNode;
+  isLocked?: boolean;
 };
 
 const DRAG_STEP_PX = 180;
@@ -38,6 +40,8 @@ export default function PlaceCarousel({
   onOpen,
   onCopy,
   onAddMemo,
+  renderCard,
+  isLocked = false,
 }: PlaceCarouselProps) {
   const { position, isDragging, handlers } = useDragStepper({
     count: places.length,
@@ -47,6 +51,7 @@ export default function PlaceCarousel({
   });
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (isLocked) return;
     if (event.key === "ArrowLeft") onChange(Math.max(activeIndex - 1, 0));
     if (event.key === "ArrowRight")
       onChange(Math.min(activeIndex + 1, places.length - 1));
@@ -60,7 +65,7 @@ export default function PlaceCarousel({
       aria-label="요약 카드"
       tabIndex={0}
       onKeyDown={handleKeyDown}
-      {...handlers}
+      {...(isLocked ? {} : handlers)}
     >
       {places.map((place, index) => {
         const isActive = index === activeIndex;
@@ -70,15 +75,18 @@ export default function PlaceCarousel({
             key={place.id}
             className={`${styles.slot} ${isDragging ? "" : styles.animated}`}
             style={getSlotStyle(index - position)}
-            onClick={() => !isActive && onChange(index)}
+            // 옆 카드는 눌러도 카드 안 버튼이 눌리지 않고, 그 카드로 넘어감
+            onClick={() => !isActive && !isLocked && onChange(index)}
             inert={!isActive}
           >
-            <PlaceCard
-              place={place}
-              onOpen={onOpen}
-              onCopy={onCopy}
-              onAddMemo={onAddMemo}
-            />
+            {renderCard?.(place, isActive) ?? (
+              <PlaceCard
+                place={place}
+                onOpen={onOpen}
+                onCopy={onCopy}
+                onAddMemo={onAddMemo}
+              />
+            )}
           </div>
         );
       })}

@@ -23,6 +23,9 @@ import {
 import CategoryDial from "@/features/place/ui/CategoryDial";
 import PlaceCarousel from "@/features/place/ui/PlaceCarousel";
 import { FAKE_PLACES_BY_CATEGORY } from "@/features/place/api/fakePlaces";
+import Toast from "@/shared/components/Toast";
+import PlaceEditCard from "@/features/place/ui/PlaceEditCard";
+import { toDraft, type PlaceDraft } from "@/features/place/model/placeEdit";
 
 export function ColorScale({ name, steps }: { name: string; steps: string[] }) {
   return (
@@ -77,6 +80,27 @@ export function PlaceCarouselDemo() {
         activeIndex={activeIndex}
         onChange={setActiveIndex}
       />
+    </div>
+  );
+}
+
+export function PlaceEditCardDemo() {
+  const place = (FAKE_PLACES_BY_CATEGORY.food ?? [])[0];
+  const [draft, setDraft] = useState<PlaceDraft>(() => toDraft(place));
+  return <PlaceEditCard place={place} draft={draft} onDraftChange={setDraft} />;
+}
+
+export function ToastDemo() {
+  return (
+    <div
+      style={{
+        position: "relative",
+        width: 390,
+        height: 180,
+        overflow: "hidden",
+      }}
+    >
+      <Toast message="편집하신 내용이 저장되었습니다." />
     </div>
   );
 }
