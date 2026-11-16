@@ -14,7 +14,9 @@ export type ApiErrorCode =
   | 'UNKNOWN'
   | 'DUPLICATE_SOURCE' // 기능명세서 5-1 중복된 링크
   | 'DUPLICATE_PLACE' // 기능명세서 5-2 보관함에 이미 있는 장소
-  | 'PLAN_PERIOD_OVERLAP'; // 기능명세서 5-3 같은 기간에 다른 계획
+  | 'PLAN_PERIOD_OVERLAP' // 기능명세서 5-3 같은 기간에 다른 계획
+  | 'AI_DRAFT_NO_PLACES'
+  | 'AI_DRAFT_FAILED';
 
 export class ApiError extends Error {
   /** HTTP 상태 코드. 서버에 닿지 못했으면 0 */
@@ -46,6 +48,8 @@ const ERROR_MESSAGES: Partial<Record<ApiErrorCode, string>> = {
   NOT_FOUND: '찾을 수 없어요. 삭제됐을 수 있어요.',
   UNAUTHORIZED: '다시 로그인해 주세요.',
   SERVER_ERROR: '잠시 후 다시 시도해 주세요.',
+  AI_DRAFT_NO_PLACES: '이 도시의 장소 카드를 보관함에 추가한 뒤 다시 시도해 주세요.',
+  AI_DRAFT_FAILED: '초안을 만들지 못했어요. 기존 계획은 그대로예요. 다시 시도해 주세요.',
 };
 
 /** 화면에 보여줄 한 줄 안내 */

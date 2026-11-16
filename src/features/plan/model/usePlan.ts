@@ -1,7 +1,7 @@
 import { skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isApiError } from '@/shared/api/client';
 import { getViewStatus } from '@/shared/api/viewStatus';
-import { createPlan, fetchPlan, fetchPlans, planKeys, updatePlan } from '../api/plans';
+import { createAiDraft, createPlan, fetchPlan, fetchPlans, planKeys, updatePlan } from '../api/plans';
 import type { Plan, PlanPeriodOverlapDetails } from './plan.types';
 
 /** 내 계획 목록 (여행계획 홈의 '최근 작성 계획') */
@@ -47,6 +47,18 @@ export function useCreatePlan() {
     onSuccess: (plan) => {
       queryClient.setQueryData(planKeys.detail(plan.id), plan);
       return queryClient.invalidateQueries({ queryKey: planKeys.list() });
+    },
+  });
+}
+
+/** AI 초안 응답을 상세 캐시에 반영하고 여행목록을 갱신해요. */
+export function useCreateAiDraft(planId: string) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => createAiDraft(planId),
+    onSuccess: (plan) => {
+      queryClient.setQueryData(planKeys.detail(planId), plan);
+      void queryClient.invalidateQueries({ queryKey: planKeys.list() });
     },
   });
 }

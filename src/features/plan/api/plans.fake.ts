@@ -93,6 +93,17 @@ const findPlan = (id: string) => {
 };
 
 export const fakePlansApi = {
+  createAiDraft: (id: string) =>
+    fakeResponse(() => {
+      findPlan(id);
+      // 가짜 카드에는 지도 좌표가 없어 AI가 쓸 도시 장소가 없어요.
+      throw new ApiError({
+        status: 400,
+        code: 'AI_DRAFT_NO_PLACES',
+        message: 'AI 초안에 사용할 장소 카드가 없어요.',
+      });
+    }),
+
   create: ({ title, startDate, endDate, destination, isForced = false }: CreatePlanRequest) =>
     fakeResponse(() => {
       if (title.includes(FAKE_PLAN_FAIL_KEYWORD)) {

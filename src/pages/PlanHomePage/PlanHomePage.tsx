@@ -4,13 +4,15 @@ import bgImage from '@/shared/assets/images/plan-home-bg.jpg';
 import globeImage from '@/shared/assets/images/plan-home-globe.svg';
 import { LoadingSpinner } from '@/shared/components/Loading';
 import TabBar from '@/shared/components/TabBar';
-import type { PlanSummary } from '@/features/plan/model/plan.types';
+import { isDraftPlanStatus, type PlanSummary } from '@/features/plan/model/plan.types';
 import { usePlans } from '@/features/plan/model/usePlan';
 import styles from './PlanHomePage.module.css';
 
 const STATUS_LABELS: Record<PlanSummary['status'], string> = {
   draft: '작성중',
   complete: '작성완료',
+  DRAFT: '작성중',
+  COMPLETED: '작성완료',
 };
 
 /** 2026-11-21 → 2026.11.21 */
@@ -23,7 +25,7 @@ export default function PlanHomePage() {
 
   // 작성 중인 계획은 이어서 편집하고, 다 만든 계획은 보기 화면으로 가요
   const openPlan = (plan: PlanSummary) =>
-    navigate(plan.status === 'draft' ? `/plans/${plan.id}/edit` : `/plans/${plan.id}`);
+    navigate(isDraftPlanStatus(plan.status) ? `/plans/${plan.id}/edit` : `/plans/${plan.id}`);
 
   const renderPlans = () => {
     if (viewStatus === 'loading') {

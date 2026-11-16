@@ -22,6 +22,12 @@ export function fetchPlan(id: string, signal?: AbortSignal): Promise<Plan> {
   return apiRequest<Plan>(`/plans/${encodeURIComponent(id)}`, { signal });
 }
 
+/** AI가 기존 동선을 새 초안으로 덮어써요. 요청 본문은 보내지 않아요. */
+export function createAiDraft(planId: string): Promise<Plan> {
+  if (isFakeApiEnabled) return fakePlansApi.createAiDraft(planId);
+  return apiRequest<Plan>(`/plans/${encodeURIComponent(planId)}/ai-drafts`, { method: 'POST' });
+}
+
 export function updatePlan(id: string, request: UpdatePlanRequest): Promise<Plan> {
   if (isFakeApiEnabled) return fakePlansApi.update(id, request);
   return apiRequest<Plan>(`/plans/${encodeURIComponent(id)}`, { method: 'PUT', body: request });

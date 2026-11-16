@@ -24,7 +24,7 @@ import {
   setPlanB,
 } from '@/features/plan/model/planEdit';
 import type { Plan } from '@/features/plan/model/plan.types';
-import { usePlan, useUpdatePlan } from '@/features/plan/model/usePlan';
+import { useCreateAiDraft, usePlan, useUpdatePlan } from '@/features/plan/model/usePlan';
 import DaySelector from '@/features/plan/ui/DaySelector';
 import ZoneSheet from '@/features/plan/ui/ZoneSheet';
 import styles from './PlanEditPage.module.css';
@@ -55,6 +55,7 @@ export default function PlanEditPage() {
   const { plan, viewStatus, error, refetch } = usePlan(planId);
   const { places, viewStatus: placesStatus } = usePlaces();
   const updatePlan = useUpdatePlan(planId);
+  const aiDraft = useCreateAiDraft(planId);
 
   // null이면 계획을 보고 정해요 (불러오기 전에는 알 수 없어서)
   const [step, setStep] = useState<EditStep | null>(null);
@@ -68,6 +69,7 @@ export default function PlanEditPage() {
   const [planBTargetId, setPlanBTargetId] = useState<string | null>(null);
   const [otherDayConfirm, setOtherDayConfirm] = useState<{ placeId: string; dayNumber: number } | null>(null);
   const [isSkipDayOpen, setIsSkipDayOpen] = useState(false);
+  const [isAiDraftConfirmOpen, setIsAiDraftConfirmOpen] = useState(false);
   const [isNoLodgingDismissed, setIsNoLodgingDismissed] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -98,6 +100,7 @@ export default function PlanEditPage() {
   }
 
   const currentStep = step ?? getInitialStep(plan);
+  const hasExistingRoute = plan.days.some((planDay) => planDay.nodes.length > 0);
   const day = plan.days[dayIndex] ?? plan.days[0];
   const dayLabel = `${dayIndex + 1}일차 · ${formatDayDate(day.date)}`;
   const isLastDay = dayIndex === plan.days.length - 1;
@@ -308,6 +311,11 @@ export default function PlanEditPage() {
     <main className={styles.page}>
       <div className={styles.top}>
         <Header title={STEP_TITLES[currentStep]} onBack={handleBack} />
+        {hasExistingRoute && (
+          <button type="button" className={styles.aiDraftButton} onClick={() => setIsAiDraftConfirmOpen(true)}>
+            AI 초안으로 다시 만들기
+          </button>
+        )}
         {currentStep !== 'lodging' && (
           <div className={styles.toolbar}>
             <DaySelector days={plan.days} selectedIndex={dayIndex} onSelect={goToDay} />
@@ -418,6 +426,31 @@ export default function PlanEditPage() {
         onConfirm={completeDay}
       />
       {toastMessage && <Toast message={toastMessage} />}
+      <ConfirmModal
+        isOpen={isAiDraftConfirmOpen}
+        icon="alert"
+        title="AI 초안을 만들까요?"
+        description="현재 계획의 모든 일자와 동선이 AI 초안으로 바뀌어요."
+        cancelLabel="취소"
+        confirmLabel="초안 만들기"
+        onCancel={() => setIsAiDraftConfirmOpen(false)}
+        onConfirm={() => {
+          setIsAiDraftConfirmOpen(false);
+          aiDraft.mutate(undefined, {
+            onSuccess: (draft) => navigate(`/plans/${draft.id}`, { replace: true }),
+            onError: (error) => setToastMessage(getErrorMessage(error)),
+          });
+        }}
+      />
+      {aiDraft.isPending && (
+        <div className={styles.aiDraftLoading} role="status">
+          <div>
+            <LoadingSpinner label="AI가 여행 동선을 만드는 중" />
+            <p>AI가 여행 동선을 짜고 있어요.</p>
+            <span>보통 5~10초 정도 걸려요.</span>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

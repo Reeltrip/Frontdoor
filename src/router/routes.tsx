@@ -1,6 +1,6 @@
 import { Outlet, type RouteObject } from "react-router";
 import RequireAuth from "./RequireAuth";
-import StartPage from "@/pages/StartPage/StartPage";
+import RootRoute from "@/router/RootRoute";
 import LoginPage from "@/pages/LoginPage/LoginPage";
 import SignupPage from "@/pages/SignupPage/SignupPage";
 import NicknamePage from "@/pages/NicknamePage/NicknamePage";
@@ -18,9 +18,10 @@ import LinkAnalyzingPage from "@/pages/LinkAnalyzingPage/LinkAnalyzingPage";
 import ResultPage from "@/pages/ResultPage/ResultPage";
 import CardBrowsePage from "@/pages/CardBrowsePage/CardBrowsePage";
 import CardAddPage from "@/pages/CardAddPage/CardAddPage";
+import TripListPage from "@/pages/TripListPage/TripListPage";
 
 export const routes: RouteObject[] = [
-  { path: "/", element: <StartPage /> },
+  { path: "/", element: <RootRoute /> },
   { path: "/login", element: <LoginPage /> },
   { path: "/signup", element: <SignupPage /> },
   { path: "/signup/nickname", element: <NicknamePage /> },
@@ -41,6 +42,7 @@ export const routes: RouteObject[] = [
       { path: "/cards", element: <CardBrowsePage /> },
       { path: "/cards/new", element: <CardAddPage /> },
       { path: "/plans", element: <PlanHomePage /> },
+      { path: "/trips", element: <TripListPage /> },
       { path: "/plans/new", element: <PlanCreatePage /> },
       { path: "/plans/:planId", element: <PlanViewPage /> },
       { path: "/plans/:planId/edit", element: <PlanEditPage /> },
