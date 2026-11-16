@@ -5,6 +5,7 @@ import editIcon from "@/shared/assets/icons/dial-edit.svg";
 import Header from "@/shared/components/Header";
 import CategoryDial from "@/features/place/ui/CategoryDial";
 import DialTutorial from "@/features/place/ui/DialTutorial";
+import EditTutorial from "@/features/place/ui/EditTutorial";
 import PlaceCarousel from "@/features/place/ui/PlaceCarousel";
 import ConfirmModal from "@/shared/components/ConfirmModal";
 import Toast from "@/shared/components/Toast";
@@ -25,19 +26,20 @@ import {
 import styles from "./CardBrowsePage.module.css";
 
 const TUTORIAL_SEEN_KEY = "reeltrip:dial-tutorial-seen";
+const EDIT_TUTORIAL_SEEN_KEY = "reeltrip:edit-tutorial-seen";
 const TOAST_DURATION_MS = 2000;
 
-function hasSeenTutorial(): boolean {
+function hasSeen(key: string): boolean {
   try {
-    return sessionStorage.getItem(TUTORIAL_SEEN_KEY) === "1";
+    return sessionStorage.getItem(key) === "1";
   } catch {
     return false;
   }
 }
 
-function markTutorialSeen() {
+function markSeen(key: string) {
   try {
-    sessionStorage.setItem(TUTORIAL_SEEN_KEY, "1");
+    sessionStorage.setItem(key, "1");
   } catch {}
 }
 
@@ -61,8 +63,9 @@ export default function CardBrowsePage() {
   );
   const [placeIndex, setPlaceIndex] = useState(0);
   const [isTutorialOpen, setIsTutorialOpen] = useState(
-    () => !hasSeenTutorial(),
+    () => !hasSeen(TUTORIAL_SEEN_KEY),
   );
+  const [isEditTutorialOpen, setIsEditTutorialOpen] = useState(false);
   const [placesByCategory, setPlacesByCategory] = useState(
     FAKE_PLACES_BY_CATEGORY,
   );
@@ -91,10 +94,15 @@ export default function CardBrowsePage() {
   }, [isToastVisible]);
 
   const closeTutorial = () => {
-    markTutorialSeen();
+    markSeen(TUTORIAL_SEEN_KEY);
     setIsTutorialOpen(false);
+    if (!hasSeen(EDIT_TUTORIAL_SEEN_KEY)) setIsEditTutorialOpen(true);
   };
 
+  const closeEditTutorial = () => {
+    markSeen(EDIT_TUTORIAL_SEEN_KEY);
+    setIsEditTutorialOpen(false);
+  };
   const handleCategoryChange = (index: number) => {
     setCategoryIndex(index);
     setPlaceIndex(0);
@@ -117,6 +125,7 @@ export default function CardBrowsePage() {
   };
 
   const handleEdit = () => {
+    closeEditTutorial();
     if (!isEditing) {
       if (activePlace) setDraft(toDraft(activePlace));
       return;
@@ -192,7 +201,7 @@ export default function CardBrowsePage() {
       </button>
       <button
         type="button"
-        className={`${styles.roundButton} ${styles.editButton}`}
+        className={`${styles.roundButton} ${styles.editButton} ${isEditTutorialOpen ? styles.aboveTutorial : ""}`}
         onClick={handleEdit}
         disabled={places.length === 0}
         aria-label={isEditing ? "편집 끝내기" : "편집"}
@@ -201,6 +210,8 @@ export default function CardBrowsePage() {
       </button>
 
       {isTutorialOpen && <DialTutorial onClose={closeTutorial} />}
+      {isTutorialOpen && <DialTutorial onClose={closeTutorial} />}
+      {isEditTutorialOpen && <EditTutorial onClose={closeEditTutorial} />}
       <ConfirmModal
         isOpen={pendingLeave !== null}
         icon="alert"
