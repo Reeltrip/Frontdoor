@@ -1,6 +1,6 @@
 import { Outlet, type RouteObject } from "react-router";
 import RequireAuth from "./RequireAuth";
-import StartPage from "@/pages/StartPage/StartPage";
+import RootRoute from "@/router/RootRoute";
 import LoginPage from "@/pages/LoginPage/LoginPage";
 import SignupPage from "@/pages/SignupPage/SignupPage";
 import NicknamePage from "@/pages/NicknamePage/NicknamePage";
@@ -20,7 +20,7 @@ import CardBrowsePage from "@/pages/CardBrowsePage/CardBrowsePage";
 import CardAddPage from "@/pages/CardAddPage/CardAddPage";
 
 export const routes: RouteObject[] = [
-  { path: "/", element: <StartPage /> },
+  { path: "/", element: <RootRoute /> },
   { path: "/login", element: <LoginPage /> },
   { path: "/signup", element: <SignupPage /> },
   { path: "/signup/nickname", element: <NicknamePage /> },

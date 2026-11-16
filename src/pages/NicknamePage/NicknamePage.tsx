@@ -10,7 +10,11 @@ import styles from "./NicknamePage.module.css";
 
 export default function NicknamePage() {
   const navigate = useNavigate();
-  const { nickname, setNickname, handleSubmit } = useNicknameForm(() =>
+  const {
+    nickname, setNickname, handleSubmit, errorMessage, isSubmitting,
+    isTermsAgreed, setIsTermsAgreed, isPrivacyAgreed, setIsPrivacyAgreed,
+    isMarketingAgreed, setIsMarketingAgreed,
+  } = useNicknameForm(() =>
     navigate("/home"),
   );
 
@@ -34,8 +38,15 @@ export default function NicknamePage() {
         autoComplete="nickname"
       />
 
+      <section className={styles.consents} aria-label="약관 동의">
+        <label><input type="checkbox" checked={isTermsAgreed} onChange={(event) => setIsTermsAgreed(event.target.checked)} /> 이용약관 동의 (필수)</label>
+        <label><input type="checkbox" checked={isPrivacyAgreed} onChange={(event) => setIsPrivacyAgreed(event.target.checked)} /> 개인정보 수집 및 이용 동의 (필수)</label>
+        <label><input type="checkbox" checked={isMarketingAgreed} onChange={(event) => setIsMarketingAgreed(event.target.checked)} /> 마케팅 정보 수신 동의 (선택)</label>
+        {errorMessage && <p className={styles.error}>{errorMessage}</p>}
+      </section>
+
       <div className={styles.actions}>
-        <Button type="submit">시작하기</Button>
+        <Button type="submit" disabled={isSubmitting}>{isSubmitting ? "가입 중" : "시작하기"}</Button>
       </div>
     </form>
   );

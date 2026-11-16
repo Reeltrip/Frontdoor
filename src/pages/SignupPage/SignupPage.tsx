@@ -9,12 +9,20 @@ export default function SignupPage() {
   const navigate = useNavigate();
   const {
     email,
-    setEmail,
+    handleEmailChange,
+    code,
+    setCode,
     password,
     handlePasswordChange,
     passwordConfirm,
     handlePasswordConfirmChange,
     errorMessage,
+    isCodeSent,
+    isEmailVerified,
+    isSendingCode,
+    isVerifyingCode,
+    handleSendCode,
+    handleVerifyCode,
     handleSubmit,
   } = useSignupForm(() => navigate("/signup/nickname"));
 
@@ -25,14 +33,25 @@ export default function SignupPage() {
 
   return (
     <form onSubmit={handleFormSubmit}>
-      <AuthLayout actions={<Button type="submit">회원가입</Button>}>
+      <AuthLayout actions={<Button type="submit" disabled={!isEmailVerified}>회원가입</Button>}>
         <AuthInput
           type="email"
           value={email}
-          onChange={setEmail}
+          onChange={handleEmailChange}
           placeholder="이메일을 입력해주세요."
           autoComplete="email"
         />
+        <Button type="button" variant="outline" size="md" onClick={handleSendCode} disabled={isSendingCode || isEmailVerified}>
+          {isEmailVerified ? "이메일 인증 완료" : isSendingCode ? "인증번호 보내는 중" : isCodeSent ? "인증번호 다시 받기" : "이메일 인증번호 받기"}
+        </Button>
+        {isCodeSent && !isEmailVerified && (
+          <>
+            <AuthInput value={code} onChange={setCode} placeholder="이메일 인증번호" autoComplete="one-time-code" errorMessage={errorMessage} />
+            <Button type="button" variant="outline" size="md" onClick={handleVerifyCode} disabled={isVerifyingCode}>
+              {isVerifyingCode ? "확인 중" : "인증번호 확인"}
+            </Button>
+          </>
+        )}
         <AuthInput
           type="password"
           value={password}
