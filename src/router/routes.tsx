@@ -1,4 +1,5 @@
-import type { RouteObject } from "react-router";
+import { Outlet, type RouteObject } from "react-router";
+import RequireAuth from "./RequireAuth";
 import StartPage from "@/pages/StartPage/StartPage";
 import LoginPage from "@/pages/LoginPage/LoginPage";
 import SignupPage from "@/pages/SignupPage/SignupPage";
@@ -23,18 +24,28 @@ export const routes: RouteObject[] = [
   { path: "/login", element: <LoginPage /> },
   { path: "/signup", element: <SignupPage /> },
   { path: "/signup/nickname", element: <NicknamePage /> },
-  { path: "/home", element: <HomePage /> },
-  { path: "/library", element: <LibraryPage /> },
-  { path: "/library/trash", element: <LibraryTrashPage /> },
-  { path: "/links/new", element: <LinkAddPage /> },
-  { path: "/links/analyzing", element: <LinkAnalyzingPage /> },
-  { path: "/result", element: <ResultPage /> },
-  { path: "/cards", element: <CardBrowsePage /> },
-  { path: "/cards/new", element: <CardAddPage /> },
-  { path: "/plans", element: <PlanHomePage /> },
-  { path: "/plans/new", element: <PlanCreatePage /> },
-  { path: "/plans/:planId", element: <PlanViewPage /> },
-  { path: "/plans/:planId/edit", element: <PlanEditPage /> },
+  // 아래 화면은 로그인해야 들어갈 수 있어요
+  {
+    element: (
+      <RequireAuth>
+        <Outlet />
+      </RequireAuth>
+    ),
+    children: [
+      { path: "/home", element: <HomePage /> },
+      { path: "/library", element: <LibraryPage /> },
+      { path: "/library/trash", element: <LibraryTrashPage /> },
+      { path: "/links/new", element: <LinkAddPage /> },
+      { path: "/links/analyzing", element: <LinkAnalyzingPage /> },
+      { path: "/result", element: <ResultPage /> },
+      { path: "/cards", element: <CardBrowsePage /> },
+      { path: "/cards/new", element: <CardAddPage /> },
+      { path: "/plans", element: <PlanHomePage /> },
+      { path: "/plans/new", element: <PlanCreatePage /> },
+      { path: "/plans/:planId", element: <PlanViewPage /> },
+      { path: "/plans/:planId/edit", element: <PlanEditPage /> },
+    ],
+  },
   // 컴포넌트 테스트 페이지는 로컬과 Vercel 미리보기에서만 열림 (제출용 main 배포에는 안 나옴)
   ...(canSeeDevPages
     ? [{ path: "/dev/components", element: <ComponentTestPage /> }]
