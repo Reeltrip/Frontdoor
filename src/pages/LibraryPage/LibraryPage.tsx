@@ -12,7 +12,7 @@ import {
   MapView,
   type MapPosition,
 } from "@/shared/components/Map";
-import TabBar, { type TabKey } from "@/shared/components/TabBar";
+import TabBar from "@/shared/components/TabBar";
 import { toMapNodes } from "@/features/place/lib/mapNodes";
 import { useDeletePlace, usePlaces } from "@/features/place/model/usePlaces";
 import type { Place, PlaceCategory } from "@/features/place/model/place.types";
@@ -87,10 +87,6 @@ export default function LibraryPage() {
         closeDeleteModal();
       },
     });
-  };
-
-  const handleTabChange = (tab: TabKey) => {
-    if (tab === "menu") navigate("/home");
   };
 
   const hasSelection = Boolean(selectedPlace);
@@ -204,7 +200,6 @@ export default function LibraryPage() {
         )}
         <TabBar
           activeTab="archive"
-          onChange={handleTabChange}
           className={styles.tabBar}
         />
       </div>

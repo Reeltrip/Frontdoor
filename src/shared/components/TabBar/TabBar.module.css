@@ -68,6 +68,19 @@
   white-space: nowrap;
 }
 
+/* 피그마 '여행계획 홈': 어두운 배경 위에서는 흰 글자·아이콘 */
+.dark {
+  background: rgba(250, 250, 250, 0.1);
+}
+
+.dark .indicator {
+  background: var(--color-gray-500);
+}
+
+.dark .label {
+  color: var(--color-white);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .indicator {
     transition: none;

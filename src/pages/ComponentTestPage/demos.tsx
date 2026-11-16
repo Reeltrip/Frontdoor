@@ -149,6 +149,7 @@ export const componentDemos: ComponentDemo[] = [
       { label: "목록 선택", render: () => <TabBarDemo initialTab="menu" /> },
       { label: "계획 선택", render: () => <TabBarDemo initialTab="plan" /> },
       { label: "마이 선택", render: () => <TabBarDemo initialTab="profile" /> },
+      { label: "어두운 배경 (계획 선택)", render: () => <TabBarDemo initialTab="plan" theme="dark" /> },
     ],
   },
   {

@@ -55,9 +55,11 @@ export function ColorScale({ name, steps }: { name: string; steps: string[] }) {
   );
 }
 
-export function TabBarDemo({ initialTab }: { initialTab: TabKey }) {
+export function TabBarDemo({ initialTab, theme = "light" }: { initialTab: TabKey; theme?: "light" | "dark" }) {
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
-  return <TabBar activeTab={activeTab} onChange={setActiveTab} />;
+  const bar = <TabBar activeTab={activeTab} onChange={setActiveTab} theme={theme} />;
+  if (theme === "light") return bar;
+  return <div style={{ padding: 16, borderRadius: 16, background: "var(--color-gray-900)" }}>{bar}</div>;
 }
 
 export function TextFieldDemo({ initialValue }: { initialValue: string }) {

@@ -1,0 +1,167 @@
+/* 피그마 '3-1 여행계획 홈'. 어두운 사진 배경 위 흰 글자 */
+.page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--color-gray-900);
+  color: var(--color-white);
+}
+
+.background {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+/* 피그마 위치: 왼쪽으로 조금 나가 있는 점 지구본 */
+.globe {
+  position: absolute;
+  top: 326px;
+  left: -44px;
+  width: 383.808px;
+  height: 413.259px;
+  pointer-events: none;
+}
+
+.intro,
+.recent,
+.tabBar {
+  position: relative;
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex-shrink: 0;
+  padding: calc(env(safe-area-inset-top) + 87px) 20px 0;
+}
+
+.title {
+  margin: 0;
+  font: var(--font-h1);
+  letter-spacing: var(--tracking);
+}
+
+.description {
+  margin: 14px 0 0;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-300);
+}
+
+.createButton {
+  margin-top: 20px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 41px;
+  background: rgba(77, 77, 77, 0.77);
+  font: var(--font-button);
+  font-weight: 600;
+  letter-spacing: var(--tracking);
+  color: var(--color-white);
+  cursor: pointer;
+}
+
+.recent {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  margin-top: 105px;
+}
+
+.recentTitle {
+  flex-shrink: 0;
+  margin: 0 0 16px;
+  padding: 0 20px;
+  font: var(--font-button);
+  font-weight: 600;
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-100);
+}
+
+/* 피그마: 아래쪽 카드일수록 흐려져요. 탭 바 아래로 지나가도 보이게 여백을 둬요 */
+.list {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  margin: 0;
+  padding: 0 20px 120px;
+  overflow-y: auto;
+  list-style: none;
+  mask-image: linear-gradient(to bottom, #000 55%, rgba(0, 0, 0, 0.35) 85%);
+}
+
+.planCard {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  height: 80px;
+  padding: 15px 20px;
+  border: 0;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 7.7px 0 rgba(26, 26, 26, 0.2);
+  backdrop-filter: blur(7.8px);
+  text-align: left;
+  cursor: pointer;
+}
+
+.planMeta,
+.planTitle {
+  overflow: hidden;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.planMeta {
+  color: var(--color-gray-500);
+}
+
+.planTitle {
+  color: var(--color-gray-200);
+}
+
+.status {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 0 20px;
+}
+
+.statusText {
+  margin: 0;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-300);
+}
+
+.retryButton {
+  padding: 6px 13px;
+  border: 0;
+  border-radius: 17px;
+  background: rgba(255, 255, 255, 0.12);
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-white);
+  cursor: pointer;
+}
+
+.tabBar {
+  position: absolute;
+  bottom: calc(24px + env(safe-area-inset-bottom));
+  left: 50%;
+  transform: translateX(-50%);
+}
