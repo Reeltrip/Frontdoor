@@ -1,8 +1,23 @@
 import { skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { isApiError } from '@/shared/api/client';
 import { getViewStatus } from '@/shared/api/viewStatus';
-import { createPlan, fetchPlan, planKeys, updatePlan } from '../api/plans';
+import { createPlan, fetchPlan, fetchPlans, planKeys, updatePlan } from '../api/plans';
 import type { Plan, PlanPeriodOverlapDetails } from './plan.types';
+
+/** 내 계획 목록 (여행계획 홈의 '최근 작성 계획') */
+export function usePlans() {
+  const query = useQuery({
+    queryKey: planKeys.list(),
+    queryFn: ({ signal }) => fetchPlans(signal),
+  });
+
+  return {
+    plans: query.data ?? [],
+    viewStatus: getViewStatus(query, (plans) => plans.length === 0),
+    error: query.error,
+    refetch: query.refetch,
+  };
+}
 
 /** 여행계획 하나. 모든 일차에 노드가 없으면 빈 화면(empty)이에요 */
 export function usePlan(planId: string | undefined) {
@@ -29,7 +44,10 @@ export function useCreatePlan() {
 
   return useMutation({
     mutationFn: createPlan,
-    onSuccess: (plan) => queryClient.setQueryData(planKeys.detail(plan.id), plan),
+    onSuccess: (plan) => {
+      queryClient.setQueryData(planKeys.detail(plan.id), plan);
+      return queryClient.invalidateQueries({ queryKey: planKeys.list() });
+    },
   });
 }
 
@@ -68,6 +86,8 @@ export function useUpdatePlan(planId: string) {
     },
     onSettled: () => {
       if (queryClient.isMutating({ mutationKey }) === 1) {
+        // 이름·작성 상태가 바뀌었을 수 있어서 목록도 다시 불러와요
+        void queryClient.invalidateQueries({ queryKey: planKeys.list() });
         return queryClient.invalidateQueries({ queryKey: planKey });
       }
     },

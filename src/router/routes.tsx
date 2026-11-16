@@ -5,6 +5,7 @@ import SignupPage from "@/pages/SignupPage/SignupPage";
 import NicknamePage from "@/pages/NicknamePage/NicknamePage";
 import HomePage from "@/pages/HomePage/HomePage";
 import PlanCreatePage from "@/pages/PlanCreatePage/PlanCreatePage";
+import PlanHomePage from "@/pages/PlanHomePage/PlanHomePage";
 import PlanEditPage from "@/pages/PlanEditPage/PlanEditPage";
 import PlanViewPage from "@/pages/PlanViewPage/PlanViewPage";
 import ComponentTestPage from "@/pages/ComponentTestPage/ComponentTestPage";
@@ -30,6 +31,7 @@ export const routes: RouteObject[] = [
   { path: "/result", element: <ResultPage /> },
   { path: "/cards", element: <CardBrowsePage /> },
   { path: "/cards/new", element: <CardAddPage /> },
+  { path: "/plans", element: <PlanHomePage /> },
   { path: "/plans/new", element: <PlanCreatePage /> },
   { path: "/plans/:planId", element: <PlanViewPage /> },
   { path: "/plans/:planId/edit", element: <PlanEditPage /> },

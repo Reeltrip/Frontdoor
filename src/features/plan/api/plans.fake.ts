@@ -1,4 +1,5 @@
 // 가짜 응답: GET /plans/{id}, PUT /plans/{id}가 정해지기 전까지 쓰는 메모리 저장소.
+// - GET /plans: 만든 순서의 반대(최근 것이 위)
 // - fake-plan-1: 후쿠오카 2일 계획 / fake-plan-empty: 노드가 하나도 없는 계획 / 그 외 id: 404
 // - fake-plan-3days: 기간 변경(기능명세서 5-4)을 볼 때 쓰는 3일 계획
 // - POST /plans: 기간이 다른 계획과 겹치면 409 PLAN_PERIOD_OVERLAP (isForced면 통과)
@@ -6,7 +7,13 @@
 import { ApiError } from '@/shared/api/client';
 import { fakeResponse } from '@/shared/api/fake';
 import { listDates } from '../model/planDays';
-import type { CreatePlanRequest, Plan, PlanPeriodOverlapDetails, UpdatePlanRequest } from '../model/plan.types';
+import type {
+  CreatePlanRequest,
+  Plan,
+  PlanPeriodOverlapDetails,
+  PlanSummary,
+  UpdatePlanRequest,
+} from '../model/plan.types';
 
 const fakePlans = new Map<string, Plan>([
   [
@@ -133,6 +140,22 @@ export const fakePlansApi = {
       fakePlans.set(id, created);
       return created;
     }),
+
+  list: (signal?: AbortSignal) =>
+    fakeResponse(
+      (): PlanSummary[] =>
+        [...fakePlans.values()]
+          .reverse()
+          .map(({ id, title, startDate, endDate, destination, status }) => ({
+            id,
+            title,
+            startDate,
+            endDate,
+            destination,
+            status,
+          })),
+      { signal },
+    ),
 
   get: (id: string, signal?: AbortSignal) => fakeResponse(() => findPlan(id), { signal }),
 

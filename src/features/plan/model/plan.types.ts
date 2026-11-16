@@ -55,3 +55,6 @@ export type CreatePlanRequest = {
 export type PlanPeriodOverlapDetails = {
   overlappingPlans: Pick<Plan, 'id' | 'title' | 'startDate' | 'endDate'>[];
 };
+
+/** 가짜 형식: GET /plans 목록의 한 줄. 일차 내용은 빼고 보내준다고 가정해요 */
+export type PlanSummary = Pick<Plan, 'id' | 'title' | 'startDate' | 'endDate' | 'destination' | 'status'>;
