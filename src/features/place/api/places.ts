@@ -7,6 +7,7 @@ import { fakePlacesApi } from './places.fake';
 export const placeKeys = {
   all: ['places'] as const,
   list: (params: PlaceListParams = {}) => [...placeKeys.all, 'list', params] as const,
+  deleted: () => [...placeKeys.all, 'deleted'] as const,
 };
 
 export function fetchPlaces(params: PlaceListParams = {}, signal?: AbortSignal): Promise<Place[]> {
@@ -19,7 +20,7 @@ export function updatePlace(id: string, changes: UpdatePlaceRequest): Promise<Pl
   return apiRequest<Place>(`/places/${encodeURIComponent(id)}`, { method: 'PATCH', body: changes });
 }
 
-// 아래 세 개는 가짜 형식: 예외 상황(기능명세서 5-2, 5-3)용으로 FE가 가정한 엔드포인트. BE와 정해지면 맞추기
+// 아래는 가짜 형식: 예외 상황(기능명세서 5-2, 5-3)용으로 FE가 가정한 엔드포인트. BE와 정해지면 맞추기
 
 /** 카드 삭제. 서버는 삭제 표시만 하고 남겨 둔다고 가정해요 (계획에서 복구할 수 있게) */
 export function deletePlace(id: string): Promise<void> {
@@ -40,4 +41,16 @@ export function replacePlace(existingPlaceId: string, newPlaceId: string): Promi
     method: 'POST',
     body: { newPlaceId },
   });
+}
+
+/** 휴지통 목록 (삭제 표시된 카드) */
+export function fetchDeletedPlaces(signal?: AbortSignal): Promise<Place[]> {
+  if (isFakeApiEnabled) return fakePlacesApi.listDeleted(signal);
+  return apiRequest<Place[]>('/places', { query: { deleted: true }, signal });
+}
+
+/** 휴지통에서 완전히 삭제. 되돌릴 수 없어요 */
+export function purgePlace(id: string): Promise<void> {
+  if (isFakeApiEnabled) return fakePlacesApi.purge(id);
+  return apiRequest<void>(`/places/${encodeURIComponent(id)}`, { method: 'DELETE', query: { permanent: true } });
 }

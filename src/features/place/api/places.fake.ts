@@ -1,7 +1,8 @@
 // 가짜 응답: GET /places, PATCH /places/{id}가 정해지기 전까지 쓰는 메모리 저장소.
 // 새로고침하면 처음 상태로 돌아가요. 쇼핑·관광지 등 비어 있는 카테고리로 빈 화면을 볼 수 있어요.
 // 예외 상황(기능명세서 5-2)용 가정:
-// - 삭제는 deletedAt만 채우고 남겨 둬요. 목록에는 안 나오고, 복구하면 다시 나와요
+// - 삭제는 deletedAt만 채우고 남겨 둬요. 보관함 목록에는 안 나오고 휴지통에 나와요. 복구하면 다시 보관함으로 가요
+// - 휴지통에서 삭제하면 완전히 없어져요
 // - 링크에 'same-place'가 있으면 보관함에 이미 있는 '하카타 잇소' 카드를 또 만들어요
 // - 링크에 'partial'이 있으면 이름만 추출된 카드를 만들어요 (빈 항목 '-' 표시 확인용). 좌표도 없어서 지도에 안 나와요
 // 좌표는 일본 국토지리원 주소 검색으로 찾은 후쿠오카 실제 위치예요
@@ -56,6 +57,21 @@ const fakePlaces: FakePlaceRecord[] = [
 
 let nextPlaceNumber = fakePlaces.length + 1;
 
+// 휴지통 확인용으로 처음부터 삭제돼 있는 카드. 복구하면 보관함 지도에 나오게 대략적인 좌표를 넣었어요
+const FAKE_DELETED_AT = '2026-11-10T09:00:00.000Z';
+const TRASH_SEEDS: Omit<Place, 'id'>[] = [
+  { category: 'food', name: 'Shin Shin', imageUrl: sampleFood, location: { lat: 33.5893, lng: 130.3985 }, summary: ['돈코츠 라멘'] },
+  { category: 'shopping', name: '미나 텐진', imageUrl: sampleHotel, location: { lat: 33.5925, lng: 130.399 }, summary: ['복합 쇼핑몰'] },
+  { category: 'cafe', name: '레크 커피 텐진미나미점', imageUrl: sampleDonut, location: { lat: 33.5867, lng: 130.4003 }, summary: ['카페'] },
+  { category: 'attraction', name: '모모치', imageUrl: sampleHotel, location: { lat: 33.5933, lng: 130.3515 }, summary: ['후쿠오카시 박물관, 타워'] },
+  { category: 'food', name: 'Kawataro Nakasu', imageUrl: sampleFood, location: { lat: 33.5916, lng: 130.4055 }, summary: ['활오징어'] },
+  { category: 'shopping', name: '후쿠오카 파르코', imageUrl: sampleDonut, location: { lat: 33.5903, lng: 130.399 }, summary: ['복합 쇼핑몰'] },
+  { category: 'attraction', name: '오호리 공원', imageUrl: sampleHotel, location: { lat: 33.5862, lng: 130.3764 }, summary: ['공원'] },
+];
+fakePlaces.push(
+  ...TRASH_SEEDS.map((place, index) => ({ id: `fake-trash-${index + 1}`, ...place, deletedAt: FAKE_DELETED_AT })),
+);
+
 // 가짜 링크 분석으로 만든 카드에 차례로 붙이는 좌표 (캐널시티 하카타, 구시다 신사, 도초지, 스미요시 신사, 오호리 공원, 후쿠오카 타워)
 const FAKE_COLLECTED_LOCATIONS: PlaceLocation[] = [
   { lat: 33.589874, lng: 130.411911 },
@@ -89,6 +105,17 @@ export const fakePlacesApi = {
       { signal },
     ),
 
+  /** 휴지통. 최근에 지운 카드가 위에 와요 */
+  listDeleted: (signal?: AbortSignal) =>
+    fakeResponse(
+      () =>
+        fakePlaces
+          .filter((place) => !isInLibrary(place))
+          .sort((a, b) => (b.deletedAt ?? '').localeCompare(a.deletedAt ?? ''))
+          .map(toPlace),
+      { signal },
+    ),
+
   update: (id: string, changes: UpdatePlaceRequest) =>
     fakeResponse(() => toPlace(Object.assign(findPlace(id), changes))),
 
@@ -103,6 +130,13 @@ export const fakePlacesApi = {
       const place = findPlace(id, { isDeletedIncluded: true });
       delete place.deletedAt;
       return toPlace(place);
+    }),
+
+  /** 휴지통에서 완전히 지워요 */
+  purge: (id: string) =>
+    fakeResponse(() => {
+      const place = findPlace(id, { isDeletedIncluded: true });
+      fakePlaces.splice(fakePlaces.indexOf(place), 1);
     }),
 
   /** 이전 카드 내용을 새 카드로 바꾸고 새 카드는 없애요. 이전 카드 id가 남아서 계획의 노드는 그대로예요 */
