@@ -11,7 +11,7 @@ import LabeledInput from '@/shared/components/LabeledInput';
 import { LoadingSpinner } from '@/shared/components/Loading';
 import { EXCEPTION_MODALS } from '@/shared/lib/exceptionMessages';
 import type { Plan } from '@/features/plan/model/plan.types';
-import { getOverlappingPlanTitles, isPlanPeriodOverlapError, useCreatePlan } from '@/features/plan/model/usePlan';
+import { getOverlappingPlanTitles, isPlanPeriodOverlapError, useCreateAiDraft, useCreatePlan } from '@/features/plan/model/usePlan';
 import { PLAN_PERIOD_ERROR_MESSAGE, usePlanCreateForm } from '@/features/plan/model/usePlanCreateForm';
 import styles from './PlanCreatePage.module.css';
 
@@ -25,6 +25,7 @@ export default function PlanCreatePage() {
   const [createdPlan, setCreatedPlan] = useState<Plan>();
   const [isAiNoticeShown, setIsAiNoticeShown] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const aiDraft = useCreateAiDraft(createdPlan?.id ?? '');
 
   // 주소로 바로 들어와서 돌아갈 화면이 없으면 홈으로 보내요
   const leavePage = () => {
@@ -140,9 +141,17 @@ export default function PlanCreatePage() {
         </Button>
       </div>
 
-      {createPlan.isPending && (
+        {(createPlan.isPending || aiDraft.isPending) && (
         <div className={styles.loading}>
-          <LoadingSpinner label="여행 계획을 만드는 중" />
+          <div className={styles.loadingContent} role="status">
+            <LoadingSpinner label={aiDraft.isPending ? 'AI가 여행 동선을 만드는 중' : '여행 계획을 만드는 중'} />
+            {aiDraft.isPending && (
+              <>
+                <p>AI가 여행 동선을 짜고 있어요.</p>
+                <span>보통 5~10초 정도 걸려요.</span>
+              </>
+            )}
+          </div>
         </div>
       )}
 
@@ -165,10 +174,16 @@ export default function PlanCreatePage() {
         theme="dark"
         icon="ticket"
         title="여행 계획이 만들어졌어요."
-        description={isAiNoticeShown ? 'AI 초안은 준비 중이에요. 직접 만들어 주세요.' : '어떻게 만들까요?'}
-        cancelLabel="AI 초안 만들기"
+        description={aiDraft.error ? getErrorMessage(aiDraft.error) : isAiNoticeShown ? 'AI 초안으로 여행 일정을 채울 수 있어요.' : '어떻게 만들까요?'}
+        cancelLabel={aiDraft.error ? '다시 시도' : aiDraft.isPending ? '만드는 중' : 'AI 초안 만들기'}
         confirmLabel="직접 만들기"
-        onCancel={() => setIsAiNoticeShown(true)}
+        onCancel={() => {
+          if (!createdPlan || aiDraft.isPending) return;
+          setIsAiNoticeShown(true);
+          aiDraft.mutate(undefined, {
+            onSuccess: (draft) => navigate(`/plans/${draft.id}`, { replace: true }),
+          });
+        }}
         onConfirm={() => {
           if (createdPlan) navigate(`/plans/${createdPlan.id}/edit`, { replace: true });
         }}

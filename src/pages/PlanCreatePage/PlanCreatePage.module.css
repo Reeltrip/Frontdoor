@@ -148,3 +148,21 @@
   justify-content: center;
   background: color-mix(in srgb, var(--color-gray-900) 40%, transparent);
 }
+
+.loadingContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-white);
+  text-align: center;
+}
+
+.loadingContent p,
+.loadingContent span {
+  margin: 0;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+}
+
+.loadingContent span { color: var(--color-gray-200); }

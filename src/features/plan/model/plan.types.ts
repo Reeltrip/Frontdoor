@@ -21,7 +21,9 @@ export type PlanDay = {
  * 가정: 계획에 상태 필드가 있어요. draft는 '작성 중인 계획'이에요.
  * 빈 일차가 있거나 기간을 늘리면 draft가 돼요 (기능명세서 5-3, 5-4)
  */
-export type PlanStatus = 'draft' | 'complete';
+export type PlanStatus = 'draft' | 'complete' | 'DRAFT' | 'COMPLETED';
+
+export const isDraftPlanStatus = (status: PlanStatus): boolean => status.toLowerCase() === 'draft';
 
 export type Plan = {
   id: string;
