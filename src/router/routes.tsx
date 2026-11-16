@@ -18,6 +18,7 @@ import LinkAnalyzingPage from "@/pages/LinkAnalyzingPage/LinkAnalyzingPage";
 import ResultPage from "@/pages/ResultPage/ResultPage";
 import CardBrowsePage from "@/pages/CardBrowsePage/CardBrowsePage";
 import CardAddPage from "@/pages/CardAddPage/CardAddPage";
+import TripListPage from "@/pages/TripListPage/TripListPage";
 
 export const routes: RouteObject[] = [
   { path: "/", element: <RootRoute /> },
@@ -41,6 +42,7 @@ export const routes: RouteObject[] = [
       { path: "/cards", element: <CardBrowsePage /> },
       { path: "/cards/new", element: <CardAddPage /> },
       { path: "/plans", element: <PlanHomePage /> },
+      { path: "/trips", element: <TripListPage /> },
       { path: "/plans/new", element: <PlanCreatePage /> },
       { path: "/plans/:planId", element: <PlanViewPage /> },
       { path: "/plans/:planId/edit", element: <PlanEditPage /> },
