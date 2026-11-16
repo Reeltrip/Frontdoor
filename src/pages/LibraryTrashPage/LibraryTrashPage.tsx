@@ -5,13 +5,28 @@ import closeIcon from "@/shared/assets/icons/close.svg";
 import kebabIcon from "@/shared/assets/icons/kebab.svg";
 import restoreIcon from "@/shared/assets/icons/restore.svg";
 import trashRedIcon from "@/shared/assets/icons/trash-outline-red.svg";
-import { FAKE_TRASH_PLACES } from "@/features/place/api/fakeTrashPlaces";
+import { getErrorMessage } from "@/shared/api/client";
+import Button from "@/shared/components/Button";
+import ConfirmModal from "@/shared/components/ConfirmModal";
+import { LoadingSpinner } from "@/shared/components/Loading";
+import Toast from "@/shared/components/Toast";
+import {
+  useDeletedPlaces,
+  usePurgePlaces,
+  useRestorePlaces,
+} from "@/features/place/model/usePlaces";
 import TrashPlaceRow from "@/features/place/ui/TrashPlaceRow";
 import styles from "./LibraryTrashPage.module.css";
 
+const TOAST_DURATION_MS = 2000;
+
 export default function LibraryTrashPage() {
   const navigate = useNavigate();
-  const [places, setPlaces] = useState(FAKE_TRASH_PLACES);
+  const { places, viewStatus, error, refetch } = useDeletedPlaces();
+  const restorePlaces = useRestorePlaces();
+  const purgePlaces = usePurgePlaces();
+  const [isPurgeConfirmOpen, setIsPurgeConfirmOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isSelecting, setIsSelecting] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -36,7 +51,17 @@ export default function LibraryTrashPage() {
     };
   }, [isMenuOpen]);
 
-  const hasSelection = selectedIds.length > 0;
+  useEffect(() => {
+    if (!toastMessage) return;
+    const timer = window.setTimeout(
+      () => setToastMessage(null),
+      TOAST_DURATION_MS,
+    );
+    return () => window.clearTimeout(timer);
+  }, [toastMessage]);
+
+  const isWorking = restorePlaces.isPending || purgePlaces.isPending;
+  const hasSelection = selectedIds.length > 0 && !isWorking;
 
   const finishSelecting = () => {
     setIsSelecting(false);
@@ -52,19 +77,87 @@ export default function LibraryTrashPage() {
     );
   };
 
-  const removeSelected = () => {
-    setPlaces((items) =>
-      items.filter((place) => !selectedIds.includes(place.id)),
-    );
-    finishSelecting();
+  // 되돌릴 수 없어서 한 번 더 물어봐요
+  const handleDelete = () => {
+    if (!hasSelection) return;
+    setIsMenuOpen(false);
+    setIsPurgeConfirmOpen(true);
   };
 
-  const handleDelete = () => {
-    if (hasSelection) removeSelected();
+  const confirmPurge = () => {
+    const count = selectedIds.length;
+    setIsPurgeConfirmOpen(false);
+    setToastMessage("삭제하는 중이에요.");
+    purgePlaces.mutate(selectedIds, {
+      onSuccess: () => {
+        finishSelecting();
+        setToastMessage(`카드 ${count}개를 완전히 삭제했어요.`);
+      },
+      onError: () => setToastMessage("삭제하지 못했어요. 다시 시도해 주세요."),
+    });
   };
 
   const handleRestore = () => {
-    if (hasSelection) removeSelected();
+    if (!hasSelection) return;
+    const count = selectedIds.length;
+    setIsMenuOpen(false);
+    setToastMessage("보관함으로 옮기는 중이에요.");
+    restorePlaces.mutate(selectedIds, {
+      onSuccess: () => {
+        finishSelecting();
+        setToastMessage(`카드 ${count}개를 보관함으로 옮겼어요.`);
+      },
+      onError: () => setToastMessage("복구하지 못했어요. 다시 시도해 주세요."),
+    });
+  };
+
+  const renderBody = () => {
+    if (viewStatus === "loading") {
+      return (
+        <div className={styles.empty}>
+          <LoadingSpinner label="휴지통을 불러오는 중" />
+        </div>
+      );
+    }
+    if (viewStatus === "error") {
+      return (
+        <div className={styles.empty} role="alert">
+          <p className={styles.emptyTitle}>휴지통을 불러오지 못했어요.</p>
+          <p className={styles.emptyDescription}>{getErrorMessage(error)}</p>
+          <Button size="sm" isFullWidth={false} onClick={() => refetch()}>
+            다시 시도
+          </Button>
+        </div>
+      );
+    }
+    if (viewStatus === "empty") {
+      return (
+        <div className={styles.empty}>
+          <p className={styles.emptyTitle}>휴지통이 비어 있어요.</p>
+          <p className={styles.emptyDescription}>
+            삭제한 카드가 여기에 보여요.
+          </p>
+        </div>
+      );
+    }
+    return (
+      <>
+        <p className={styles.count}>총 {places.length}개의 카드</p>
+        <div className={styles.listArea}>
+          <ul className={styles.list}>
+            {places.map((place) => (
+              <TrashPlaceRow
+                key={place.id}
+                place={place}
+                isSelectable={isSelecting}
+                isSelected={selectedIds.includes(place.id)}
+                onToggle={() => toggleSelected(place.id)}
+              />
+            ))}
+          </ul>
+        </div>
+      </>
+    );
   };
 
   return (
@@ -141,31 +234,19 @@ export default function LibraryTrashPage() {
         </div>
       </header>
 
-      {places.length === 0 ? (
-        <div className={styles.empty}>
-          <p className={styles.emptyTitle}>휴지통이 비어 있어요.</p>
-          <p className={styles.emptyDescription}>
-            삭제한 카드가 여기에 보여요.
-          </p>
-        </div>
-      ) : (
-        <>
-          <p className={styles.count}>총 {places.length}개의 카드</p>
-          <div className={styles.listArea}>
-            <ul className={styles.list}>
-              {places.map((place) => (
-                <TrashPlaceRow
-                  key={place.id}
-                  place={place}
-                  isSelectable={isSelecting}
-                  isSelected={selectedIds.includes(place.id)}
-                  onToggle={() => toggleSelected(place.id)}
-                />
-              ))}
-            </ul>
-          </div>
-        </>
-      )}
+      {renderBody()}
+
+      <ConfirmModal
+        isOpen={isPurgeConfirmOpen}
+        icon="alert"
+        title={`카드 ${selectedIds.length}개를 완전히 삭제할까요?`}
+        description="삭제하면 되돌릴 수 없어요."
+        cancelLabel="취소"
+        confirmLabel="삭제"
+        onCancel={() => setIsPurgeConfirmOpen(false)}
+        onConfirm={confirmPurge}
+      />
+      {toastMessage && <Toast message={toastMessage} />}
     </main>
   );
 }
