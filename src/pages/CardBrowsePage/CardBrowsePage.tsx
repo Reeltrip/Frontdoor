@@ -70,9 +70,7 @@ export default function CardBrowsePage() {
     FAKE_PLACES_BY_CATEGORY,
   );
   const [draft, setDraft] = useState<PlaceDraft | null>(null);
-  const [pendingLeave, setPendingLeave] = useState<"exit" | "back" | null>(
-    null,
-  );
+  const [pendingLeave, setPendingLeave] = useState<"back" | null>(null);
   const [isToastVisible, setIsToastVisible] = useState(false);
 
   const category = FAKE_RESULT_CATEGORIES[categoryIndex];
@@ -126,12 +124,8 @@ export default function CardBrowsePage() {
 
   const handleEdit = () => {
     closeEditTutorial();
-    if (!isEditing) {
-      if (activePlace) setDraft(toDraft(activePlace));
-      return;
-    }
-    if (isChanged) setPendingLeave("exit");
-    else setDraft(null);
+    if (activePlace) setDraft(toDraft(activePlace));
+    return;
   };
 
   const handleSave = () => {
