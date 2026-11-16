@@ -231,8 +231,7 @@ export default function PlanEditPage() {
       return;
     }
     save(finishPlan(plan));
-    // TODO: 계획 완성 보기(4-4) 화면이 생기면 그 화면으로 보내기
-    navigate('/home', { replace: true });
+    navigate(`/plans/${plan.id}`, { replace: true });
   };
 
   const handleCompleteDay = () => {

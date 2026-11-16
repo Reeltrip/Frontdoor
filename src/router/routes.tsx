@@ -6,6 +6,7 @@ import NicknamePage from "@/pages/NicknamePage/NicknamePage";
 import HomePage from "@/pages/HomePage/HomePage";
 import PlanCreatePage from "@/pages/PlanCreatePage/PlanCreatePage";
 import PlanEditPage from "@/pages/PlanEditPage/PlanEditPage";
+import PlanViewPage from "@/pages/PlanViewPage/PlanViewPage";
 import ComponentTestPage from "@/pages/ComponentTestPage/ComponentTestPage";
 import { canSeeDevPages } from "@/shared/lib/env";
 import LibraryPage from "@/pages/LibraryPage/LibraryPage";
@@ -30,7 +31,7 @@ export const routes: RouteObject[] = [
   { path: "/cards", element: <CardBrowsePage /> },
   { path: "/cards/new", element: <CardAddPage /> },
   { path: "/plans/new", element: <PlanCreatePage /> },
-  // 편집 화면은 아직 임시 화면이에요
+  { path: "/plans/:planId", element: <PlanViewPage /> },
   { path: "/plans/:planId/edit", element: <PlanEditPage /> },
   // 컴포넌트 테스트 페이지는 로컬과 Vercel 미리보기에서만 열림 (제출용 main 배포에는 안 나옴)
   ...(canSeeDevPages

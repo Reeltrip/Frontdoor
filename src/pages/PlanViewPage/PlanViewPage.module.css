@@ -1,0 +1,172 @@
+.page {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--color-white);
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 100dvh;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.statusTitle {
+  margin: 0;
+  font: var(--font-h3);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-900);
+}
+
+.statusText {
+  margin: 0 0 8px;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-500);
+}
+
+.top {
+  position: relative;
+  z-index: 3;
+  flex-shrink: 0;
+  padding: calc(env(safe-area-inset-top) + 64px) 0 8px;
+  background: var(--color-white);
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  padding: 0 20px;
+}
+
+.planBToggle,
+.planBToggleOn {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--color-gray-100);
+  border-radius: 16px;
+  background: var(--color-surface);
+  font: var(--font-caption);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-600);
+  cursor: pointer;
+}
+
+.planBToggleOn {
+  border-color: var(--color-lime-600);
+  background: color-mix(in srgb, var(--color-lime-600) 16%, transparent);
+  color: var(--color-gray-900);
+}
+
+.mapArea {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+
+.map {
+  position: absolute;
+  inset: 0;
+}
+
+/* 피그마: 높이 281, 위쪽 모서리만 둥근 흰 시트 */
+.sheet {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  max-height: 281px;
+  padding: 28px 20px calc(16px + env(safe-area-inset-bottom));
+  border-radius: 12px 12px 0 0;
+  background: var(--color-surface);
+  box-shadow: 0 -4px 6px 0 rgba(0, 0, 0, 0.03);
+}
+
+.handle {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  display: block;
+  width: 40px;
+  height: 4px;
+  transform: translateX(-50%);
+}
+
+.sheetHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  padding-bottom: 12px;
+  border-bottom: 0.8px solid var(--color-gray-100);
+}
+
+.sheetTitle {
+  margin: 0;
+  font: var(--font-button);
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-900);
+}
+
+.sheetDate {
+  margin: 2px 0 0;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-500);
+}
+
+/* 아이콘에 그림자 여백이 있어 버튼보다 커요 */
+.editButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin-right: -4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.editIcon {
+  display: block;
+  width: 45px;
+  height: 45px;
+}
+
+.sheetBody {
+  min-height: 0;
+  padding-top: 12px;
+  overflow-y: auto;
+}
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px 0;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
