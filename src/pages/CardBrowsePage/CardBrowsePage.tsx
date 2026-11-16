@@ -190,25 +190,26 @@ export default function CardBrowsePage() {
           isRaised={isTutorialOpen}
         />
       </div>
-      <button
-        type="button"
-        className={`${styles.roundButton} ${styles.saveButton}`}
-        onClick={handleSave}
-        disabled={!isEditing}
-        aria-label="저장"
-      >
-        <img src={checkIcon} alt="" />
-      </button>
-      <button
-        type="button"
-        className={`${styles.roundButton} ${styles.editButton} ${isEditTutorialOpen ? styles.aboveTutorial : ""}`}
-        onClick={handleEdit}
-        disabled={places.length === 0}
-        aria-label={isEditing ? "편집 끝내기" : "편집"}
-      >
-        <img src={editIcon} alt="" />
-      </button>
-
+      {isEditing ? (
+        <button
+          type="button"
+          className={`${styles.roundButton} ${styles.saveButton}`}
+          onClick={handleSave}
+          aria-label="저장"
+        >
+          <img src={checkIcon} alt="" />
+        </button>
+      ) : (
+        <button
+          type="button"
+          className={`${styles.roundButton} ${styles.editButton} ${isEditTutorialOpen ? styles.aboveTutorial : ""}`}
+          onClick={handleEdit}
+          disabled={places.length === 0}
+          aria-label="편집"
+        >
+          <img src={editIcon} alt="" />
+        </button>
+      )}
       {isTutorialOpen && <DialTutorial onClose={closeTutorial} />}
       {isTutorialOpen && <DialTutorial onClose={closeTutorial} />}
       {isEditTutorialOpen && <EditTutorial onClose={closeEditTutorial} />}
