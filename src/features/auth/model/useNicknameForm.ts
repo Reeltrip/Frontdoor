@@ -51,6 +51,7 @@ export function useNicknameForm(onSuccess: () => void) {
 
   return {
     nickname, setNickname, handleSubmit, errorMessage, isSubmitting,
+    canSubmit: nickname.trim().length > 0 && isTermsAgreed && isPrivacyAgreed && !isSubmitting,
     isTermsAgreed, setIsTermsAgreed, isPrivacyAgreed, setIsPrivacyAgreed,
     isMarketingAgreed, setIsMarketingAgreed,
   };

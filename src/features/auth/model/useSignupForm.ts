@@ -1,94 +1,105 @@
 import { useState } from 'react';
 import { requestEmailCode, verifyEmailCode } from '@/features/auth/api/signup';
-import { isFakeApiEnabled } from '@/shared/lib/env';
 import { saveSignupDraft } from './signupDraft';
 
+export type SignupStep = 'email' | 'code' | 'password';
+
+export const SIGNUP_STEPS: SignupStep[] = ['email', 'code', 'password'];
+export const CODE_LENGTH = 6;
+export const PASSWORD_MIN_LENGTH = 8;
+export const FAKE_FAIL_CODE = '000000';
+
+const EMAIL_PATTERN = /^\S+@\S+\.\S+$/;
+
+export function isValidPassword(password: string): boolean {
+  return password.length >= PASSWORD_MIN_LENGTH && /[A-Za-z]/.test(password) && /\d/.test(password);
+}
+
 export function useSignupForm(onSuccess: () => void) {
-  const [email, setEmail] = useState('');
+  const [step, setStep] = useState<SignupStep>('email');
+  const [email, setEmailValue] = useState('');
   const [code, setCode] = useState('');
   const [password, setPassword] = useState('');
-  const [passwordConfirm, setPasswordConfirm] = useState('');
-  const [isCodeSent, setIsCodeSent] = useState(false);
-  const [isEmailVerified, setIsEmailVerified] = useState(false);
-  const [isSendingCode, setIsSendingCode] = useState(false);
-  const [isVerifyingCode, setIsVerifyingCode] = useState(false);
+  const [isCodeFailed, setIsCodeFailed] = useState(false);
+  const [isBusy, setIsBusy] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleEmailChange = (value: string) => {
-    setEmail(value);
-    setIsEmailVerified(false);
-    setIsCodeSent(false);
+  const canNext = !isBusy && {
+    email: EMAIL_PATTERN.test(email.trim()),
+    code: code.length === CODE_LENGTH,
+    password: isValidPassword(password),
+  }[step];
+
+  const setEmail = (value: string) => {
+    setEmailValue(value);
+    setCode('');
+    setErrorMessage('');
+    setIsCodeFailed(false);
+  };
+
+  const handleCodeChange = (value: string) => {
+    setCode(value);
+    setIsCodeFailed(false);
+    setErrorMessage('');
+  };
+
+  const goBack = (onFirstStepBack: () => void) => {
+    const index = SIGNUP_STEPS.indexOf(step);
+    if (index === 0) onFirstStepBack();
+    else setStep(SIGNUP_STEPS[index - 1]);
+  };
+
+  const handleSubmit = async () => {
+    if (!canNext) return;
+    setErrorMessage('');
+    setIsBusy(true);
+    try {
+      if (step === 'email') {
+        await requestEmailCode(email.trim());
+        setStep('code');
+      } else if (step === 'code') {
+        if (code === FAKE_FAIL_CODE) {
+          setIsCodeFailed(true);
+          return;
+        }
+        try {
+          await verifyEmailCode(email.trim(), code);
+          setStep('password');
+        } catch (error) {
+          setErrorMessage(error instanceof Error ? error.message : '인증번호를 확인하지 못했어요.');
+          setIsCodeFailed(true);
+        }
+      } else {
+        saveSignupDraft({ email: email.trim(), password });
+        onSuccess();
+      }
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : '요청을 완료하지 못했어요.');
+    } finally {
+      setIsBusy(false);
+    }
+  };
+
+  const retryCode = () => {
+    setIsCodeFailed(false);
     setCode('');
     setErrorMessage('');
   };
 
-  const handleSendCode = async () => {
-    const normalizedEmail = email.trim();
-    if (!/^\S+@\S+\.\S+$/.test(normalizedEmail)) {
-      setErrorMessage('올바른 이메일 주소를 입력해주세요.');
-      return;
-    }
-    setIsSendingCode(true);
-    setErrorMessage('');
-    try {
-      if (!isFakeApiEnabled) await requestEmailCode(normalizedEmail);
-      setIsCodeSent(true);
-      setIsEmailVerified(false);
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : '인증번호를 보내지 못했어요.');
-    } finally {
-      setIsSendingCode(false);
-    }
-  };
-
-  const handleVerifyCode = async () => {
-    if (!code.trim()) {
-      setErrorMessage('인증번호를 입력해주세요.');
-      return;
-    }
-    setIsVerifyingCode(true);
-    setErrorMessage('');
-    try {
-      if (!isFakeApiEnabled) await verifyEmailCode(email.trim(), code.trim());
-      setIsEmailVerified(true);
-    } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : '인증번호를 확인하지 못했어요.');
-    } finally {
-      setIsVerifyingCode(false);
-    }
-  };
-
-  const handlePasswordChange = (value: string) => {
-    setPassword(value);
-    setErrorMessage('');
-  };
-  const handlePasswordConfirmChange = (value: string) => {
-    setPasswordConfirm(value);
-    setErrorMessage('');
-  };
-
-  const handleSubmit = () => {
-    if (!isEmailVerified) {
-      setErrorMessage('이메일 인증을 완료해주세요.');
-      return;
-    }
-    if (!password || !passwordConfirm) return;
-    if (!/^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(password)) {
-      setErrorMessage('비밀번호는 영문과 숫자를 포함해 8자 이상 입력해주세요.');
-      return;
-    }
-    if (password !== passwordConfirm) {
-      setErrorMessage('비밀번호가 일치하지 않아요.');
-      return;
-    }
-    saveSignupDraft({ email: email.trim(), password });
-    onSuccess();
-  };
-
   return {
-    email, handleEmailChange, code, setCode, password, handlePasswordChange,
-    passwordConfirm, handlePasswordConfirmChange, errorMessage, isCodeSent,
-    isEmailVerified, isSendingCode, isVerifyingCode, handleSendCode,
-    handleVerifyCode, handleSubmit,
+    step,
+    email,
+    setEmail,
+    code,
+    handleCodeChange,
+    password,
+    setPassword,
+    canNext,
+    isCodeFailed,
+    retryCode,
+    goBack,
+    handleSubmit,
+    isBusy,
+    errorMessage,
   };
 }
