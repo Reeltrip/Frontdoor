@@ -8,7 +8,8 @@ type PlaceCardStripProps = {
   places: Place[];
   selectedId: string | null;
   onSelect: (placeId: string) => void;
-  onDelete: (place: Place) => void;
+  /** 없으면 삭제 버튼을 그리지 않아요 (여행계획 편집처럼 삭제가 없는 화면) */
+  onDelete?: (place: Place) => void;
   onOpen?: (place: Place) => void;
   onCopy?: (place: Place) => void;
 };
@@ -57,15 +58,16 @@ export default function PlaceCardStrip({
       {places.map((place) => (
         <div key={place.id} className={styles.item}>
           <PlaceCardCompact place={place} onOpen={onOpen} onCopy={onCopy} />
-          {}
-          <button
-            type="button"
-            className={styles.deleteButton}
-            onClick={() => onDelete(place)}
-            aria-label={`${place.name} 삭제`}
-          >
-            <img src={trashIcon} alt="" />
-          </button>
+          {onDelete && (
+            <button
+              type="button"
+              className={styles.deleteButton}
+              onClick={() => onDelete(place)}
+              aria-label={`${place.name} 삭제`}
+            >
+              <img src={trashIcon} alt="" />
+            </button>
+          )}
         </div>
       ))}
     </div>

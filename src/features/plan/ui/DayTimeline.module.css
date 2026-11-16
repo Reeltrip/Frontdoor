@@ -1,0 +1,96 @@
+.list {
+  position: relative;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* 피그마: 아이콘 가운데를 지나는 회색 점선 */
+.list::before {
+  position: absolute;
+  top: 12px;
+  bottom: 12px;
+  left: 11.5px;
+  border-left: 1px dashed var(--color-gray-200);
+  content: '';
+}
+
+.item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.stopRow,
+.planBRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 40px;
+}
+
+.iconSlot {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-surface);
+}
+
+.icon,
+.iconFlipped {
+  display: block;
+  width: 24px;
+  height: 24px;
+}
+
+.iconFlipped {
+  transform: scaleY(-1);
+}
+
+.category {
+  flex-shrink: 0;
+  width: 48px;
+  font: var(--font-body1);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-600);
+}
+
+.name {
+  min-width: 0;
+  overflow: hidden;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-400);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.planBRow .category {
+  color: var(--color-lime-600);
+}
+
+.moveRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 28px;
+  padding-left: 4px;
+}
+
+.moveIcon {
+  position: relative;
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.moveText {
+  margin-left: 4px;
+  font: var(--font-caption);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-400);
+}
