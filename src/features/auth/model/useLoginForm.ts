@@ -1,27 +1,24 @@
 import { useState } from "react";
-
-// 가짜 로그인: 로그인 API가 정해지면 교체
-const FAKE_PASSWORD = "test1234";
+import { getErrorMessage } from "@/shared/api/client";
+import { useLogin } from "./useAuth";
 
 export function useLoginForm(onSuccess: () => void) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [errorMessage, setErrorMessage] = useState("");
+  const login = useLogin();
 
-  const canSubmit = email.trim() !== "" && password !== "";
+  const canSubmit = email.trim() !== "" && password !== "" && !login.isPending;
+  // 서버가 보내는 message는 화면에 바로 띄울 수 있는 문구예요
+  const errorMessage = login.isError ? getErrorMessage(login.error) : "";
 
   const handlePasswordChange = (value: string) => {
     setPassword(value);
-    setErrorMessage("");
+    login.reset();
   };
 
   const handleSubmit = () => {
     if (!canSubmit) return;
-    if (password !== FAKE_PASSWORD) {
-      setErrorMessage("비밀번호가 일치하지 않습니다.");
-      return;
-    }
-    onSuccess();
+    login.mutate({ email: email.trim(), password }, { onSuccess });
   };
 
   return {
@@ -31,6 +28,7 @@ export function useLoginForm(onSuccess: () => void) {
     handlePasswordChange,
     errorMessage,
     canSubmit,
+    isSubmitting: login.isPending,
     handleSubmit,
   };
 }

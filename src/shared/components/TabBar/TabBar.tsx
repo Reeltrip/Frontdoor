@@ -25,7 +25,7 @@ const TABS: { key: TabKey; label: string; icon: string; lightIcon: string }[] = 
  * 탭을 누르면 가는 화면. 없는 탭은 아직 화면이 없어서 눌러도 그대로예요.
  * 목록(여행목록)은 화면이 생기기 전까지 홈으로 보내요
  */
-export const TAB_PATHS: Partial<Record<TabKey, string>> = {
+const TAB_PATHS: Partial<Record<TabKey, string>> = {
   menu: '/home',
   archive: '/library',
   plan: '/plans',
