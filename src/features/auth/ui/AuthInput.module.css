@@ -18,10 +18,28 @@
     outline: none;
 }
 
+.underline {
+    height: 47px;
+    padding: 0;
+    border: 0;
+    border-bottom: 1px solid var(--color-gray-300);
+    border-radius: 0;
+    background: transparent;
+}
+
+.underline:focus {
+    border-bottom-color: var(--color-gray-900);
+}
+
 .error,
 .error:focus {
     border-color: #f37490;
     background: #f374900d;
+}
+
+.underline.error,
+.underline.error:focus {
+    background: transparent;
 }
 
 .errorMessage {
