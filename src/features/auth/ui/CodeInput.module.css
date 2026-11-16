@@ -9,6 +9,7 @@
 }
 
 .box {
+  position: relative;
   display: flex;
   flex: 1;
   align-items: center;
@@ -18,11 +19,21 @@
   border-radius: 8px;
   background: var(--color-gray-50);
   color: var(--color-gray-900);
-  font: var(--font-h3);
+  font: var(--font-h2);
 }
 
-.active {
-  border-color: var(--color-gray-900);
+.active::after {
+  content: "";
+  width: 2px;
+  height: 24px;
+  background: var(--color-gray-900);
+  animation: blink 1s step-end infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
 }
 
 .error {

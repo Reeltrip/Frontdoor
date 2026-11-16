@@ -13,28 +13,22 @@
 .backButton {
   display: flex;
   align-items: center;
-  width: 40px;
-  height: 40px;
+  width: 26px;
+  height: 26px;
   padding: 0;
   border: 0;
   background: none;
   cursor: pointer;
 }
 
-.backButton img {
-  width: 26px;
-  height: 26px;
-}
-
 .header {
-  margin-top: 30px;
+  margin-top: 38px;
 }
 
 .title {
   margin: 0;
   color: var(--color-gray-900);
-  font: var(--font-h1);
-  line-height: 46px;
+  font: 600 30px/1.5 var(--font-family);
   letter-spacing: var(--tracking);
   white-space: pre-line;
 }
@@ -42,7 +36,7 @@
 .description {
   margin: 7px 0 4px;
   color: var(--color-gray-400);
-  font: var(--font-caption);
+  font: var(--font-body1);
   letter-spacing: var(--tracking);
 }
 

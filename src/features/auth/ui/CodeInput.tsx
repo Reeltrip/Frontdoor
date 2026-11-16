@@ -16,7 +16,7 @@ export default function CodeInput({
 }: CodeInputProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [isFocused, setIsFocused] = useState(false);
-  const activeIndex = Math.min(value.length, length - 1);
+  const activeIndex = value.length;
 
   return (
     <div className={styles.wrapper} onClick={() => inputRef.current?.focus()}>
