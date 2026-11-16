@@ -47,3 +47,7 @@
 .editButton {
     right: 21px;
 }
+
+.aboveTutorial {
+    z-index: 12;
+}
