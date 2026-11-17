@@ -10,10 +10,15 @@ import handleIcon from '@/shared/assets/icons/sheet-handle.svg';
 import { toMapNodes } from '@/features/place/lib/mapNodes';
 import { usePlaces } from '@/features/place/model/usePlaces';
 import type { Place } from '@/features/place/model/place.types';
-import { findZone } from '@/features/plan/lib/planZones';
+import { hasAuthTokens } from '@/shared/lib/authToken';
+import { getDayZone } from '@/features/plan/lib/planZones';
+import { mergePlanPlaces } from '@/features/plan/model/planPlaces';
+import ShareSheet, { type ShareChannel } from '@/features/plan/ui/ShareSheet';
+import kebabIcon from '@/shared/assets/icons/kebab.svg';
 import { formatDayDate } from '@/features/plan/model/planDays';
 import { buildDayRoute } from '@/features/plan/model/planEdit';
-import { usePlan } from '@/features/plan/model/usePlan';
+import { useCreateShareLink, usePlan } from '@/features/plan/model/usePlan';
+import type { ShareType } from '@/features/plan/model/plan.types';
 import DaySelector from '@/features/plan/ui/DaySelector';
 import DayTimeline, { type TimelineStop } from '@/features/plan/ui/DayTimeline';
 import styles from './PlanViewPage.module.css';
@@ -37,7 +42,15 @@ export default function PlanViewPage() {
   const { planId = '' } = useParams();
   const navigate = useNavigate();
   const { plan, viewStatus, error, refetch } = usePlan(planId);
-  const { places } = usePlaces();
+  // 공유 링크(/plan/{id})는 로그인 없이도 열려요. 그때는 보관함을 부르지 않고 계획에 든 카드로 그려요
+  const isLoggedIn = hasAuthTokens();
+  const { places: libraryPlaces } = usePlaces({}, { isEnabled: isLoggedIn });
+  const places = mergePlanPlaces(libraryPlaces, plan);
+  const shareLink = useCreateShareLink(planId);
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [shareType, setShareType] = useState<ShareType>('READ_ONLY');
+  const [sharedUrl, setSharedUrl] = useState<string | null>(null);
+  const [shareMessage, setShareMessage] = useState<string | null>(null);
   const [dayIndex, setDayIndex] = useState(0);
   const [isPlanBVisible, setIsPlanBVisible] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -66,6 +79,46 @@ export default function PlanViewPage() {
   const placeById = new Map(places.map((place) => [place.id, place]));
   const lodging = plan.accommodationPlaceId ? placeById.get(plan.accommodationPlaceId) : undefined;
   const editPath = `/plans/${plan.id}/edit`;
+  // 읽기 전용으로 공유받았거나 로그인하지 않았으면 고치지 못해요
+  const canEdit = isLoggedIn && plan.role !== undefined && plan.role !== 'VIEWER';
+
+  const share = (channel: ShareChannel) => {
+    setShareMessage(null);
+    shareLink.mutate(shareType, {
+      onSuccess: async () => {
+        // 받은 사람이 지금 보고 있는 이 사이트에서 열리게 현재 주소로 링크를 만들어요
+        const url = `${window.location.origin}/plan/${plan.id}`;
+        setSharedUrl(url);
+        const label = shareType === 'EDIT' ? '함께 편집' : '읽기 전용';
+        if (channel === 'message') {
+          window.location.href = `sms:?&body=${encodeURIComponent(`${plan.title} ${url}`)}`;
+          return;
+        }
+        if (channel === 'more' && typeof navigator.share === 'function') {
+          // 공유 창을 닫으면 실패로 오는데, 그건 알릴 일이 아니에요
+          await navigator.share({ title: plan.title, url }).catch(() => undefined);
+          return;
+        }
+        try {
+          await navigator.clipboard.writeText(url);
+          setShareMessage(
+            channel === 'instagram'
+              ? `${label} 링크를 복사했어요. 인스타그램 메시지에 붙여넣어 보내 주세요.`
+              : `${label} 링크를 복사했어요. 친구에게 붙여넣어 보내 주세요.`,
+          );
+        } catch {
+          setShareMessage(`${label} 링크를 만들었어요. 아래 주소를 복사해 보내 주세요.`);
+        }
+      },
+      onError: (shareError) => setShareMessage(getErrorMessage(shareError)),
+    });
+  };
+
+  const openShare = () => {
+    setSharedUrl(null);
+    setShareMessage(null);
+    setIsShareOpen(true);
+  };
 
   // 숙소에서 출발해 확정한 순서대로 돌고 숙소로 돌아와요
   const nodeStops: TimelineStop[] = day.nodes.flatMap((node) => {
@@ -87,7 +140,7 @@ export default function PlanViewPage() {
   const mapNodes = toMapNodes(places.filter((place) => routePlaceIds.has(place.id)));
   const hasPlanB = day.nodes.some((node) => node.planB);
 
-  const mapCenter = getRouteCenter(stops.map((stop) => stop.place)) ?? findZone(day.zone)?.center ?? DEFAULT_MAP_CENTER;
+  const mapCenter = getRouteCenter(stops.map((stop) => stop.place)) ?? getDayZone(day)?.center ?? DEFAULT_MAP_CENTER;
 
   const selectDay = (nextIndex: number) => {
     setDayIndex(nextIndex);
@@ -97,7 +150,18 @@ export default function PlanViewPage() {
   return (
     <main className={styles.page}>
       <div className={styles.top}>
-        <Header title="여행계획" onBack={() => navigate(-1)} />
+        <Header
+          title="여행계획"
+          onBack={() => (isLoggedIn ? navigate(-1) : navigate('/'))}
+          action={
+            // 공유 링크는 계획을 만든 사람만 만들 수 있어요 (서버 규칙)
+            plan.role === 'OWNER' && (
+              <button type="button" className={styles.moreButton} aria-label="공유하기" onClick={openShare}>
+                <img src={kebabIcon} alt="" />
+              </button>
+            )
+          }
+        />
         <div className={styles.toolbar}>
           <DaySelector days={plan.days} selectedIndex={dayIndex} onSelect={selectDay} />
           {hasPlanB && (
@@ -110,6 +174,16 @@ export default function PlanViewPage() {
               플랜B 같이 보기
             </button>
           )}
+          {!isLoggedIn && (
+            <button
+              type="button"
+              className={styles.planBToggle}
+              onClick={() => navigate('/login', { state: { from: `/plan/${plan.id}` } })}
+            >
+              로그인하고 함께 보기
+            </button>
+          )}
+
         </div>
       </div>
 
@@ -136,26 +210,46 @@ export default function PlanViewPage() {
                 {day.zone ? ` · ${day.zone}` : ''}
               </p>
             </div>
-            <button type="button" className={styles.editButton} onClick={() => navigate(editPath)}>
-              <img src={editIcon} alt="" className={styles.editIcon} />
-              <span className={styles.srOnly}>계획 수정</span>
-            </button>
+            {canEdit && (
+              <button type="button" className={styles.editButton} onClick={() => navigate(editPath)}>
+                <img src={editIcon} alt="" className={styles.editIcon} />
+                <span className={styles.srOnly}>계획 수정</span>
+              </button>
+            )}
           </div>
 
           <div key={dayIndex} className={styles.sheetBody}>
             {stops.length > 0 ? (
-              <DayTimeline stops={stops} isPlanBVisible={isPlanBVisible} />
+              <DayTimeline stops={stops} isPlanBVisible={isPlanBVisible} date={day.date} canFetchRoutes={isLoggedIn} />
             ) : (
               <div className={styles.empty}>
                 <p className={styles.statusText}>이 날은 아직 정한 장소가 없어요.</p>
-                <Button size="sm" variant="outline" isFullWidth={false} onClick={() => navigate(editPath)}>
-                  장소 고르기
-                </Button>
+                {canEdit && (
+                  <Button size="sm" variant="outline" isFullWidth={false} onClick={() => navigate(editPath)}>
+                    장소 고르기
+                  </Button>
+                )}
               </div>
             )}
           </div>
         </section>
       </div>
+
+      {isShareOpen && (
+        <ShareSheet
+          shareType={shareType}
+          onChangeShareType={(nextType) => {
+            setShareType(nextType);
+            setSharedUrl(null);
+            setShareMessage(null);
+          }}
+          isPending={shareLink.isPending}
+          sharedUrl={sharedUrl}
+          message={shareMessage}
+          onShare={share}
+          onClose={() => setIsShareOpen(false)}
+        />
+      )}
     </main>
   );
 }

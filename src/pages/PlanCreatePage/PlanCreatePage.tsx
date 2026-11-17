@@ -9,9 +9,8 @@ import Calendar from '@/shared/components/Calendar';
 import ConfirmModal from '@/shared/components/ConfirmModal';
 import LabeledInput from '@/shared/components/LabeledInput';
 import { LoadingSpinner } from '@/shared/components/Loading';
-import { EXCEPTION_MODALS } from '@/shared/lib/exceptionMessages';
 import type { Plan } from '@/features/plan/model/plan.types';
-import { getOverlappingPlanTitles, isPlanPeriodOverlapError, useCreateAiDraft, useCreatePlan } from '@/features/plan/model/usePlan';
+import { useCreateAiDraft, useCreatePlan } from '@/features/plan/model/usePlan';
 import { PLAN_PERIOD_ERROR_MESSAGE, usePlanCreateForm } from '@/features/plan/model/usePlanCreateForm';
 import styles from './PlanCreatePage.module.css';
 
@@ -21,7 +20,6 @@ export default function PlanCreatePage() {
   const location = useLocation();
   const form = usePlanCreateForm();
   const createPlan = useCreatePlan();
-  const [overlapError, setOverlapError] = useState<unknown>();
   const [createdPlan, setCreatedPlan] = useState<Plan>();
   const [isAiNoticeShown, setIsAiNoticeShown] = useState(false);
   const aiDraft = useCreateAiDraft(createdPlan?.id ?? '');
@@ -32,17 +30,9 @@ export default function PlanCreatePage() {
     else navigate(-1);
   };
 
-  const submit = (isForced = false) => {
+  const submit = () => {
     if (!form.request || createPlan.isPending) return;
-    createPlan.mutate(
-      { ...form.request, isForced },
-      {
-        onSuccess: (plan) => setCreatedPlan(plan),
-        onError: (error) => {
-          if (isPlanPeriodOverlapError(error)) setOverlapError(error);
-        },
-      },
-    );
+    createPlan.mutate(form.request, { onSuccess: (plan) => setCreatedPlan(plan) });
   };
 
   const handleSubmit = (event: SyntheticEvent) => {
@@ -50,9 +40,7 @@ export default function PlanCreatePage() {
     submit();
   };
 
-  // 기간이 겹치는 건 안내창으로 묻기 때문에 실패 문구로는 보여주지 않아요
-  const hasCreateError = createPlan.isError && !isPlanPeriodOverlapError(createPlan.error);
-  const overlappingTitles = getOverlappingPlanTitles(overlapError);
+  const hasCreateError = createPlan.isError;
 
   return (
     <form className={styles.page} onSubmit={handleSubmit}>
@@ -123,19 +111,6 @@ export default function PlanCreatePage() {
           </div>
         </div>
       )}
-
-      {/* '아니요'를 누르면 입력한 내용을 두고 화면을 나가니까 바깥을 눌러도 닫히지 않게 해요 */}
-      <ConfirmModal
-        {...EXCEPTION_MODALS.planPeriodOverlap}
-        isOpen={overlapError !== undefined}
-        isDismissible={false}
-        description={overlappingTitles.length > 0 ? `겹치는 계획: ${overlappingTitles.join(', ')}` : undefined}
-        onConfirm={() => {
-          setOverlapError(undefined);
-          submit(true);
-        }}
-        onCancel={leavePage}
-      />
 
       <ConfirmModal
         isOpen={createdPlan !== undefined}

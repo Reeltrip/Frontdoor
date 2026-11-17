@@ -8,7 +8,7 @@ export type PlaceCategory =
   | "tip"
   | "activity";
 
-// 가짜 형식: 좌표 필드 이름(location.lat / location.lng)은 BE와 정해지면 맞추기
+// 화면에서 쓰는 좌표 모양. BE의 latitude·longitude는 features/place/api/places.ts에서 바꿔요
 export type PlaceLocation = {
   /** 위도 */
   lat: number;
@@ -35,7 +35,10 @@ export type PlaceListParams = {
   category?: PlaceCategory;
 };
 
-// 가짜 형식: PATCH /places/{id}에서 바꿀 수 있는 항목. BE와 정해지면 맞추기
+// 화면에서 고칠 수 있는 항목. BE 필드로 옮기는 건 api/places.ts의 updatePlace가 해요
 export type UpdatePlaceRequest = Partial<
-  Pick<Place, "name" | "category" | "summary" | "address" | "tag">
->;
+  Pick<Place, "name" | "address" | "tag">
+> & {
+  /** 이름 아래 첫 줄. 장소 카드는 가는 길, 교통·팁 카드는 세부유형이에요 */
+  summaryFirst?: string;
+};

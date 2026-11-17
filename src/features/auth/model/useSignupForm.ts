@@ -7,7 +7,6 @@ export type SignupStep = 'email' | 'code' | 'password';
 export const SIGNUP_STEPS: SignupStep[] = ['email', 'code', 'password'];
 export const CODE_LENGTH = 6;
 export const PASSWORD_MIN_LENGTH = 8;
-export const FAKE_FAIL_CODE = '000000';
 
 const EMAIL_PATTERN = /^\S+@\S+\.\S+$/;
 
@@ -58,10 +57,6 @@ export function useSignupForm(onSuccess: () => void) {
         await requestEmailCode(email.trim());
         setStep('code');
       } else if (step === 'code') {
-        if (code === FAKE_FAIL_CODE) {
-          setIsCodeFailed(true);
-          return;
-        }
         try {
           await verifyEmailCode(email.trim(), code);
           setStep('password');

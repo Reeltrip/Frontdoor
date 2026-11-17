@@ -1,14 +1,13 @@
 import { skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { isApiError } from '@/shared/api/client';
 import { getViewStatus } from '@/shared/api/viewStatus';
-import { createAiDraft, createPlan, fetchPlan, fetchPlans, planKeys, updatePlan } from '../api/plans';
-import type { Plan, PlanPeriodOverlapDetails } from './plan.types';
+import { createAiDraft, createPlan, createShareLink, fetchPlan, fetchPlans, planKeys, updatePlan } from '../api/plans';
+import type { Plan, PlanListParams, ShareType } from './plan.types';
 
-/** 내 계획 목록 (여행계획 홈의 '최근 작성 계획') */
-export function usePlans() {
+/** 계획 목록. 조건이 없으면 내 계획과 공유받은 계획을 모두 줘요 */
+export function usePlans(params: PlanListParams = {}) {
   const query = useQuery({
-    queryKey: planKeys.list(),
-    queryFn: ({ signal }) => fetchPlans(signal),
+    queryKey: planKeys.list(params),
+    queryFn: ({ signal }) => fetchPlans(params, signal),
   });
 
   return {
@@ -34,11 +33,7 @@ export function usePlan(planId: string | undefined) {
   };
 }
 
-/**
- * 계획 만들기. 성공하면 응답을 바로 캐시에 넣어서 편집 화면이 다시 불러오지 않아요.
- * 같은 기간에 다른 계획이 있으면(5-3) isPlanPeriodOverlapError로 확인해
- * EXCEPTION_MODALS.planPeriodOverlap 안내창을 띄우고, '네'면 isForced: true로 다시 불러요.
- */
+/** 계획 만들기. 성공하면 응답을 바로 캐시에 넣어서 편집 화면이 다시 불러오지 않아요. */
 export function useCreatePlan() {
   const queryClient = useQueryClient();
 
@@ -46,7 +41,7 @@ export function useCreatePlan() {
     mutationFn: createPlan,
     onSuccess: (plan) => {
       queryClient.setQueryData(planKeys.detail(plan.id), plan);
-      return queryClient.invalidateQueries({ queryKey: planKeys.list() });
+      return queryClient.invalidateQueries({ queryKey: [...planKeys.all, 'list'] });
     },
   });
 }
@@ -58,21 +53,14 @@ export function useCreateAiDraft(planId: string) {
     mutationFn: () => createAiDraft(planId),
     onSuccess: (plan) => {
       queryClient.setQueryData(planKeys.detail(planId), plan);
-      void queryClient.invalidateQueries({ queryKey: planKeys.list() });
+      void queryClient.invalidateQueries({ queryKey: [...planKeys.all, 'list'] });
     },
   });
 }
 
-export function isPlanPeriodOverlapError(error: unknown): boolean {
-  return isApiError(error, 'PLAN_PERIOD_OVERLAP');
-}
-
-/** 겹치는 계획 이름들. 서버가 알려 주지 않으면 빈 배열 (안내창 설명에 씀) */
-export function getOverlappingPlanTitles(error: unknown): string[] {
-  if (!isApiError(error, 'PLAN_PERIOD_OVERLAP')) return [];
-  const { overlappingPlans } = (error.details ?? {}) as Partial<PlanPeriodOverlapDetails>;
-  if (!Array.isArray(overlappingPlans)) return [];
-  return overlappingPlans.flatMap((plan) => (typeof plan?.title === 'string' ? plan.title : []));
+/** 공유 링크 만들기 */
+export function useCreateShareLink(planId: string) {
+  return useMutation({ mutationFn: (shareType: ShareType) => createShareLink(planId, shareType) });
 }
 
 /**
@@ -86,6 +74,8 @@ export function useUpdatePlan(planId: string) {
 
   return useMutation({
     mutationKey,
+    // 저장은 서버 값과 비교해 여러 요청을 차례로 보내서, 같은 계획의 저장은 한 번에 하나씩만 돌려요
+    scope: { id: mutationKey.join(':') },
     mutationFn: ({ id: _id, ...request }: Plan) => updatePlan(planId, request),
     onMutate: async (nextPlan) => {
       await queryClient.cancelQueries({ queryKey: planKey });
@@ -99,7 +89,7 @@ export function useUpdatePlan(planId: string) {
     onSettled: () => {
       if (queryClient.isMutating({ mutationKey }) === 1) {
         // 이름·작성 상태가 바뀌었을 수 있어서 목록도 다시 불러와요
-        void queryClient.invalidateQueries({ queryKey: planKeys.list() });
+        void queryClient.invalidateQueries({ queryKey: [...planKeys.all, 'list'] });
         return queryClient.invalidateQueries({ queryKey: planKey });
       }
     },

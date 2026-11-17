@@ -1,0 +1,126 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: rgb(0 0 0 / 40%);
+}
+
+.sheet {
+  width: 100%;
+  max-width: 390px;
+  padding: 10px 20px 28px;
+  border-radius: 20px 20px 0 0;
+  background: var(--color-surface);
+}
+
+.handle {
+  display: block;
+  margin: 0 auto 14px;
+}
+
+.title {
+  font: var(--font-button);
+  font-weight: 600;
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-900);
+}
+
+.description {
+  margin-top: 2px;
+  font: var(--font-caption);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-400);
+}
+
+.buttons {
+  display: flex;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.cancel,
+.shareType {
+  flex: 1;
+  height: 48px;
+  border-radius: 12px;
+  font: var(--font-button);
+  letter-spacing: var(--tracking);
+  cursor: pointer;
+}
+
+.cancel {
+  border: 1px solid var(--color-gray-100);
+  background: var(--color-surface);
+  color: var(--color-gray-400);
+}
+
+.shareType {
+  border: 0;
+  background: var(--color-gray-900);
+  color: #fff;
+}
+
+.channels {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 24px;
+  padding: 0 8px;
+  list-style: none;
+}
+
+.channel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 64px;
+  border: 0;
+  background: none;
+  font: var(--font-caption);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-600);
+  cursor: pointer;
+}
+
+.channel:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.channelIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #ebebeb;
+}
+
+.instagram {
+  background: radial-gradient(circle at 30% 105%, #fdd675 0%, #f9a13b 25%, #e9415a 50%, #c13584 70%, #6a3ac9 100%);
+}
+
+.messageIcon {
+  background: #34c759;
+}
+
+.url {
+  margin-top: 18px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #f5f5f5;
+  font: var(--font-caption);
+  color: var(--color-gray-600);
+  word-break: break-all;
+}
+
+.message {
+  margin-top: 8px;
+  font: var(--font-caption);
+  letter-spacing: var(--tracking);
+  color: var(--color-lime-700);
+}

@@ -8,10 +8,11 @@ import {
   useAnalysis,
 } from "@/features/source/model/useAnalysis";
 import { isAnalyzingState } from "@/features/source/model/source.types";
+import { useProfile } from "@/features/account/model/useAccount";
 import styles from "./LinkAnalyzingPage.module.css";
 
 const RESULT_DELAY_MS = 600;
-const FAKE_NICKNAME = "여행자";
+const DEFAULT_NICKNAME = "여행자";
 
 export default function LinkAnalyzingPage() {
   const location = useLocation();
@@ -21,12 +22,14 @@ export default function LinkAnalyzingPage() {
     return <Navigate to="/links/new" replace />;
   }
 
-  return <AnalyzingView links={location.state.links} />;
+  // location.key는 화면에 들어올 때마다 달라서, 같은 링크를 다시 넣어도 새로 분석해요
+  return <AnalyzingView links={location.state.links} runKey={location.key} />;
 }
 
-function AnalyzingView({ links }: { links: string[] }) {
+function AnalyzingView({ links, runKey }: { links: string[]; runKey: string }) {
   const navigate = useNavigate();
-  const { status, currentStep } = useAnalysis(links);
+  const { status, currentStep, failMessage } = useAnalysis(links, runKey);
+  const nickname = useProfile().data?.nickname ?? DEFAULT_NICKNAME;
 
   useEffect(() => {
     if (status !== "done") return;
@@ -40,6 +43,7 @@ function AnalyzingView({ links }: { links: string[] }) {
   if (status === "failed") {
     return (
       <AnalysisFailed
+        message={failMessage}
         onRetry={() => navigate("/links/new", { replace: true })}
         onQuit={() => navigate("/")}
       />
@@ -50,7 +54,7 @@ function AnalyzingView({ links }: { links: string[] }) {
     <main className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.title}>
-          {FAKE_NICKNAME}님께 꼭 맞는 맞춤 카드가
+          {nickname}님께 꼭 맞는 맞춤 카드가
           <br />
           만들어지고 있어요 !
         </h1>

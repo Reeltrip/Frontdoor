@@ -12,12 +12,14 @@ import { usePlaces } from '@/features/place/model/usePlaces';
 import type { Place, PlaceCategory } from '@/features/place/model/place.types';
 import CategoryFilterBar from '@/features/place/ui/CategoryFilterBar';
 import PlaceCardStrip from '@/features/place/ui/PlaceCardStrip';
-import { findZone, isPlaceInZone, type PlanZone } from '@/features/plan/lib/planZones';
-import { finishPlan, formatDayDate } from '@/features/plan/model/planDays';
+import { getDayZone, isPlaceInZone, type PlanZone } from '@/features/plan/lib/planZones';
+import { mergePlanPlaces } from '@/features/plan/model/planPlaces';
+import { finishPlan, formatDayDate, withDraftIfEmptyDay } from '@/features/plan/model/planDays';
 import {
   addNodeToDay,
   buildDayRoute,
   findOtherDayNumber,
+  moveNodeToDay,
   removeNodeFromDay,
   setAccommodation,
   setDayZone,
@@ -53,7 +55,9 @@ export default function PlanEditPage() {
   const { planId = '' } = useParams();
   const navigate = useNavigate();
   const { plan, viewStatus, error, refetch } = usePlan(planId);
-  const { places, viewStatus: placesStatus } = usePlaces();
+  const { places: libraryPlaces, viewStatus: placesStatus } = usePlaces();
+  // 공유받은 계획의 카드는 내 보관함에 없어서 계획 응답에 든 카드로 채워요
+  const places = mergePlanPlaces(libraryPlaces, plan);
   const updatePlan = useUpdatePlan(planId);
   const aiDraft = useCreateAiDraft(planId);
 
@@ -65,7 +69,7 @@ export default function PlanEditPage() {
   const [centerOverride, setCenterOverride] = useState<MapPosition | null>(null);
   const [pendingZone, setPendingZone] = useState<PlanZone | undefined>();
   const [zoneError, setZoneError] = useState<string | null>(null);
-  /** 플랜B를 붙일 확정 노드 id. 있으면 지도에서 대신 갈 곳을 고르는 중이에요 */
+  /** 플랜B를 붙일 확정 노드의 카드 id. 있으면 지도에서 대신 갈 곳을 고르는 중이에요 */
   const [planBTargetId, setPlanBTargetId] = useState<string | null>(null);
   const [otherDayConfirm, setOtherDayConfirm] = useState<{ placeId: string; dayNumber: number } | null>(null);
   const [isSkipDayOpen, setIsSkipDayOpen] = useState(false);
@@ -108,7 +112,7 @@ export default function PlanEditPage() {
 
   const save = (nextPlan: Plan) =>
     updatePlan.mutate(nextPlan, {
-      onError: () => setToastMessage('저장하지 못했어요. 다시 시도해 주세요.'),
+      onError: (saveError) => setToastMessage(`저장하지 못했어요. ${getErrorMessage(saveError)}`),
     });
 
   const resetSelection = () => {
@@ -123,7 +127,7 @@ export default function PlanEditPage() {
     setStep(nextStep);
     setCategory('all');
     setZoneError(null);
-    setPendingZone(findZone(plan.days[nextDayIndex]?.zone));
+    setPendingZone(getDayZone(plan.days[nextDayIndex]));
   };
 
   const goToDay = (nextDayIndex: number) =>
@@ -139,7 +143,7 @@ export default function PlanEditPage() {
   // ── 화면에 올릴 장소 ──
   const lodgingPlaces = places.filter((place) => place.category === 'accommodation' && isOnMap(place));
   const lodgingPlace = places.find((place) => place.id === plan.accommodationPlaceId);
-  const dayZone = findZone(day.zone);
+  const dayZone = getDayZone(day);
   const dayPlaceIds = new Set(day.nodes.flatMap((node) => [node.placeId, ...(node.planB ? [node.planB.placeId] : [])]));
 
   const getVisiblePlaces = (): Place[] => {
@@ -168,7 +172,8 @@ export default function PlanEditPage() {
   const selectedPlace = visiblePlaces.find((place) => place.id === selectedId);
   const selectedNode = day.nodes.find((node) => node.placeId === selectedId);
   const isSelectedLodging = selectedId !== null && selectedId === plan.accommodationPlaceId;
-  const planBTargetIndex = day.nodes.findIndex((node) => node.id === planBTargetId);
+  const planBTargetIndex = day.nodes.findIndex((node) => node.placeId === planBTargetId);
+  const planBTargetPlace = places.find((place) => place.id === planBTargetId);
 
   const selectPlace = (placeId: string) => {
     if (currentStep === 'zone') return;
@@ -194,7 +199,7 @@ export default function PlanEditPage() {
       setZoneError(`${pendingZone.name} 주변에는 저장한 장소가 없어요. 다른 구역을 입력하거나, 직접 추가해 보세요.`);
       return;
     }
-    save(setDayZone(plan, dayIndex, pendingZone.name));
+    save(setDayZone(plan, dayIndex, pendingZone));
     goToStep('nodes');
   };
 
@@ -266,7 +271,11 @@ export default function PlanEditPage() {
     }
 
     if (planBTargetId) {
-      const canAdd = selectedPlace && !dayPlaceIds.has(selectedPlace.id) && !isSelectedLodging;
+      // 플랜B는 대신할 장소와 같은 카테고리여야 하고, 다른 일차에 이미 넣은 카드는 못 써요 (서버 규칙)
+      const isSameCategory = selectedPlace?.category === planBTargetPlace?.category;
+      const isUsedElsewhere = selectedPlace ? findOtherDayNumber(plan, dayIndex, selectedPlace.id) !== undefined : false;
+      const canAdd =
+        selectedPlace && !dayPlaceIds.has(selectedPlace.id) && !isSelectedLodging && isSameCategory && !isUsedElsewhere;
       return (
         <>
           <Button disabled={!canAdd} onClick={addPlanB}>
@@ -284,7 +293,7 @@ export default function PlanEditPage() {
         <>
           <Button
             onClick={() => {
-              setPlanBTargetId(selectedNode.id);
+              setPlanBTargetId(selectedNode.placeId);
               setSelectedId(null);
             }}
           >
@@ -354,6 +363,9 @@ export default function PlanEditPage() {
         {planBTargetId && !selectedPlace && (
           <p className={styles.notice}>{planBTargetIndex + 1}번 장소 대신 갈 곳을 지도에서 골라 주세요.</p>
         )}
+        {planBTargetId && selectedPlace && selectedPlace.category !== planBTargetPlace?.category && (
+          <p className={styles.notice}>플랜 B는 같은 종류의 장소만 넣을 수 있어요.</p>
+        )}
         {!planBTargetId && isEmptyCategory && (
           <p className={styles.notice}>이 구역에 해당하는 장소가 없어요.</p>
         )}
@@ -369,6 +381,7 @@ export default function PlanEditPage() {
           <ZoneSheet
             key={dayIndex}
             dayLabel={dayLabel}
+            destination={plan.destination}
             selectedZone={pendingZone}
             onSelectZone={(zone) => {
               setPendingZone(zone);
@@ -406,12 +419,16 @@ export default function PlanEditPage() {
         isOpen={otherDayConfirm !== null}
         icon="alert"
         title={`${otherDayConfirm?.dayNumber ?? ''}일차에 추가된 일정이에요.`}
-        description="이 일차에도 추가할까요?"
+        description="같은 장소는 한 번만 넣을 수 있어요. 이 일차로 옮길까요?"
         cancelLabel="아니요"
-        confirmLabel="추가하기"
+        confirmLabel="옮기기"
         onCancel={() => setOtherDayConfirm(null)}
         onConfirm={() => {
-          if (otherDayConfirm) addPlace(otherDayConfirm.placeId);
+          if (otherDayConfirm) {
+            // 옮기고 나서 원래 일차가 비면 계획은 다시 '작성 중'이 돼요
+            save(withDraftIfEmptyDay(moveNodeToDay(plan, dayIndex, otherDayConfirm.placeId)));
+            setSelectedId(null);
+          }
           setOtherDayConfirm(null);
         }}
       />

@@ -170,3 +170,15 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+.moreButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-right: 12px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}

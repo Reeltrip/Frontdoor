@@ -30,6 +30,8 @@ export const routes: RouteObject[] = [
   { path: "/login", element: <LoginPage /> },
   { path: "/signup", element: <SignupPage /> },
   { path: "/signup/nickname", element: <NicknamePage /> },
+  // 공유 링크. 읽기 전용으로 공유한 계획은 로그인 없이 볼 수 있어요
+  { path: "/plan/:planId", element: <PlanViewPage /> },
   // 아래 화면은 로그인해야 들어갈 수 있어요
   {
     element: (
