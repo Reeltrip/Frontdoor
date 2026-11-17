@@ -4,7 +4,7 @@ import nextIcon from '@/shared/assets/icons/calendar-next.svg';
 import styles from './Calendar.module.css';
 
 type CalendarProps = {
-  /** 초록 원으로 표시할 날짜. 여행 기간이면 [시작일, 종료일]을 넘김 */
+  /** 선택할 날짜. 여행 기간이면 [시작일, 종료일]을 넘김 */
   selectedDates?: Date[];
   onSelectDate?: (date: Date) => void;
   /** 처음 보여줄 달. 없으면 첫 선택 날짜의 달, 그것도 없으면 이번 달 */
@@ -69,14 +69,18 @@ export default function Calendar({ selectedDates = [], onSelectDate, initialMont
 
       <div className={`${styles.grid} ${styles.dates}`}>
         {days.map((date) => {
+          const [start, end] = selectedDates;
           const isSelected = selectedDates.some((selected) => isSameDay(selected, date));
+          const isInRange = Boolean(start && end && date >= start && date <= end);
+          const isStart = Boolean(start && isSameDay(start, date));
+          const isEnd = Boolean(end && isSameDay(end, date));
           return (
             <button
               key={date.getDate()}
               type="button"
-              className={`${styles.date} ${isSelected ? styles.selected : ''}`}
+              className={`${styles.date} ${isInRange ? styles.inRange : ''} ${isStart ? styles.rangeStart : ''} ${isEnd ? styles.rangeEnd : ''} ${isSelected && !end ? styles.selected : ''}`}
               style={date.getDate() === 1 ? { gridColumnStart: firstWeekday + 1 } : undefined}
-              aria-pressed={isSelected}
+              aria-pressed={isSelected || isInRange}
               aria-label={`${month + 1}월 ${date.getDate()}일`}
               onClick={() => onSelectDate?.(date)}
             >

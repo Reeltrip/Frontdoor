@@ -207,7 +207,11 @@ export const componentDemos: ComponentDemo[] = [
     name: "Calendar",
     path: "shared/components/Calendar",
     description: "여행 기간 선택. 시작일 → 종료일 순서로 눌러 보기",
-    variants: [{ label: "기간 선택", render: () => <CalendarDemo /> }],
+    variants: [
+      { label: "시작일 선택", render: () => <CalendarDemo /> },
+      { label: "기간 선택 · 19–21", render: () => <CalendarDemo endDay={21} /> },
+      { label: "여러 주 선택 · 19–29", render: () => <CalendarDemo endDay={29} /> },
+    ],
   },
   {
     name: "TextField",

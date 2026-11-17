@@ -293,8 +293,8 @@ export function LabeledInputDemo() {
 const formatDate = (date: Date) => `${date.getMonth() + 1}.${date.getDate()}`;
 
 // 첫 클릭은 시작일, 두 번째는 종료일, 세 번째는 다시 시작일
-export function CalendarDemo() {
-  const [range, setRange] = useState<Date[]>([new Date(2026, 10, 20)]);
+export function CalendarDemo({ endDay }: { endDay?: number }) {
+  const [range, setRange] = useState<Date[]>(endDay ? [new Date(2026, 10, 19), new Date(2026, 10, endDay)] : [new Date(2026, 10, 19)]);
   const handleSelect = (date: Date) => {
     if (range.length !== 1 || date < range[0]) {
       setRange([date]);
