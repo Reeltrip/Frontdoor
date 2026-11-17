@@ -154,7 +154,8 @@ export default function PlanViewPage() {
           title="여행계획"
           onBack={() => (isLoggedIn ? navigate(-1) : navigate('/'))}
           action={
-            canEdit && (
+            // 공유 링크는 계획을 만든 사람만 만들 수 있어요 (서버 규칙)
+            plan.role === 'OWNER' && (
               <button type="button" className={styles.moreButton} aria-label="공유하기" onClick={openShare}>
                 <img src={kebabIcon} alt="" />
               </button>
@@ -171,6 +172,15 @@ export default function PlanViewPage() {
               onClick={() => setIsPlanBVisible((visible) => !visible)}
             >
               플랜B 같이 보기
+            </button>
+          )}
+          {!isLoggedIn && (
+            <button
+              type="button"
+              className={styles.planBToggle}
+              onClick={() => navigate('/login', { state: { from: `/plan/${plan.id}` } })}
+            >
+              로그인하고 함께 보기
             </button>
           )}
 

@@ -111,7 +111,15 @@ export default function CardBrowsePage() {
     updatePlace.mutate(
       {
         id: place.id,
-        changes: { name: next.name, summary: next.summary, tag: next.tag },
+        category: place.category,
+        // 바뀐 항목만 보내요. 안 고친 항목을 같이 보내면 서버의 다른 값을 덮어쓸 수 있어요
+        changes: {
+          ...(next.name !== place.name ? { name: next.name } : {}),
+          ...(next.summary[0] !== place.summary[0]
+            ? { summaryFirst: next.summary[0] ?? "" }
+            : {}),
+          ...(next.tag !== place.tag ? { tag: next.tag } : {}),
+        },
       },
       {
         onSuccess: () => setToastMessage("편집하신 내용이 저장되었습니다."),

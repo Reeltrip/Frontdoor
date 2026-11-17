@@ -36,13 +36,37 @@ export function removeNodeFromDay(plan: Plan, dayIndex: number, placeId: string)
   }));
 }
 
-export function setPlanB(plan: Plan, dayIndex: number, nodeId: string, planBPlaceId: string): Plan {
+/** 노드는 카드 id로 찾아요. 저장 뒤 서버가 노드 id를 새로 매겨도 같은 노드를 가리켜요 */
+export function setPlanB(plan: Plan, dayIndex: number, nodePlaceId: string, planBPlaceId: string): Plan {
   return updateDay(plan, dayIndex, (day) => ({
     ...day,
     nodes: day.nodes.map((node): PlanNode =>
-      node.id === nodeId ? { ...node, planB: { placeId: planBPlaceId } } : node,
+      node.placeId === nodePlaceId ? { ...node, planB: { placeId: planBPlaceId } } : node,
     ),
   }));
+}
+
+/**
+ * 다른 일차에 있던 카드를 이 일차로 옮겨요. 같은 카드는 한 계획에 한 번만 넣을 수 있어서(서버 규칙)
+ * 다른 일차의 노드·플랜B에서 빼고 이 일차 뒤에 붙여요.
+ */
+export function moveNodeToDay(plan: Plan, dayIndex: number, placeId: string): Plan {
+  const removed: Plan = {
+    ...plan,
+    days: plan.days.map((day, index) =>
+      index === dayIndex
+        ? day
+        : {
+            ...day,
+            nodes: day.nodes
+              .filter((node) => node.placeId !== placeId)
+              .map((node): PlanNode =>
+                node.planB?.placeId === placeId ? { id: node.id, placeId: node.placeId } : node,
+              ),
+          },
+    ),
+  };
+  return addNodeToDay(removed, dayIndex, placeId);
 }
 
 /** 이 장소가 들어간 다른 일차 번호(1부터). 없으면 undefined. 지도에서 회색으로 보여요 */

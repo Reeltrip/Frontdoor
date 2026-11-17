@@ -68,8 +68,10 @@ function ProfileForm({ profile }: { profile: AccountProfile }) {
       return;
     }
     updateProfile.mutate({ nickname: nickname.trim(), avatarUrl }, {
-      onSuccess: () => {
-        setNickname(nickname.trim());
+      onSuccess: (saved) => {
+        setNickname(saved.nickname);
+        // 방금 고른 사진의 data 주소를 서버에 올린 주소로 바꿔야 다시 '변경됨'으로 보지 않아요
+        setAvatarUrl(saved.avatarUrl);
         setIsSaveConfirmOpen(false);
         setIsEditing(false);
         setStatusMessage('프로필을 저장했어요.');

@@ -9,7 +9,7 @@ import {
   restorePlaces,
   updatePlace,
 } from '../api/places';
-import type { Place, PlaceListParams, UpdatePlaceRequest } from './place.types';
+import type { Place, PlaceCategory, PlaceListParams, UpdatePlaceRequest } from './place.types';
 
 const NO_PLACES: Place[] = [];
 
@@ -53,7 +53,8 @@ export function useUpdatePlace() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, changes }: { id: string; changes: UpdatePlaceRequest }) => updatePlace(id, changes),
+    mutationFn: ({ id, category, changes }: { id: string; category: PlaceCategory; changes: UpdatePlaceRequest }) =>
+      updatePlace(id, category, changes),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: placeKeys.all }),
   });
 }

@@ -14,11 +14,12 @@ import CategoryFilterBar from '@/features/place/ui/CategoryFilterBar';
 import PlaceCardStrip from '@/features/place/ui/PlaceCardStrip';
 import { getDayZone, isPlaceInZone, type PlanZone } from '@/features/plan/lib/planZones';
 import { mergePlanPlaces } from '@/features/plan/model/planPlaces';
-import { finishPlan, formatDayDate } from '@/features/plan/model/planDays';
+import { finishPlan, formatDayDate, withDraftIfEmptyDay } from '@/features/plan/model/planDays';
 import {
   addNodeToDay,
   buildDayRoute,
   findOtherDayNumber,
+  moveNodeToDay,
   removeNodeFromDay,
   setAccommodation,
   setDayZone,
@@ -68,7 +69,7 @@ export default function PlanEditPage() {
   const [centerOverride, setCenterOverride] = useState<MapPosition | null>(null);
   const [pendingZone, setPendingZone] = useState<PlanZone | undefined>();
   const [zoneError, setZoneError] = useState<string | null>(null);
-  /** 플랜B를 붙일 확정 노드 id. 있으면 지도에서 대신 갈 곳을 고르는 중이에요 */
+  /** 플랜B를 붙일 확정 노드의 카드 id. 있으면 지도에서 대신 갈 곳을 고르는 중이에요 */
   const [planBTargetId, setPlanBTargetId] = useState<string | null>(null);
   const [otherDayConfirm, setOtherDayConfirm] = useState<{ placeId: string; dayNumber: number } | null>(null);
   const [isSkipDayOpen, setIsSkipDayOpen] = useState(false);
@@ -171,7 +172,8 @@ export default function PlanEditPage() {
   const selectedPlace = visiblePlaces.find((place) => place.id === selectedId);
   const selectedNode = day.nodes.find((node) => node.placeId === selectedId);
   const isSelectedLodging = selectedId !== null && selectedId === plan.accommodationPlaceId;
-  const planBTargetIndex = day.nodes.findIndex((node) => node.id === planBTargetId);
+  const planBTargetIndex = day.nodes.findIndex((node) => node.placeId === planBTargetId);
+  const planBTargetPlace = places.find((place) => place.id === planBTargetId);
 
   const selectPlace = (placeId: string) => {
     if (currentStep === 'zone') return;
@@ -269,7 +271,11 @@ export default function PlanEditPage() {
     }
 
     if (planBTargetId) {
-      const canAdd = selectedPlace && !dayPlaceIds.has(selectedPlace.id) && !isSelectedLodging;
+      // 플랜B는 대신할 장소와 같은 카테고리여야 하고, 다른 일차에 이미 넣은 카드는 못 써요 (서버 규칙)
+      const isSameCategory = selectedPlace?.category === planBTargetPlace?.category;
+      const isUsedElsewhere = selectedPlace ? findOtherDayNumber(plan, dayIndex, selectedPlace.id) !== undefined : false;
+      const canAdd =
+        selectedPlace && !dayPlaceIds.has(selectedPlace.id) && !isSelectedLodging && isSameCategory && !isUsedElsewhere;
       return (
         <>
           <Button disabled={!canAdd} onClick={addPlanB}>
@@ -287,7 +293,7 @@ export default function PlanEditPage() {
         <>
           <Button
             onClick={() => {
-              setPlanBTargetId(selectedNode.id);
+              setPlanBTargetId(selectedNode.placeId);
               setSelectedId(null);
             }}
           >
@@ -357,6 +363,9 @@ export default function PlanEditPage() {
         {planBTargetId && !selectedPlace && (
           <p className={styles.notice}>{planBTargetIndex + 1}번 장소 대신 갈 곳을 지도에서 골라 주세요.</p>
         )}
+        {planBTargetId && selectedPlace && selectedPlace.category !== planBTargetPlace?.category && (
+          <p className={styles.notice}>플랜 B는 같은 종류의 장소만 넣을 수 있어요.</p>
+        )}
         {!planBTargetId && isEmptyCategory && (
           <p className={styles.notice}>이 구역에 해당하는 장소가 없어요.</p>
         )}
@@ -410,12 +419,16 @@ export default function PlanEditPage() {
         isOpen={otherDayConfirm !== null}
         icon="alert"
         title={`${otherDayConfirm?.dayNumber ?? ''}일차에 추가된 일정이에요.`}
-        description="이 일차에도 추가할까요?"
+        description="같은 장소는 한 번만 넣을 수 있어요. 이 일차로 옮길까요?"
         cancelLabel="아니요"
-        confirmLabel="추가하기"
+        confirmLabel="옮기기"
         onCancel={() => setOtherDayConfirm(null)}
         onConfirm={() => {
-          if (otherDayConfirm) addPlace(otherDayConfirm.placeId);
+          if (otherDayConfirm) {
+            // 옮기고 나서 원래 일차가 비면 계획은 다시 '작성 중'이 돼요
+            save(withDraftIfEmptyDay(moveNodeToDay(plan, dayIndex, otherDayConfirm.placeId)));
+            setSelectedId(null);
+          }
           setOtherDayConfirm(null);
         }}
       />

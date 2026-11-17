@@ -37,5 +37,8 @@ export type PlaceListParams = {
 
 // 화면에서 고칠 수 있는 항목. BE 필드로 옮기는 건 api/places.ts의 updatePlace가 해요
 export type UpdatePlaceRequest = Partial<
-  Pick<Place, "name" | "category" | "summary" | "address" | "tag">
->;
+  Pick<Place, "name" | "address" | "tag">
+> & {
+  /** 이름 아래 첫 줄. 장소 카드는 가는 길, 교통·팁 카드는 세부유형이에요 */
+  summaryFirst?: string;
+};

@@ -1,4 +1,4 @@
-import { apiRequest } from '@/shared/api/client';
+import { ApiError, apiRequest } from '@/shared/api/client';
 import { fromApiCategory, type ApiCategory } from '@/features/place/api/places';
 import type { Place } from '@/features/place/model/place.types';
 import {
@@ -206,6 +206,12 @@ export async function updatePlan(id: string, request: UpdatePlanRequest): Promis
 
   const isDraft = isDraftPlanStatus(request.status);
   const days = request.days.slice(0, current.days.length);
+
+  // 같은 카드가 두 일차에 있으면 서버가 거절해요. 요청을 보내기 전에 막아서 앞선 저장만 반영되는 일을 없애요
+  const allIds = days.flatMap((day) => day.nodes.flatMap((node) => [node.placeId, ...(node.planB ? [node.planB.placeId] : [])]));
+  if (new Set(allIds).size !== allIds.length) {
+    throw new ApiError({ status: 409, code: 'DUPLICATE_PLAN_PLACE', message: '이미 다른 일자에 넣은 장소예요.' });
+  }
   const isCompletedDay = (day: PlanDay) => !isDraft && day.nodes.length > 0;
   const changedIndexes = days.flatMap((day, index) => {
     const before = current.days[index];
@@ -238,15 +244,22 @@ export async function updatePlan(id: string, request: UpdatePlanRequest): Promis
       },
     });
 
-  // 같은 카드는 한 계획에 한 번만 들어가요. 카드가 다른 일차로 옮겨 가면 먼저 원래 일차를 비워야 해요
+  // 같은 카드는 한 계획에 한 번만 들어가요. 카드가 다른 일차로 옮겨 가면 원래 일차에서 먼저 빼야 서버가 받아요.
+  // 그래서 카드가 빠져나가는 일차만, 새로 들어오는 카드 없이 "남는 노드"로 먼저 저장해요 (남는 노드는 지우지 않아요)
   const usedIds = (day: PlanDay) => day.nodes.flatMap((node) => [node.placeId, ...(node.planB ? [node.planB.placeId] : [])]);
-  const hasMovedPlace = changedIndexes.some((index) =>
-    usedIds(days[index]).some((placeId) =>
-      current.days.some((before, beforeIndex) => beforeIndex !== index && usedIds(before).includes(placeId)),
-    ),
-  );
-  if (hasMovedPlace) {
-    for (const index of changedIndexes) await putDay(index, { ...days[index], nodes: [] }, false);
+  for (const index of changedIndexes) {
+    const beforeIds = new Set(usedIds(current.days[index]));
+    const leavingIds = [...beforeIds].filter(
+      (placeId) => !usedIds(days[index]).includes(placeId) && days.some((day, dayIndex) => dayIndex !== index && usedIds(day).includes(placeId)),
+    );
+    if (leavingIds.length === 0) continue;
+    const staying: PlanDay = {
+      ...days[index],
+      nodes: days[index].nodes
+        .filter((node) => beforeIds.has(node.placeId))
+        .map((node) => (node.planB && !beforeIds.has(node.planB.placeId) ? { id: node.id, placeId: node.placeId } : node)),
+    };
+    await putDay(index, staying, false);
   }
   for (const index of changedIndexes) await putDay(index, days[index], isCompletedDay(days[index]));
 

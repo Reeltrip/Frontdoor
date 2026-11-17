@@ -100,17 +100,14 @@ export async function fetchPlaces(params: PlaceListParams = {}, signal?: AbortSi
   }
 }
 
-/** 화면의 수정 항목을 BE 필드로 옮겨요. summary[0]은 가는 길, summary[1]은 영업시간이에요 */
-export function updatePlace(id: string, changes: UpdatePlaceRequest): Promise<Place> {
+/** 화면의 수정 항목을 BE 필드로 옮겨요. 보낸 항목만 바뀌어요. category는 그 카드의 카테고리예요 */
+export function updatePlace(id: string, category: PlaceCategory, changes: UpdatePlaceRequest): Promise<Place> {
+  const isOffMap = category === 'transportation' || category === 'tip';
   const body: Record<string, unknown> = {};
   if (changes.name !== undefined) body.name = changes.name;
-  if (changes.category !== undefined) body.category = toApiCategory(changes.category);
   if (changes.address !== undefined) body.address = changes.address;
-  if ('tag' in changes) body.priceText = changes.tag ?? null;
-  if (changes.summary !== undefined) {
-    body.accessText = changes.summary[0] ?? null;
-    if (changes.summary.length > 1) body.openingHours = changes.summary[1];
-  }
+  if ('tag' in changes) body[isOffMap ? 'cost' : 'priceText'] = changes.tag ?? null;
+  if (changes.summaryFirst !== undefined) body[isOffMap ? 'subType' : 'accessText'] = changes.summaryFirst;
   return apiRequest<ApiPlace>(`/places/${encodeURIComponent(id)}`, { method: 'PATCH', body }).then((item) =>
     toPlace(item),
   );
