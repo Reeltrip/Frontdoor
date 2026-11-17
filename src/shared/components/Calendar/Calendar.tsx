@@ -84,7 +84,7 @@ export default function Calendar({ selectedDates = [], onSelectDate, initialMont
               aria-label={`${month + 1}월 ${date.getDate()}일`}
               onClick={() => onSelectDate?.(date)}
             >
-              {date.getDate()}
+              <span className={styles.dayNumber}>{date.getDate()}</span>
             </button>
           );
         })}
