@@ -12,7 +12,8 @@ import infoIcon from '@/features/account/assets/info.svg';
 import logoutIcon from '@/features/account/assets/logout.svg';
 import kebabIcon from '@/shared/assets/icons/kebab.svg';
 import ConfirmModal from '@/shared/components/ConfirmModal';
-import { clearAuthTokens } from '@/shared/lib/authToken';
+import { clearAuthTokens, getAuthTokens } from '@/shared/lib/authToken';
+import { logout } from '@/features/auth/api/auth';
 import styles from './MyPage.module.css';
 
 export default function MyPage() {
@@ -43,6 +44,9 @@ export default function MyPage() {
   const handleLogout = async () => {
     setIsLoggingOut(true);
     await queryClient.cancelQueries();
+    // 서버에서 토큰을 못 지워도 이 기기에서는 로그아웃해요
+    const refreshToken = getAuthTokens()?.refreshToken;
+    if (refreshToken) await logout(refreshToken).catch(() => undefined);
     clearAuthTokens();
     queryClient.clear();
     navigate('/login', { replace: true });

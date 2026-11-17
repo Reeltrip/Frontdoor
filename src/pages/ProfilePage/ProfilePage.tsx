@@ -87,8 +87,9 @@ function ProfileForm({ profile }: { profile: AccountProfile }) {
     const file = event.target.files?.[0];
     event.target.value = '';
     if (!file) return;
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 3 * 1024 * 1024) {
-      setErrorMessage('3MB 이하의 JPG, PNG, WebP 사진을 선택해 주세요.');
+    // 서버가 PNG·JPEG만 받아요
+    if (!['image/jpeg', 'image/png'].includes(file.type) || file.size > 3 * 1024 * 1024) {
+      setErrorMessage('3MB 이하의 JPG, PNG 사진을 선택해 주세요.');
       return;
     }
     const reader = new FileReader();
@@ -117,7 +118,7 @@ function ProfileForm({ profile }: { profile: AccountProfile }) {
       <div className={styles.avatar}>
         <AccountAvatar avatarUrl={avatarUrl} />
         <button type="button" className={styles.photoButton} aria-label="프로필 사진 변경" onClick={() => fileInputRef.current?.click()}><img src={editIcon} alt="" /></button>
-        <input ref={fileInputRef} type="file" accept="image/jpeg,image/png,image/webp" className={styles.fileInput} onChange={selectPhoto} />
+        <input ref={fileInputRef} type="file" accept="image/jpeg,image/png" className={styles.fileInput} onChange={selectPhoto} />
       </div>
       <div className={styles.fields}>
         <label className={styles.field}>닉네임

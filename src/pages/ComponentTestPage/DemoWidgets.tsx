@@ -17,12 +17,12 @@ import SegmentedButtons from "@/shared/components/SegmentedButtons";
 import { FILTER_CATEGORY_KEYS } from "@/features/place/lib/categories";
 import type { PlaceCategory } from "@/features/place/model/place.types";
 import {
-  FAKE_RESULT_CATEGORIES,
-  FAKE_RESULT_INITIAL_INDEX,
-} from "@/features/place/api/fakeResult";
+  DEMO_PLACES,
+  DEMO_RESULT_CATEGORIES,
+  DEMO_RESULT_INITIAL_INDEX,
+} from "./demoData";
 import CategoryDial from "@/features/place/ui/CategoryDial";
 import PlaceCarousel from "@/features/place/ui/PlaceCarousel";
-import { FAKE_PLACES_BY_CATEGORY } from "@/features/place/api/fakePlaces";
 import Toast from "@/shared/components/Toast";
 import PlaceEditCard from "@/features/place/ui/PlaceEditCard";
 import { toDraft, type PlaceDraft } from "@/features/place/model/placeEdit";
@@ -74,7 +74,7 @@ export function TextFieldDemo({ initialValue }: { initialValue: string }) {
 }
 export function PlaceCarouselDemo() {
   const [activeIndex, setActiveIndex] = useState(1);
-  const places = FAKE_PLACES_BY_CATEGORY.food ?? [];
+  const places = DEMO_PLACES;
   return (
     <div style={{ width: 390, height: 360, overflow: "hidden" }}>
       <PlaceCarousel
@@ -87,7 +87,7 @@ export function PlaceCarouselDemo() {
 }
 
 export function PlaceEditCardDemo() {
-  const place = (FAKE_PLACES_BY_CATEGORY.food ?? [])[0];
+  const place = DEMO_PLACES[0];
   const [draft, setDraft] = useState<PlaceDraft>(() => toDraft(place));
   return <PlaceEditCard place={place} draft={draft} onDraftChange={setDraft} />;
 }
@@ -108,7 +108,7 @@ export function ToastDemo() {
 }
 
 export function CategoryDialDemo() {
-  const [activeIndex, setActiveIndex] = useState(FAKE_RESULT_INITIAL_INDEX);
+  const [activeIndex, setActiveIndex] = useState(DEMO_RESULT_INITIAL_INDEX);
   return (
     <div
       style={{
@@ -119,7 +119,7 @@ export function CategoryDialDemo() {
       }}
     >
       <CategoryDial
-        items={FAKE_RESULT_CATEGORIES}
+        items={DEMO_RESULT_CATEGORIES}
         activeIndex={activeIndex}
         onChange={setActiveIndex}
       />
@@ -128,11 +128,11 @@ export function CategoryDialDemo() {
 }
 
 export function CategoryWheelDemo() {
-  const [activeIndex, setActiveIndex] = useState(FAKE_RESULT_INITIAL_INDEX);
+  const [activeIndex, setActiveIndex] = useState(DEMO_RESULT_INITIAL_INDEX);
   return (
     <div style={{ height: 640 }}>
       <CategoryWheel
-        items={FAKE_RESULT_CATEGORIES}
+        items={DEMO_RESULT_CATEGORIES}
         activeIndex={activeIndex}
         onChange={setActiveIndex}
         onView={() => {}}

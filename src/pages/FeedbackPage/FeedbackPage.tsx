@@ -6,7 +6,6 @@ import { INQUIRY_TYPES, type InquiryType } from '@/features/account/model/accoun
 import chevron from '@/features/account/assets/feedback-chevron.svg';
 import openChevron from '@/features/account/assets/feedback-chevron-open.svg';
 import Button from '@/shared/components/Button';
-import { isFakeApiEnabled } from '@/shared/lib/env';
 import styles from './FeedbackPage.module.css';
 
 const MAX_CONTENT_LENGTH = 300;
@@ -57,7 +56,7 @@ export default function FeedbackPage() {
         setType(null);
         setContent('');
         setWantsReplyNotification(false);
-        setMessage(isFakeApiEnabled ? '시연용 문의를 이 기기에 저장했어요.' : '문의를 접수했어요.');
+        setMessage('문의를 접수했어요.');
       },
       onError: (error) => setMessage(error.message || '저장하지 못했어요. 다시 시도해 주세요.'),
     });
