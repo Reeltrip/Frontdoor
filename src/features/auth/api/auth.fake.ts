@@ -3,6 +3,7 @@
 import { ApiError } from '@/shared/api/client';
 import { fakeResponse } from '@/shared/api/fake';
 import type { LoginRequest, LoginResponse } from '../model/auth.types';
+import { initializeFakeAccount } from '@/features/account/api/account.fake';
 
 export const FAKE_LOGIN_PASSWORD = 'test1234';
 
@@ -12,6 +13,7 @@ export const fakeAuthApi = {
       if (password !== FAKE_LOGIN_PASSWORD) {
         throw new ApiError({ status: 401, code: 'INVALID_LOGIN', message: '이메일 또는 비밀번호를 확인해주세요' });
       }
+      initializeFakeAccount({ userId: 1, email, nickname: email.split('@')[0] || '여행자' });
       return {
         userId: 1,
         nickname: email.split('@')[0] || '여행자',

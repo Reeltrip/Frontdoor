@@ -1,6 +1,7 @@
 import { apiRequest } from '@/shared/api/client';
 import { fakeResponse } from '@/shared/api/fake';
 import { isFakeApiEnabled } from '@/shared/lib/env';
+import { initializeFakeAccount } from '@/features/account/api/account.fake';
 
 export type SignupPayload = {
   email: string;
@@ -32,10 +33,13 @@ export function verifyEmailCode(email: string, code: string): Promise<void> {
 
 export function signup(payload: SignupPayload): Promise<SignupResponse> {
   if (isFakeApiEnabled) {
-    return fakeResponse(() => ({
-      accessToken: 'fake-signup-access-token',
-      refreshToken: 'fake-signup-refresh-token',
-    }));
+    return fakeResponse(() => {
+      initializeFakeAccount({ userId: 1, email: payload.email, nickname: payload.nickname });
+      return {
+        accessToken: 'fake-signup-access-token',
+        refreshToken: 'fake-signup-refresh-token',
+      };
+    });
   }
   return apiRequest<SignupResponse>('/auth/signup', {
     method: 'POST', body: payload, isAuthRequired: false,

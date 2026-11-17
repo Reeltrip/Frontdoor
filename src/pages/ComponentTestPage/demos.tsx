@@ -229,6 +229,18 @@ export const componentDemos: ComponentDemo[] = [
     path: "shared/components/ConfirmModal",
     variants: [
       {
+        label: "마이페이지 로그아웃",
+        render: () => <ConfirmModal isOpen isInline icon="logout" presentation="account" title="정말로 로그아웃 하시겠어요?" cancelLabel="그만두기" confirmLabel="로그아웃" onCancel={noop} onConfirm={noop} />,
+      },
+      {
+        label: "프로필 변경사항 저장",
+        render: () => <ConfirmModal isOpen isInline icon="alert" presentation="account" title="변경사항이 감지되었어요." description="변경하신 내용을 저장할까요?" cancelLabel="그만두기" confirmLabel="저장하기" onCancel={noop} onConfirm={noop} />,
+      },
+      {
+        label: "프로필 저장 중",
+        render: () => <ConfirmModal isOpen isInline isPending icon="alert" presentation="account" title="변경사항이 감지되었어요." description="변경하신 내용을 저장할까요?" cancelLabel="그만두기" confirmLabel="저장 중" onCancel={noop} onConfirm={noop} />,
+      },
+      {
         label: "링크 불러오기",
         render: () => (
           <ConfirmModal

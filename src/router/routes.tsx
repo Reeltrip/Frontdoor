@@ -19,6 +19,11 @@ import ResultPage from "@/pages/ResultPage/ResultPage";
 import CardBrowsePage from "@/pages/CardBrowsePage/CardBrowsePage";
 import CardAddPage from "@/pages/CardAddPage/CardAddPage";
 import TripListPage from "@/pages/TripListPage/TripListPage";
+import MyPage from "@/pages/MyPage/MyPage";
+import ProfilePage from "@/pages/ProfilePage/ProfilePage";
+import AccountPolicyPage from "@/pages/AccountPolicyPage/AccountPolicyPage";
+import FeedbackPage from "@/pages/FeedbackPage/FeedbackPage";
+import AccountSettingsPage from "@/pages/AccountSettingsPage/AccountSettingsPage";
 
 export const routes: RouteObject[] = [
   { path: "/", element: <RootRoute /> },
@@ -43,6 +48,13 @@ export const routes: RouteObject[] = [
       { path: "/cards/new", element: <CardAddPage /> },
       { path: "/plans", element: <PlanHomePage /> },
       { path: "/trips", element: <TripListPage /> },
+      { path: "/my", element: <MyPage /> },
+      { path: "/my/profile", element: <ProfilePage /> },
+      { path: "/my/terms", element: <AccountPolicyPage kind="terms" /> },
+      { path: "/my/privacy", element: <AccountPolicyPage kind="privacy" /> },
+      { path: "/my/feedback", element: <FeedbackPage /> },
+      { path: "/my/notifications", element: <AccountSettingsPage kind="notifications" /> },
+      { path: "/my/app", element: <AccountSettingsPage kind="app" /> },
       { path: "/plans/new", element: <PlanCreatePage /> },
       { path: "/plans/:planId", element: <PlanViewPage /> },
       { path: "/plans/:planId/edit", element: <PlanEditPage /> },

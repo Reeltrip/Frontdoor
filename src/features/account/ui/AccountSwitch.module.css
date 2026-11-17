@@ -1,0 +1,34 @@
+.switch {
+  display: flex;
+  flex: none;
+  align-items: center;
+  width: 58px;
+  height: 24px;
+  padding: 2.4px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--color-gray-200);
+  cursor: pointer;
+}
+
+.switch span {
+  width: 37.46px;
+  height: 19.2px;
+  border-radius: 9.6px;
+  background: white;
+  transition: transform .15s ease;
+}
+
+.checked {
+  background: var(--color-gray-800);
+}
+
+.checked span {
+  transform: translateX(15.74px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch span {
+    transition: none;
+  }
+}
