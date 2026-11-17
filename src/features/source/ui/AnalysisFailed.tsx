@@ -4,19 +4,22 @@ import styles from "./AnalysisFailed.module.css";
 type AnalysisFailedProps = {
   onRetry: () => void;
   onQuit: () => void;
+  /** 서버가 알려 준 실패 이유. 없으면 기본 안내를 보여줘요 */
+  message?: string;
 };
 
 // 정보 추출에 실패했을 때 화면. 다시 시도하면 링크 입력으로 돌아감
 export default function AnalysisFailed({
   onRetry,
   onQuit,
+  message,
 }: AnalysisFailedProps) {
   return (
     <main className={styles.page}>
       <header className={styles.header}>
         <h1 className={styles.title}>모아둔 정보를 가져오지 못했어요.</h1>
         <p className={styles.description}>
-          링크가 비공개이거나 지원하지 않는 형식일 수도 있어요
+          {message ?? "링크가 비공개이거나 지원하지 않는 형식일 수도 있어요"}
         </p>
       </header>
 

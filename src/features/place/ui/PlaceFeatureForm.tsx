@@ -26,7 +26,7 @@ export default function PlaceFeatureForm({
     const file = event.target.files?.[0];
     if (!file) return;
     if (value.photoUrl) URL.revokeObjectURL(value.photoUrl);
-    onChange({ ...value, photoUrl: URL.createObjectURL(file) });
+    onChange({ ...value, photoUrl: URL.createObjectURL(file), photoFile: file });
   };
 
   const handleTagButton = () => {

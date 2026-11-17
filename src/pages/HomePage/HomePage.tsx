@@ -2,7 +2,7 @@ import { useNavigate } from "react-router";
 import TabBar from "@/shared/components/TabBar";
 import linkBg from "@/shared/assets/images/link-bg.png";
 import RecentCollectionCard from "@/features/source/ui/RecentCollectionCard";
-import { FAKE_RECENT_COLLECTIONS } from "@/features/source/api/recentCollections";
+import { useRecentCollections } from "@/features/source/model/useRecentCollections";
 import styles from "./HomePage.module.css";
 import { useState } from "react";
 import ConfirmModal from "@/shared/components/ConfirmModal";
@@ -11,7 +11,8 @@ import type { LinkAddState } from "@/features/source/model/source.types";
 
 export default function HomePage() {
   const navigate = useNavigate();
-  const recentCollections = FAKE_RECENT_COLLECTIONS;
+  // 불러오는 중이거나 실패하면 목록 없이 링크 불러오기만 보여줘요
+  const recentCollections = useRecentCollections();
   const hasRecentCollections = recentCollections.length > 0;
 
   const [clipboardLink, setClipboardLink] = useState<string | null>(null);

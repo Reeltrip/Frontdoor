@@ -8,8 +8,20 @@ import CategoryDial from "@/features/place/ui/CategoryDial";
 import DialTutorial from "@/features/place/ui/DialTutorial";
 import { readClipboardLink } from "@/features/source/lib/readClipboardLink";
 import type { AnalyzingState } from "@/features/source/model/source.types";
-import { FAKE_RESULT_CATEGORIES } from "@/features/place/api/fakeResult";
-import { searchFakeAddresses } from "@/features/place/api/fakeAddressSearch";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { getErrorMessage } from "@/shared/api/client";
+import {
+  createPlaces,
+  placeKeys,
+  searchPlaces,
+  toApiCategory,
+  uploadImage,
+  type ApiPlace,
+  type PlaceSearchResult,
+} from "@/features/place/api/places";
+import { saveLastResult } from "@/features/place/model/lastResult";
+import { RESULT_CATEGORIES } from "@/features/place/model/useResultPlaces";
+import type { ResultCategoryItem } from "@/features/place/model/result.types";
 import {
   CARD_ADD_STEPS,
   EMPTY_CARD_FEATURES,
@@ -33,8 +45,12 @@ const STEP_SUBTITLES: Record<CardAddStep, string | null> = {
   features: "사진과 가격, 대표특징을 알아보아요.",
 };
 
+const CATEGORY_ITEMS: ResultCategoryItem[] = RESULT_CATEGORIES.map(
+  ({ category, title }) => ({ id: category, category, title, description: "" }),
+);
+
 const INITIAL_CATEGORY_INDEX = Math.max(
-  FAKE_RESULT_CATEGORIES.findIndex((item) => item.category === "food"),
+  CATEGORY_ITEMS.findIndex((item) => item.category === "food"),
   0,
 );
 
@@ -52,7 +68,56 @@ export default function CardAddPage() {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [features, setFeatures] = useState<CardFeatures>(EMPTY_CARD_FEATURES);
-  const [results, setResults] = useState<string[] | null>(null);
+  const [results, setResults] = useState<PlaceSearchResult[] | null>(null);
+  /** 검색 결과에서 고른 장소. 지도에 올릴 좌표가 여기서 와요 */
+  const [pickedPlace, setPickedPlace] = useState<PlaceSearchResult | null>(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+
+  const category = CATEGORY_ITEMS[categoryIndex].category;
+  // 팁 카드는 지도에 올리지 않아서 좌표와 사진이 없어도 돼요
+  const isTip = category === "tip";
+
+  const saveCard = useMutation({
+    mutationFn: async () => {
+      const imageUrl = features.photoFile
+        ? await uploadImage(features.photoFile)
+        : undefined;
+      const price = features.price.trim() || undefined;
+      const memo = features.memo.trim() || undefined;
+      const card: ApiPlace = isTip
+        ? {
+            category: "TIP",
+            name: name.trim(),
+            subType: features.tags[0] ?? "팁",
+            applicableRegion: pickedPlace?.name ?? address.trim(),
+            placeText: address.trim(),
+            cost: price,
+            memo,
+            imageUrl,
+          }
+        : {
+            category: toApiCategory(category),
+            name: name.trim(),
+            address: pickedPlace?.address ?? address.trim(),
+            latitude: pickedPlace?.latitude,
+            longitude: pickedPlace?.longitude,
+            googlePlaceId: pickedPlace?.googlePlaceId,
+            imageUrl,
+            keyPoints: features.tags,
+            priceText: price,
+            memo,
+          };
+      return createPlaces([card]);
+    },
+    onSuccess: async (result) => {
+      saveLastResult({ placeIds: result.placeIds, title: null });
+      await queryClient.invalidateQueries({ queryKey: placeKeys.all });
+      navigate("/library", { replace: true });
+    },
+    onError: (error) => setErrorMessage(getErrorMessage(error)),
+  });
   const [isImportModalOpen, setIsImportModalOpen] = useState(true);
   const [isTutorialOpen, setIsTutorialOpen] = useState(false);
 
@@ -74,8 +139,12 @@ export default function CardAddPage() {
   const canGoNext = {
     category: true,
     name: name.trim() !== "",
-    address: address.trim() !== "",
-    features: hasFeatures,
+    // 장소 카드는 검색 결과에서 골라야 좌표가 생겨요
+    address: isTip ? address.trim() !== "" : pickedPlace !== null,
+    // 장소 카드는 사진이 필수예요 (서버 규칙)
+    features:
+      (isTip ? hasFeatures : features.photoFile !== null) &&
+      !saveCard.isPending,
   }[step];
 
   const handleBack = () => {
@@ -85,12 +154,12 @@ export default function CardAddPage() {
 
   const handleNext = () => {
     setIsTutorialOpen(false);
+    setErrorMessage(null);
     if (step !== "features") {
       setStep(CARD_ADD_STEPS[stepIndex + 1]);
       return;
     }
-    const state: AnalyzingState = { links: ["manual-card"] };
-    navigate("/links/analyzing", { replace: true, state });
+    saveCard.mutate();
   };
 
   const handleImportLink = async () => {
@@ -109,16 +178,24 @@ export default function CardAddPage() {
     setIsTutorialOpen(true);
   };
 
-  const handleSearch = () => {
-    if (address.trim() === "") {
+  const handleSearch = async () => {
+    const query = address.trim();
+    if (query === "" || isSearching) return;
+    setIsSearching(true);
+    setErrorMessage(null);
+    try {
+      setResults(await searchPlaces(query));
+    } catch (error) {
       setResults(null);
-      return;
+      setErrorMessage(getErrorMessage(error));
+    } finally {
+      setIsSearching(false);
     }
-    setResults(searchFakeAddresses(address));
   };
 
-  const handlePickAddress = (picked: string) => {
-    setAddress(picked);
+  const handlePickAddress = (picked: PlaceSearchResult) => {
+    setPickedPlace(picked);
+    setAddress(picked.address ?? picked.name);
     setResults(null);
   };
 
@@ -190,32 +267,50 @@ export default function CardAddPage() {
             <input
               className={styles.addressInput}
               value={address}
-              onChange={(event) => setAddress(event.target.value)}
+              onChange={(event) => {
+                setAddress(event.target.value);
+                setPickedPlace(null);
+              }}
+              onKeyDown={(event) => {
+                if (event.key === "Enter") void handleSearch();
+              }}
               placeholder="주소를 검색해주세요."
               autoFocus
             />
             <button
               type="button"
               className={styles.searchButton}
-              onClick={handleSearch}
+              onClick={() => void handleSearch()}
+              disabled={isSearching}
             >
-              주소 찾기
+              {isSearching ? "찾는 중" : "주소 찾기"}
             </button>
           </div>
           {results !== null && results.length > 0 && (
             <ul className={styles.results}>
               {results.map((result) => (
-                <li key={result}>
+                <li key={result.googlePlaceId}>
                   <button
                     type="button"
                     className={styles.resultItem}
                     onClick={() => handlePickAddress(result)}
                   >
-                    {result}
+                    {result.name}
+                    {result.address ? " · " + result.address : ""}
                   </button>
                 </li>
               ))}
             </ul>
+          )}
+          {results !== null && results.length === 0 && (
+            <p className={styles.subtitle}>
+              검색 결과가 없어요. 다른 이름으로 찾아보세요.
+            </p>
+          )}
+          {!isTip && pickedPlace === null && results === null && (
+            <p className={styles.subtitle}>
+              주소 찾기로 검색한 뒤 목록에서 골라 주세요.
+            </p>
           )}
         </div>
       )}
@@ -227,15 +322,20 @@ export default function CardAddPage() {
       <div
         className={`${styles.next} ${step === "category" ? styles.nextOnDial : ""}`}
       >
+        {errorMessage && (
+          <p className={styles.subtitle} role="alert">
+            {errorMessage}
+          </p>
+        )}
         <Button onClick={handleNext} disabled={!canGoNext}>
-          다음
+          {saveCard.isPending ? "저장하는 중" : step === "features" ? "저장" : "다음"}
         </Button>
       </div>
 
       {step === "category" && (
         <div className={styles.dialArea}>
           <CategoryDial
-            items={FAKE_RESULT_CATEGORIES}
+            items={CATEGORY_ITEMS}
             activeIndex={categoryIndex}
             onChange={(index) => {
               setCategoryIndex(index);
@@ -248,7 +348,7 @@ export default function CardAddPage() {
         </div>
       )}
 
-      {isTutorialOpen && isTutorialOpen && (
+      {isTutorialOpen && (
         <DialTutorial
           onClose={() => setIsTutorialOpen(false)}
           lines={["다이얼을 돌려", "카드 카테고리를 정해보세요!"]}

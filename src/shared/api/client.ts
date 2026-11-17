@@ -1,7 +1,7 @@
 import { API_BASE_URL } from '@/shared/lib/env';
 import { getAuthTokens, notifyAuthExpired, setAuthTokens } from '@/shared/lib/authToken';
 
-// 화면에서 분기할 에러 종류. 예외 상황용 코드는 BE와 이름을 맞춰야 해요 (아직 가짜)
+// 화면에서 분기할 에러 종류. 서버가 준 code는 BE ErrorCode 이름 그대로예요 (docs/api-spec.md)
 export type ApiErrorCode =
   | 'NETWORK_ERROR' // 서버에 닿지 못함 (오프라인, CORS, 주소 틀림)
   | 'PARSE_ERROR' // 응답이 JSON이 아님
@@ -12,9 +12,17 @@ export type ApiErrorCode =
   | 'CONFLICT'
   | 'SERVER_ERROR'
   | 'UNKNOWN'
-  | 'DUPLICATE_SOURCE' // 기능명세서 5-1 중복된 링크
-  | 'DUPLICATE_PLACE' // 기능명세서 5-2 보관함에 이미 있는 장소
-  | 'PLAN_PERIOD_OVERLAP' // 기능명세서 5-3 같은 기간에 다른 계획
+  | 'INVALID_INPUT'
+  | 'SOURCE_FETCH_FAILED'
+  | 'AI_EXTRACTION_FAILED'
+  | 'PLACE_NOT_FOUND'
+  | 'PLAN_NOT_FOUND'
+  | 'PLAN_FORBIDDEN'
+  | 'INVALID_PLAN_PERIOD'
+  | 'INVALID_PLAN_PLACE'
+  | 'DUPLICATE_PLAN_PLACE'
+  | 'ROUTE_NOT_FOUND'
+  | 'IMAGE_UPLOAD_FAILED'
   | 'AI_DRAFT_NO_PLACES'
   | 'AI_DRAFT_FAILED';
 
@@ -62,7 +70,7 @@ type QueryValue = string | number | boolean | undefined;
 
 type RequestOptions = {
   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-  /** JSON으로 바꿔서 보냄 */
+  /** JSON으로 바꿔서 보냄. FormData면 파일 올리기라 그대로 보내요 */
   body?: unknown;
   /** 값이 undefined인 항목은 빼고 붙임 */
   query?: Record<string, QueryValue>;
@@ -135,6 +143,7 @@ const refreshTokens = () => {
 async function sendRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, query, signal, isAuthRequired = true } = options;
   const hasBody = body !== undefined;
+  const isForm = body instanceof FormData;
   const accessToken = isAuthRequired ? getAuthTokens()?.accessToken : undefined;
 
   let response: Response;
@@ -143,10 +152,11 @@ async function sendRequest<T>(path: string, options: RequestOptions = {}): Promi
       method,
       headers: {
         Accept: 'application/json',
-        ...(hasBody ? { 'Content-Type': 'application/json' } : {}),
+        // FormData는 브라우저가 경계 값이 든 Content-Type을 직접 붙여요
+        ...(hasBody && !isForm ? { 'Content-Type': 'application/json' } : {}),
         ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       },
-      body: hasBody ? JSON.stringify(body) : undefined,
+      body: isForm ? body : hasBody ? JSON.stringify(body) : undefined,
       signal,
     });
   } catch (error) {
@@ -193,4 +203,9 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
       throw retryError;
     }
   }
+}
+
+/** 파일 올리기 (multipart/form-data). 토큰·재발급 처리는 apiRequest와 같아요 */
+export function apiUpload<T>(path: string, form: FormData): Promise<T> {
+  return apiRequest<T>(path, { method: 'POST', body: form });
 }

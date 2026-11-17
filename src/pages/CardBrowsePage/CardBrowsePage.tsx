@@ -16,13 +16,13 @@ import {
   toDraft,
   type PlaceDraft,
 } from "@/features/place/model/placeEdit";
-import type { Place, PlaceCategory } from "@/features/place/model/place.types";
-import { FAKE_PLACES_BY_CATEGORY } from "@/features/place/api/fakePlaces";
+import type { Place } from "@/features/place/model/place.types";
 import {
-  FAKE_RESULT_CATEGORIES,
-  FAKE_RESULT_INITIAL_INDEX,
-  FAKE_RESULT_REGION,
-} from "@/features/place/api/fakeResult";
+  RESULT_CATEGORIES,
+  useResultPlaces,
+} from "@/features/place/model/useResultPlaces";
+import { useUpdatePlace } from "@/features/place/model/usePlaces";
+import { getErrorMessage } from "@/shared/api/client";
 import styles from "./CardBrowsePage.module.css";
 
 const TUTORIAL_SEEN_KEY = "reeltrip:dial-tutorial-seen";
@@ -45,35 +45,34 @@ function markSeen(key: string) {
 
 type CardBrowseState = { categoryIndex?: number };
 
-function getInitialCategoryIndex(state: unknown): number {
+/** 결과 화면에서 고른 카테고리. 주소로 바로 들어왔으면 null (카드가 가장 많은 카테고리로 시작) */
+function getInitialCategoryIndex(state: unknown): number | null {
   const { categoryIndex } = (state ?? {}) as CardBrowseState;
-  if (
-    typeof categoryIndex === "number" &&
-    FAKE_RESULT_CATEGORIES[categoryIndex]
-  )
+  if (typeof categoryIndex === "number" && RESULT_CATEGORIES[categoryIndex])
     return categoryIndex;
-  return FAKE_RESULT_INITIAL_INDEX;
+  return null;
 }
 
 export default function CardBrowsePage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [categoryIndex, setCategoryIndex] = useState(() =>
+  const { title, items, placesByCategory, initialIndex } = useResultPlaces();
+  const updatePlace = useUpdatePlace();
+  const [pickedCategoryIndex, setCategoryIndex] = useState(() =>
     getInitialCategoryIndex(location.state),
   );
+  const categoryIndex = pickedCategoryIndex ?? initialIndex;
   const [placeIndex, setPlaceIndex] = useState(0);
   const [isTutorialOpen, setIsTutorialOpen] = useState(
     () => !hasSeen(TUTORIAL_SEEN_KEY),
   );
   const [isEditTutorialOpen, setIsEditTutorialOpen] = useState(false);
-  const [placesByCategory, setPlacesByCategory] = useState(
-    FAKE_PLACES_BY_CATEGORY,
-  );
   const [draft, setDraft] = useState<PlaceDraft | null>(null);
   const [pendingLeave, setPendingLeave] = useState<"back" | null>(null);
-  const [isToastVisible, setIsToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const isToastVisible = toastMessage !== null;
 
-  const category = FAKE_RESULT_CATEGORIES[categoryIndex];
+  const category = items[categoryIndex];
   const places = placesByCategory[category.category] ?? [];
   const activePlace: Place | undefined = places[placeIndex];
   const isEditing = draft !== null;
@@ -85,7 +84,7 @@ export default function CardBrowsePage() {
   useEffect(() => {
     if (!isToastVisible) return;
     const timer = window.setTimeout(
-      () => setIsToastVisible(false),
+      () => setToastMessage(null),
       TOAST_DURATION_MS,
     );
     return () => window.clearTimeout(timer);
@@ -107,19 +106,19 @@ export default function CardBrowsePage() {
     closeTutorial();
   };
 
-  const savePlace = (
-    categoryKey: PlaceCategory,
-    place: Place,
-    nextDraft: PlaceDraft,
-  ) => {
-    const saved = applyDraft(place, nextDraft);
-    setPlacesByCategory((current) => ({
-      ...current,
-      [categoryKey]: (current[categoryKey] ?? []).map((item) =>
-        item.id === saved.id ? saved : item,
-      ),
-    }));
-    setIsToastVisible(true);
+  const savePlace = (place: Place, nextDraft: PlaceDraft) => {
+    const next = applyDraft(place, nextDraft);
+    updatePlace.mutate(
+      {
+        id: place.id,
+        changes: { name: next.name, summary: next.summary, tag: next.tag },
+      },
+      {
+        onSuccess: () => setToastMessage("편집하신 내용이 저장되었습니다."),
+        onError: (error) =>
+          setToastMessage("저장하지 못했어요. " + getErrorMessage(error)),
+      },
+    );
   };
 
   const handleEdit = () => {
@@ -130,7 +129,7 @@ export default function CardBrowsePage() {
 
   const handleSave = () => {
     if (!activePlace || !draft) return;
-    if (isChanged) savePlace(category.category, activePlace, draft);
+    if (isChanged) savePlace(activePlace, draft);
     setDraft(null);
   };
 
@@ -147,13 +146,13 @@ export default function CardBrowsePage() {
   };
 
   const handleLeaveSave = () => {
-    if (activePlace && draft) savePlace(category.category, activePlace, draft);
+    if (activePlace && draft) savePlace(activePlace, draft);
     finishLeave();
   };
 
   return (
     <main className={styles.page}>
-      <Header title={FAKE_RESULT_REGION} onBack={handleBack} />
+      <Header title={title} onBack={handleBack} />
 
       <div className={styles.stage}>
         {places.length > 0 ? (
@@ -178,7 +177,7 @@ export default function CardBrowsePage() {
       </div>
       <div inert={isEditing}>
         <CategoryDial
-          items={FAKE_RESULT_CATEGORIES}
+          items={items}
           activeIndex={categoryIndex}
           onChange={handleCategoryChange}
           isRaised={isTutorialOpen}
@@ -205,7 +204,6 @@ export default function CardBrowsePage() {
         </button>
       )}
       {isTutorialOpen && <DialTutorial onClose={closeTutorial} />}
-      {isTutorialOpen && <DialTutorial onClose={closeTutorial} />}
       {isEditTutorialOpen && <EditTutorial onClose={closeEditTutorial} />}
       <ConfirmModal
         isOpen={pendingLeave !== null}
@@ -218,7 +216,7 @@ export default function CardBrowsePage() {
         onConfirm={handleLeaveSave}
       />
 
-      {isToastVisible && <Toast message="편집하신 내용이 저장되었습니다." />}
+      {toastMessage && <Toast message={toastMessage} />}
     </main>
   );
 }

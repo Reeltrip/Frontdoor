@@ -5,8 +5,8 @@ import {
   fetchDeletedPlaces,
   fetchPlaces,
   placeKeys,
-  purgePlace,
-  restorePlace,
+  purgePlaces,
+  restorePlaces,
   updatePlace,
 } from '../api/places';
 import type { Place, PlaceListParams, UpdatePlaceRequest } from './place.types';
@@ -14,10 +14,12 @@ import type { Place, PlaceListParams, UpdatePlaceRequest } from './place.types';
 const NO_PLACES: Place[] = [];
 
 /** 보관함 카드 목록. viewStatus로 로딩·실패·빈 화면을 고르면 돼요 */
-export function usePlaces(params: PlaceListParams = {}) {
+export function usePlaces(params: PlaceListParams = {}, { isEnabled = true }: { isEnabled?: boolean } = {}) {
   const query = useQuery({
     queryKey: placeKeys.list(params),
     queryFn: ({ signal }) => fetchPlaces(params, signal),
+    // 로그인 없이 보는 공유 계획에서는 보관함을 부르지 않아요
+    enabled: isEnabled,
   });
 
   return {
@@ -56,7 +58,7 @@ export function useUpdatePlace() {
   });
 }
 
-/** 카드 삭제. 서버에는 삭제 표시로 남아서, 계획에 들어 있던 카드는 계획 화면에서 복구할 수 있어요 (기능명세서 5-3) */
+/** 카드 삭제. 서버가 휴지통으로 옮기고, 그 카드를 쓰던 계획의 노드·플랜B·숙소에서도 빼요 */
 export function useDeletePlace() {
   const queryClient = useQueryClient();
 
@@ -71,7 +73,7 @@ export function useRestorePlaces() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (placeIds: string[]) => Promise.all(placeIds.map((id) => restorePlace(id))),
+    mutationFn: (placeIds: string[]) => restorePlaces(placeIds),
     // 일부만 복구돼도 목록을 맞추려고 실패했을 때도 다시 불러옴
     onSettled: () => queryClient.invalidateQueries({ queryKey: placeKeys.all }),
   });
@@ -82,7 +84,7 @@ export function usePurgePlaces() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (placeIds: string[]) => Promise.all(placeIds.map((id) => purgePlace(id))),
+    mutationFn: (placeIds: string[]) => purgePlaces(placeIds),
     onSettled: () => queryClient.invalidateQueries({ queryKey: placeKeys.all }),
   });
 }
