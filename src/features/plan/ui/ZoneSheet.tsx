@@ -33,6 +33,7 @@ export default function ZoneSheet({ dayLabel, destination, selectedZone, onSelec
     name: place.name,
     center: { lat: place.latitude, lng: place.longitude },
   }));
+  const hasHangul = (text: string) => /[가-힣]/.test(text);
 
   const submit = () => {
     const keyword = query.trim();
@@ -42,9 +43,11 @@ export default function ZoneSheet({ dayLabel, destination, selectedZone, onSelec
   };
 
   const chooseZone = (zone: PlanZone) => {
-    setQuery(zone.name);
+    // 한글로 검색했는데 결과 이름이 영어(Namba)면 검색한 이름(난바)으로 보여줘요
+    const name = !hasHangul(zone.name) && hasHangul(submittedQuery) ? submittedQuery : zone.name;
+    setQuery(name);
     setIsListOpen(false);
-    onSelectZone(zone);
+    onSelectZone({ ...zone, name });
   };
 
   const renderStatus = () => {
@@ -76,8 +79,8 @@ export default function ZoneSheet({ dayLabel, destination, selectedZone, onSelec
             if (event.key === 'Enter') submit();
           }}
         />
-        <button type="button" className={styles.searchIcon} aria-label="구역 검색" onClick={submit}>
-          <img src={searchIcon} alt="" />
+        <button type="button" className={styles.searchButton} aria-label="구역 검색" onClick={submit}>
+          <img src={searchIcon} alt="" className={styles.searchIcon} />
         </button>
       </div>
 
