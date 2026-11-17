@@ -1,4 +1,5 @@
 import type { MapRouteStop } from '@/shared/components/Map';
+import type { PlanZone } from '../lib/planZones';
 import type { Plan, PlanDay, PlanNode } from './plan.types';
 
 // 여행계획 편집(기능명세서 4-3)에서 계획을 바꾸는 순수 함수들. 원본은 그대로 두고 새 계획을 돌려줘요
@@ -14,8 +15,8 @@ export function setAccommodation(plan: Plan, placeId: string | undefined): Plan 
   return { ...plan, accommodationPlaceId: placeId };
 }
 
-export function setDayZone(plan: Plan, dayIndex: number, zone: string): Plan {
-  return updateDay(plan, dayIndex, (day) => ({ ...day, zone }));
+export function setDayZone(plan: Plan, dayIndex: number, zone: PlanZone): Plan {
+  return updateDay(plan, dayIndex, (day) => ({ ...day, zone: zone.name, zoneCenter: zone.center }));
 }
 
 /** 확정한 순서대로 뒤에 붙여요. 이미 이 일차에 있으면 그대로 */

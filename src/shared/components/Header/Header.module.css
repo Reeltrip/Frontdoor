@@ -26,3 +26,9 @@
     letter-spacing: var(--tracking);
     color: var(--color-gray-900);
 }
+
+.action {
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+}

@@ -32,7 +32,8 @@ export default function TripListPage() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<PlanTab>('mine');
   const [showAllPast, setShowAllPast] = useState(false);
-  const { plans, viewStatus, error, refetch } = usePlans();
+  const { plans, viewStatus, error, refetch } = usePlans({ owner: 'me' });
+  const shared = usePlans({ owner: 'shared' });
   const { upcoming, past } = useMemo(() => {
     const sorted = [...plans].sort((a, b) => a.startDate.localeCompare(b.startDate));
     return {
@@ -66,9 +67,25 @@ export default function TripListPage() {
 
       <div className={styles.content}>
         {activeTab === 'shared' ? (
-          <div className={styles.emptyShared} role="tabpanel">
-            <p>공유받은 여행계획이 없어요.</p>
-          </div>
+          shared.viewStatus === 'loading' ? (
+            <div className={styles.state} role="status">공유받은 계획을 불러오는 중이에요.</div>
+          ) : shared.viewStatus === 'error' ? (
+            <div className={styles.state} role="alert">
+              <p>공유받은 계획을 불러오지 못했어요. {getErrorMessage(shared.error)}</p>
+              <button type="button" onClick={() => shared.refetch()}>다시 시도</button>
+            </div>
+          ) : shared.plans.length === 0 ? (
+            <div className={styles.emptyShared} role="tabpanel">
+              <p>공유받은 여행계획이 없어요.</p>
+            </div>
+          ) : (
+            <div role="tabpanel" className={styles.planContent}>
+              <ul className={styles.list}>
+                {/* 공유받은 계획은 권한에 따라 못 고칠 수 있어서 늘 보기 화면으로 열어요 */}
+                {shared.plans.map((plan) => <PlanRow key={plan.id} plan={plan} onOpen={(item) => navigate(`/plans/${item.id}`)} />)}
+              </ul>
+            </div>
+          )
         ) : viewStatus === 'loading' ? (
           <div className={styles.state} role="status">여행목록을 불러오는 중이에요.</div>
         ) : viewStatus === 'error' ? (

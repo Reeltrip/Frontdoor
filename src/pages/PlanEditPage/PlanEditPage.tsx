@@ -12,7 +12,8 @@ import { usePlaces } from '@/features/place/model/usePlaces';
 import type { Place, PlaceCategory } from '@/features/place/model/place.types';
 import CategoryFilterBar from '@/features/place/ui/CategoryFilterBar';
 import PlaceCardStrip from '@/features/place/ui/PlaceCardStrip';
-import { findZone, isPlaceInZone, type PlanZone } from '@/features/plan/lib/planZones';
+import { getDayZone, isPlaceInZone, type PlanZone } from '@/features/plan/lib/planZones';
+import { mergePlanPlaces } from '@/features/plan/model/planPlaces';
 import { finishPlan, formatDayDate } from '@/features/plan/model/planDays';
 import {
   addNodeToDay,
@@ -53,7 +54,9 @@ export default function PlanEditPage() {
   const { planId = '' } = useParams();
   const navigate = useNavigate();
   const { plan, viewStatus, error, refetch } = usePlan(planId);
-  const { places, viewStatus: placesStatus } = usePlaces();
+  const { places: libraryPlaces, viewStatus: placesStatus } = usePlaces();
+  // 공유받은 계획의 카드는 내 보관함에 없어서 계획 응답에 든 카드로 채워요
+  const places = mergePlanPlaces(libraryPlaces, plan);
   const updatePlan = useUpdatePlan(planId);
   const aiDraft = useCreateAiDraft(planId);
 
@@ -108,7 +111,7 @@ export default function PlanEditPage() {
 
   const save = (nextPlan: Plan) =>
     updatePlan.mutate(nextPlan, {
-      onError: () => setToastMessage('저장하지 못했어요. 다시 시도해 주세요.'),
+      onError: (saveError) => setToastMessage(`저장하지 못했어요. ${getErrorMessage(saveError)}`),
     });
 
   const resetSelection = () => {
@@ -123,7 +126,7 @@ export default function PlanEditPage() {
     setStep(nextStep);
     setCategory('all');
     setZoneError(null);
-    setPendingZone(findZone(plan.days[nextDayIndex]?.zone));
+    setPendingZone(getDayZone(plan.days[nextDayIndex]));
   };
 
   const goToDay = (nextDayIndex: number) =>
@@ -139,7 +142,7 @@ export default function PlanEditPage() {
   // ── 화면에 올릴 장소 ──
   const lodgingPlaces = places.filter((place) => place.category === 'accommodation' && isOnMap(place));
   const lodgingPlace = places.find((place) => place.id === plan.accommodationPlaceId);
-  const dayZone = findZone(day.zone);
+  const dayZone = getDayZone(day);
   const dayPlaceIds = new Set(day.nodes.flatMap((node) => [node.placeId, ...(node.planB ? [node.planB.placeId] : [])]));
 
   const getVisiblePlaces = (): Place[] => {
@@ -194,7 +197,7 @@ export default function PlanEditPage() {
       setZoneError(`${pendingZone.name} 주변에는 저장한 장소가 없어요. 다른 구역을 입력하거나, 직접 추가해 보세요.`);
       return;
     }
-    save(setDayZone(plan, dayIndex, pendingZone.name));
+    save(setDayZone(plan, dayIndex, pendingZone));
     goToStep('nodes');
   };
 
@@ -369,6 +372,7 @@ export default function PlanEditPage() {
           <ZoneSheet
             key={dayIndex}
             dayLabel={dayLabel}
+            destination={plan.destination}
             selectedZone={pendingZone}
             onSelectZone={(zone) => {
               setPendingZone(zone);
