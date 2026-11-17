@@ -56,10 +56,23 @@
   display: none;
 }
 
-.searchIcon {
+/* 아이콘보다 넓게 잡아 손가락으로 누르기 쉽게 해요 */
+.searchButton {
   position: absolute;
-  top: 18px;
-  right: 22px;
+  top: 6px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.searchIcon {
   display: block;
   width: 19.5px;
   height: 19.5px;

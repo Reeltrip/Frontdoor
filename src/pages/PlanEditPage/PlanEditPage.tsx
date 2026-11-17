@@ -5,7 +5,7 @@ import Button from '@/shared/components/Button';
 import ConfirmModal from '@/shared/components/ConfirmModal';
 import Header from '@/shared/components/Header';
 import { LoadingSpinner } from '@/shared/components/Loading';
-import { DEFAULT_MAP_CENTER, MapView, type MapPosition } from '@/shared/components/Map';
+import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, MapView, type MapPosition } from '@/shared/components/Map';
 import Toast from '@/shared/components/Toast';
 import { getFirstNodePosition, toMapNodes } from '@/features/place/lib/mapNodes';
 import { usePlaces } from '@/features/place/model/usePlaces';
@@ -354,6 +354,8 @@ export default function PlanEditPage() {
         <MapView
           className={styles.map}
           center={mapCenter}
+          // 구역 안에서는 카드가 몰려 있어 마커가 겹쳐요. 한 단계 확대해 덜 겹치게 해요
+          zoom={currentStep === 'lodging' ? DEFAULT_MAP_ZOOM : DEFAULT_MAP_ZOOM + 1}
           nodes={mapNodes}
           selectedNodeId={selectedId}
           route={route}
