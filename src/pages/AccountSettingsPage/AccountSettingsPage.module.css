@@ -1,0 +1,27 @@
+.content {
+  padding: 32px 20px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 56px;
+  font: var(--font-body1);
+  letter-spacing: var(--tracking);
+}
+
+.description {
+  color: var(--color-gray-500);
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+}
+
+.link {
+  display: block;
+  padding: 16px 0;
+  border-top: 1px solid var(--color-gray-50);
+  color: var(--color-gray-900);
+  font: var(--font-body2);
+  text-decoration: none;
+}

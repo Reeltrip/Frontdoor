@@ -1,0 +1,30 @@
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  padding: 41px 20px 24px;
+  letter-spacing: var(--tracking);
+}
+
+.content h2 {
+  margin: 0 0 8px;
+  font: var(--font-body1);
+  font-weight: 500;
+}
+
+.content p {
+  margin: 0;
+  color: var(--color-gray-500);
+  font: var(--font-body2);
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.privacy h2 {
+  color: #262838;
+}
+
+.privacy section:first-child h2 {
+  padding-left: 5px;
+}

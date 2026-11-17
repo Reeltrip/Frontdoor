@@ -21,14 +21,13 @@ const TABS: { key: TabKey; label: string; icon: string; lightIcon: string }[] = 
   { key: 'profile', label: '마이', icon: profileIcon, lightIcon: profileLightIcon },
 ];
 
-/**
- * 탭을 누르면 가는 화면. 아직 연결되지 않은 탭은 그대로 있어요.
- */
-const TAB_PATHS: Partial<Record<TabKey, string>> = {
+// 탭을 누르면 가는 화면이에요.
+const TAB_PATHS: Record<TabKey, string> = {
   menu: '/trips',
   archive: '/library',
   plan: '/plans',
   sources: '/home',
+  profile: '/my',
 };
 
 type TabBarProps = {

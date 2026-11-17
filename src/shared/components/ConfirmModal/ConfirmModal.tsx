@@ -1,13 +1,16 @@
-import { useEffect, useId } from 'react';
+import { useEffect, useId, useRef } from 'react';
 import linkIcon from '@/shared/assets/icons/modal-link.svg';
 import alertIcon from '@/shared/assets/icons/modal-alert.svg';
 import ticketIcon from '@/shared/assets/icons/modal-ticket.svg';
+import logoutIcon from '@/shared/assets/icons/modal-logout.svg';
 import Button from '@/shared/components/Button';
 import styles from './ConfirmModal.module.css';
 
 type ConfirmModalProps = {
   isOpen: boolean;
-  icon: 'link' | 'alert' | 'ticket';
+  icon: 'link' | 'alert' | 'ticket' | 'logout';
+  presentation?: 'default' | 'account';
+  isPending?: boolean;
   /** dark: 검은 배경 (여행 계획 완성 안내) */
   theme?: 'light' | 'dark';
   title: string;
@@ -35,43 +38,59 @@ export default function ConfirmModal({
   isInline = false,
   isDismissible = true,
   theme = 'light',
+  presentation = 'default',
+  isPending = false,
 }: ConfirmModalProps) {
   const titleId = useId();
+  const descriptionId = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!isOpen || isInline || !isDismissible) return;
+    if (!isOpen || isInline || !isDismissible || isPending) return;
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onCancel();
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, isInline, isDismissible, onCancel]);
+  }, [isOpen, isInline, isDismissible, isPending, onCancel]);
 
   if (!isOpen) return null;
 
   const dialog = (
     <div
-      className={`${styles.dialog} ${theme === 'dark' ? styles.dark : ''}`}
+      ref={dialogRef}
+      className={[styles.dialog, theme === 'dark' && styles.dark, presentation === 'account' && styles.account, presentation === 'account' && !description && styles.withoutDescription].filter(Boolean).join(' ')}
       role="dialog"
       aria-modal={!isInline}
       aria-labelledby={titleId}
+      aria-describedby={description ? descriptionId : undefined}
+      aria-busy={isPending}
+      onKeyDown={(event) => {
+        if (presentation !== 'account' || isInline || event.key !== 'Tab') return;
+        const buttons = dialogRef.current?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)');
+        if (!buttons?.length) { event.preventDefault(); return; }
+        const first = buttons[0];
+        const last = buttons[buttons.length - 1];
+        if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+        else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+      }}
     >
       <div className={styles.iconBox}>
         {icon === 'alert' ? (
           <img src={alertIcon} alt="" className={styles.alertIcon} />
         ) : (
-          <img src={icon === 'link' ? linkIcon : ticketIcon} alt="" />
+          <img src={icon === 'link' ? linkIcon : icon === 'logout' ? logoutIcon : ticketIcon} alt="" />
         )}
       </div>
       <p id={titleId} className={styles.title}>
         {title}
       </p>
-      {description && <p className={styles.description}>{description}</p>}
+      {description && <p id={descriptionId} className={styles.description}>{description}</p>}
       <div className={styles.actions}>
-        <Button variant="outline" size="md" className={styles.cancelButton} onClick={onCancel}>
+        <Button variant="outline" size="md" className={styles.cancelButton} onClick={onCancel} disabled={isPending}>
           {cancelLabel}
         </Button>
-        <Button variant="filled" size="md" onClick={onConfirm} autoFocus={!isInline}>
+        <Button variant="filled" size="md" onClick={onConfirm} disabled={isPending} autoFocus={!isInline}>
           {confirmLabel}
         </Button>
       </div>
@@ -81,7 +100,7 @@ export default function ConfirmModal({
   if (isInline) return dialog;
 
   return (
-    <div className={styles.overlay} onClick={isDismissible ? onCancel : undefined}>
+    <div className={`${styles.overlay} ${presentation === 'account' ? styles.accountOverlay : ''}`} onClick={isDismissible && !isPending ? onCancel : undefined}>
       <div onClick={(event) => event.stopPropagation()}>{dialog}</div>
     </div>
   );

@@ -1,0 +1,17 @@
+.status {
+  display: flex;
+  flex: 1;
+  min-height: 300px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 20px;
+  text-align: center;
+}
+
+.status p {
+  margin: 0;
+  font: var(--font-body2);
+  color: var(--color-gray-500);
+}

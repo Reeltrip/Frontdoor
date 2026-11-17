@@ -1,0 +1,121 @@
+.form {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
+.avatar {
+  position: relative;
+  align-self: center;
+  width: 122px;
+  height: 132px;
+  margin-top: 35px;
+  transform: translateX(2px);
+}
+
+.photoButton {
+  position: absolute;
+  top: 86px;
+  left: 92px;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.photoButton img {
+  display: block;
+}
+
+.fileInput {
+  display: none;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  margin: 33px 20px 0;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: var(--color-gray-700);
+  font: var(--font-body2);
+  line-height: 22px;
+  letter-spacing: var(--tracking);
+}
+
+.field input {
+  width: 100%;
+  height: 56px;
+  padding: 17px 19px;
+  border: 1px solid var(--color-gray-50);
+  border-radius: 15px;
+  outline-offset: 3px;
+  background: transparent;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-900);
+}
+
+.field input[name='email'] {
+  font: var(--font-body1);
+}
+
+.field input[aria-invalid='true'] {
+  border-color: var(--color-error);
+}
+
+.edit {
+  height: 38px;
+  padding: 6px 16px;
+  border: 1px solid var(--color-white);
+  border-radius: 41px;
+  background: white;
+  box-shadow: 0 0 2px #1a1a1a1f, inset 3px 2px 8.2px #1a1a1a0d;
+  font: var(--font-body2);
+  color: var(--color-gray-800);
+  cursor: pointer;
+}
+
+.close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.close img {
+  width: 24px;
+  height: 24px;
+}
+
+.error, .status {
+  margin: -14px 0 0;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+}
+
+.error {
+  color: #d93c53;
+}
+
+.status {
+  color: var(--color-gray-600);
+}
+
+.save {
+  margin-top: auto;
+  padding: 30px 20px calc(env(safe-area-inset-bottom) + 44px);
+}

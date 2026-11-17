@@ -79,3 +79,25 @@
   width: 100%;
   margin-top: 15px;
 }
+
+.accountOverlay {
+  background: rgba(51, 51, 51, 0.62);
+  backdrop-filter: blur(2.35px);
+}
+
+.account {
+  padding-top: 19px;
+  transform: translateY(7px);
+}
+
+.account .iconBox {
+  height: 82px;
+  margin-bottom: 4px;
+}
+
+.account .title { line-height: 1.75; }
+.account .description { line-height: 23px; }
+.account .alertIcon { transform: none; }
+.account .cancelButton { color: var(--color-gray-400); }
+.account .actions { width: calc(100% + 3px); grid-template-columns: 1fr 1fr; align-self: flex-start; }
+.withoutDescription { padding-bottom: 29px; transform: none; }
