@@ -28,7 +28,8 @@ export default function LibraryPage() {
   );
   const [category, setCategory] = useState<PlaceCategory | "all">("all");
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [center, setCenter] = useState<MapPosition>(DEFAULT_MAP_CENTER);
+  /** 카드를 눌러 옮긴 지도 중심. 아직 누르지 않았으면 카드가 있는 곳을 보여줘요 */
+  const [pickedCenter, setCenter] = useState<MapPosition | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Place | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -58,6 +59,7 @@ export default function LibraryPage() {
   }, [isMenuOpen]);
 
   const nodes = toMapNodes(places);
+  const center = pickedCenter ?? nodes[0]?.position ?? DEFAULT_MAP_CENTER;
   const mappedPlaces = places.filter((place) =>
     nodes.some((node) => node.id === place.id),
   );

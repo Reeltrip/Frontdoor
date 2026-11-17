@@ -7,7 +7,7 @@ import Header from '@/shared/components/Header';
 import { LoadingSpinner } from '@/shared/components/Loading';
 import { DEFAULT_MAP_CENTER, MapView, type MapPosition } from '@/shared/components/Map';
 import Toast from '@/shared/components/Toast';
-import { toMapNodes } from '@/features/place/lib/mapNodes';
+import { getFirstNodePosition, toMapNodes } from '@/features/place/lib/mapNodes';
 import { usePlaces } from '@/features/place/model/usePlaces';
 import type { Place, PlaceCategory } from '@/features/place/model/place.types';
 import CategoryFilterBar from '@/features/place/ui/CategoryFilterBar';
@@ -167,7 +167,14 @@ export default function PlanEditPage() {
   const route = currentStep === 'nodes' ? buildDayRoute(plan, dayIndex) : undefined;
 
   const zoneCenter = (currentStep === 'zone' ? pendingZone : dayZone)?.center;
-  const mapCenter = centerOverride ?? zoneCenter ?? lodgingPlace?.location ?? DEFAULT_MAP_CENTER;
+  // 구역·숙소를 아직 안 골랐으면 지금 보이는 카드, 그것도 없으면 보관함 카드가 있는 곳을 보여줘요
+  const mapCenter =
+    centerOverride ??
+    zoneCenter ??
+    lodgingPlace?.location ??
+    getFirstNodePosition(visiblePlaces) ??
+    getFirstNodePosition(places) ??
+    DEFAULT_MAP_CENTER;
 
   const selectedPlace = visiblePlaces.find((place) => place.id === selectedId);
   const selectedNode = day.nodes.find((node) => node.placeId === selectedId);
