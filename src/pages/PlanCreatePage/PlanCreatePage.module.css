@@ -83,19 +83,10 @@
   color: var(--color-error);
 }
 
-/* 달력은 입력칸 아래에 떠서 열려요. 아래 입력칸을 밀지 않고 덮어요 */
-.calendarBackdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 10;
-}
-
-.calendar {
-  position: absolute;
-  top: calc(100% + 12px);
-  left: 0;
-  z-index: 11;
-  width: 100%;
+.periodLabel {
+  margin: 0 0 24px;
+  font: var(--font-body2);
+  color: var(--color-gray-300);
 }
 
 .destination {

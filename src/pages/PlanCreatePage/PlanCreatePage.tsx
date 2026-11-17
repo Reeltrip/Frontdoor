@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent, type SyntheticEvent } from 'react';
+import { useState, type SyntheticEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router';
 import backIcon from '@/shared/assets/icons/arrow-back-light.svg';
 import locationIcon from '@/shared/assets/icons/location-light.svg';
@@ -24,7 +24,6 @@ export default function PlanCreatePage() {
   const [overlapError, setOverlapError] = useState<unknown>();
   const [createdPlan, setCreatedPlan] = useState<Plan>();
   const [isAiNoticeShown, setIsAiNoticeShown] = useState(false);
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const aiDraft = useCreateAiDraft(createdPlan?.id ?? '');
 
   // 주소로 바로 들어와서 돌아갈 화면이 없으면 홈으로 보내요
@@ -44,21 +43,6 @@ export default function PlanCreatePage() {
         },
       },
     );
-  };
-
-  // 종료일까지 고르면 달력을 닫아요
-  const handleSelectDate = (date: Date) => {
-    if (form.selectDate(date)) setIsCalendarOpen(false);
-  };
-
-  // 읽기 전용 입력칸에서 Enter를 누르면 폼이 제출되니까 막고 달력을 여닫아요
-  const handlePeriodKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      setIsCalendarOpen((isOpen) => !isOpen);
-    } else if (event.key === 'Escape') {
-      setIsCalendarOpen(false);
-    }
   };
 
   const handleSubmit = (event: SyntheticEvent) => {
@@ -91,29 +75,14 @@ export default function PlanCreatePage() {
         />
 
         <div className={styles.period}>
-          <LabeledInput
-            label="여행 기간"
-            value={form.periodText}
-            placeholder="날짜를 선택해주세요."
-            readOnly
-            aria-haspopup="dialog"
-            aria-expanded={isCalendarOpen}
-            onClick={() => setIsCalendarOpen((isOpen) => !isOpen)}
-            onKeyDown={handlePeriodKeyDown}
-          />
+          <p className={styles.periodLabel}>여행 기간</p>
+          <Calendar selectedDates={form.selectedDates} onSelectDate={form.selectDate} />
           {form.hasPeriodError && (
             <p className={styles.periodError} role="alert">
               {PLAN_PERIOD_ERROR_MESSAGE}
             </p>
           )}
-          {isCalendarOpen && (
-            <>
-              <div className={styles.calendarBackdrop} onClick={() => setIsCalendarOpen(false)} />
-              <div className={styles.calendar} role="dialog" aria-label="여행 기간 선택">
-                <Calendar selectedDates={form.selectedDates} onSelectDate={handleSelectDate} />
-              </div>
-            </>
-          )}
+
         </div>
 
         <div className={styles.destination}>
