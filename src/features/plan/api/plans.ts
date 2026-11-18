@@ -111,6 +111,7 @@ function toPlan(plan: ApiPlan): Plan {
       const area = day.areas[0];
       return {
         date: day.date,
+        isCompleted: day.isCompleted,
         ...(area ? { zone: area.name } : {}),
         ...(area && area.latitude !== null && area.longitude !== null
           ? { zoneCenter: { lat: area.latitude, lng: area.longitude } }
@@ -212,13 +213,12 @@ export async function updatePlan(id: string, request: UpdatePlanRequest): Promis
   if (new Set(allIds).size !== allIds.length) {
     throw new ApiError({ status: 409, code: 'DUPLICATE_PLAN_PLACE', message: '이미 다른 일자에 넣은 장소예요.' });
   }
-  const isCompletedDay = (day: PlanDay) => !isDraft && day.nodes.length > 0;
+  const isCompletedDay = (day: PlanDay) => day.nodes.length > 0 && (day.isCompleted ?? !isDraft);
   const changedIndexes = days.flatMap((day, index) => {
     const before = current.days[index];
     const isSame =
       dayNodeKey(before.nodes) === dayNodeKey(day.nodes) &&
-      // 서버 상태가 완성인데 일차가 그대로면 다시 보낼 필요가 없어요
-      isDraftPlanStatus(current.status) === isDraft;
+      isCompletedDay(before) === isCompletedDay(day);
     return isSame ? [] : [index];
   });
 

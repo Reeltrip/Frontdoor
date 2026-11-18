@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { getErrorMessage } from '@/shared/api/client';
 import Button from '@/shared/components/Button';
@@ -14,7 +14,7 @@ import CategoryFilterBar from '@/features/place/ui/CategoryFilterBar';
 import PlaceCardStrip from '@/features/place/ui/PlaceCardStrip';
 import { getDayZone, isPlaceInZone, type PlanZone } from '@/features/plan/lib/planZones';
 import { mergePlanPlaces } from '@/features/plan/model/planPlaces';
-import { finishPlan, formatDayDate, withDraftIfEmptyDay } from '@/features/plan/model/planDays';
+import { completePlanDay, formatDayDate, withDraftIfEmptyDay } from '@/features/plan/model/planDays';
 import {
   addNodeToDay,
   buildDayRoute,
@@ -76,6 +76,11 @@ export default function PlanEditPage() {
   const [isAiDraftConfirmOpen, setIsAiDraftConfirmOpen] = useState(false);
   const [isNoLodgingDismissed, setIsNoLodgingDismissed] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [isContinuing, setIsContinuing] = useState(false);
+  const continuingRef = useRef(false);
+  const saveAttempt = useRef(0);
+  const failedSave = useRef<{ plan: Plan; onSaved?: () => void } | null>(null);
 
   useEffect(() => {
     if (!toastMessage) return;
@@ -110,10 +115,34 @@ export default function PlanEditPage() {
   const isLastDay = dayIndex === plan.days.length - 1;
   const isPlacesLoaded = placesStatus === 'success' || placesStatus === 'empty';
 
-  const save = (nextPlan: Plan) =>
-    updatePlan.mutate(nextPlan, {
-      onError: (saveError) => setToastMessage(`저장하지 못했어요. ${getErrorMessage(saveError)}`),
-    });
+  const save = async (nextPlan: Plan, onSaved?: () => void) => {
+    if (continuingRef.current) return;
+    const attempt = ++saveAttempt.current;
+    if (onSaved) {
+      continuingRef.current = true;
+      setIsContinuing(true);
+    }
+    failedSave.current = null;
+    setSaveError(null);
+    try {
+      await updatePlan.mutateAsync(nextPlan);
+      if (attempt === saveAttempt.current) {
+        failedSave.current = null;
+        setSaveError(null);
+        onSaved?.();
+      }
+    } catch (error) {
+      if (attempt === saveAttempt.current) {
+        failedSave.current = { plan: nextPlan, onSaved };
+        setSaveError(getErrorMessage(error));
+      }
+    } finally {
+      if (onSaved) {
+        continuingRef.current = false;
+        setIsContinuing(false);
+      }
+    }
+  };
 
   const resetSelection = () => {
     setSelectedId(null);
@@ -134,6 +163,7 @@ export default function PlanEditPage() {
     goToStep(plan.days[nextDayIndex]?.zone ? 'nodes' : 'zone', nextDayIndex);
 
   const handleBack = () => {
+    if (continuingRef.current) return;
     if (currentStep === 'nodes') return goToStep('zone');
     if (currentStep === 'zone' && dayIndex > 0) return goToStep('nodes', dayIndex - 1);
     if (currentStep === 'zone') return goToStep('lodging');
@@ -191,8 +221,7 @@ export default function PlanEditPage() {
 
   // ── 숙소 ──
   const confirmLodging = (placeId: string | undefined) => {
-    save(setAccommodation(plan, placeId));
-    goToStep(plan.days[0]?.zone ? 'nodes' : 'zone', 0);
+    void save(setAccommodation(plan, placeId), () => goToStep(plan.days[0]?.zone ? 'nodes' : 'zone', 0));
   };
 
   const isNoLodgingOpen =
@@ -206,8 +235,7 @@ export default function PlanEditPage() {
       setZoneError(`${pendingZone.name} 주변에는 저장한 장소가 없어요. 다른 구역을 입력하거나, 직접 추가해 보세요.`);
       return;
     }
-    save(setDayZone(plan, dayIndex, pendingZone));
-    goToStep('nodes');
+    void save(setDayZone(plan, dayIndex, pendingZone), () => goToStep('nodes'));
   };
 
   // ── 노드 ──
@@ -241,12 +269,10 @@ export default function PlanEditPage() {
 
   const completeDay = () => {
     setIsSkipDayOpen(false);
-    if (!isLastDay) {
-      goToDay(dayIndex + 1);
-      return;
-    }
-    save(finishPlan(plan));
-    navigate(`/plans/${plan.id}`, { replace: true });
+    void save(completePlanDay(plan, dayIndex), () => {
+      if (isLastDay) navigate(`/plans/${plan.id}`, { replace: true });
+      else goToDay(dayIndex + 1);
+    });
   };
 
   const handleCompleteDay = () => {
@@ -325,10 +351,10 @@ export default function PlanEditPage() {
 
   return (
     <main className={styles.page}>
-      <div className={styles.top}>
+      <div className={styles.top} inert={isContinuing || aiDraft.isPending}>
         <Header title={STEP_TITLES[currentStep]} onBack={handleBack} />
         {hasExistingRoute && (
-          <button type="button" className={styles.aiDraftButton} onClick={() => setIsAiDraftConfirmOpen(true)}>
+          <button type="button" className={styles.aiDraftButton} disabled={updatePlan.isSaving} onClick={() => setIsAiDraftConfirmOpen(true)}>
             AI 초안으로 다시 만들기
           </button>
         )}
@@ -350,7 +376,7 @@ export default function PlanEditPage() {
         )}
       </div>
 
-      <div className={styles.mapArea}>
+      <div className={styles.mapArea} inert={isContinuing || aiDraft.isPending}>
         <MapView
           className={styles.map}
           center={mapCenter}
@@ -385,7 +411,16 @@ export default function PlanEditPage() {
         )}
       </div>
 
-      <div className={styles.bottom}>
+      <div className={styles.bottom} inert={isContinuing || aiDraft.isPending}>
+        {saveError && (
+          <div className={styles.saveError} role="alert">
+            <p>저장하지 못했어요. {saveError}</p>
+            <Button size="sm" variant="outline" disabled={updatePlan.isSaving} onClick={() => {
+              const failed = failedSave.current;
+              if (failed) void save(failed.plan, failed.onSaved);
+            }}>다시 저장</Button>
+          </div>
+        )}
         {currentStep === 'zone' && (
           <ZoneSheet
             key={dayIndex}
@@ -412,7 +447,7 @@ export default function PlanEditPage() {
       </div>
 
       <ConfirmModal
-        isOpen={isNoLodgingOpen}
+        isOpen={isNoLodgingOpen && !isContinuing}
         icon="alert"
         title="숙소 위치가 어디인가요?"
         description="선택한 주소가 매일의 출발지, 도착지가 돼요."
@@ -452,6 +487,14 @@ export default function PlanEditPage() {
         onConfirm={completeDay}
       />
       {toastMessage && <Toast message={toastMessage} />}
+      {isContinuing && (
+        <div className={styles.aiDraftLoading} role="status">
+          <div>
+            <LoadingSpinner label="여행 일정을 저장하는 중" />
+            <p>저장이 끝나면 다음 화면으로 이동해요.</p>
+          </div>
+        </div>
+      )}
       <ConfirmModal
         isOpen={isAiDraftConfirmOpen}
         icon="alert"

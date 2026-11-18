@@ -1,3 +1,6 @@
+import { Link, useNavigate, useSearchParams } from 'react-router';
+import AnalysisFailed from '@/features/source/ui/AnalysisFailed';
+import LiveApiTestPanel from './LiveApiTestPanel';
 import { componentDemos } from './demos';
 import { mapDemos } from './mapDemos';
 import styles from './ComponentTestPage.module.css';
@@ -5,6 +8,16 @@ import styles from './ComponentTestPage.module.css';
 const allDemos = [...componentDemos, ...mapDemos];
 
 export default function ComponentTestPage() {
+  const [params] = useSearchParams();
+  const isApiTab = params.get('tab') === 'api';
+  const navigate = useNavigate();
+  if (params.get('preview') === 'analysis-failed') {
+    return <AnalysisFailed
+      message={params.get('message') === 'private' ? '링크가 비공개예요. 공개 링크인지 확인해 주세요.' : undefined}
+      onRetry={() => navigate('/dev/components#AnalysisFailed')}
+      onQuit={() => navigate('/dev/components#AnalysisFailed')}
+    />;
+  }
   return (
     <main className={styles.page}>
       <header className={styles.header}>
@@ -12,7 +25,11 @@ export default function ComponentTestPage() {
         <p className={styles.sub}>로컬과 Vercel 미리보기에서만 보이는 페이지예요. 컴포넌트는 demos.tsx에 추가하세요.</p>
       </header>
 
-      {allDemos.length === 0 ? (
+      <nav className={styles.nav} aria-label="테스트 종류">
+        <Link className={styles.chip} to="/dev/components" aria-current={!isApiTab ? 'page' : undefined}>컴포넌트</Link>
+        <Link className={styles.chip} to="/dev/components?tab=api" aria-current={isApiTab ? 'page' : undefined}>실제 API 검증</Link>
+      </nav>
+      {isApiTab ? <LiveApiTestPanel /> : allDemos.length === 0 ? (
         <p className={styles.empty}>아직 등록된 컴포넌트가 없어요.</p>
       ) : (
         <>

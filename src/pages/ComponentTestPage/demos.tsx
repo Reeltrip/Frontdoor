@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import type { ReactNode } from "react";
 import Button from "@/shared/components/Button";
 import ConfirmModal from "@/shared/components/ConfirmModal";
@@ -439,6 +440,21 @@ export const componentDemos: ComponentDemo[] = [
       { label: "작은 스피너", render: () => <LoadingSpinner /> },
       { label: "회색 호", render: () => <LoadingArc /> },
       { label: "분석 중 (큰 로딩)", render: () => <LoadingBlob /> },
+    ],
+  },
+  {
+    name: "AnalysisFailed",
+    path: "features/source/ui/AnalysisFailed",
+    description: "분석 실패 · 기본 안내와 서버 실패 이유",
+    variants: [
+      {
+        label: "기본 실패",
+        render: () => <Link to="/dev/components?preview=analysis-failed">실패 화면 전체 보기</Link>,
+      },
+      {
+        label: "서버 실패 이유",
+        render: () => <Link to="/dev/components?preview=analysis-failed&message=private">서버 실패 이유가 있는 화면 보기</Link>,
+      },
     ],
   },
 ];

@@ -1,0 +1,71 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  font: var(--font-body2);
+  overflow-wrap: anywhere;
+}
+
+.panel h2,
+.panel h3,
+.panel p {
+  margin: 0;
+}
+
+.panel h2 {
+  font-size: 20px;
+}
+
+.panel h3 {
+  font-size: 16px;
+}
+
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+}
+
+.step form,
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field {
+  flex: 1;
+  min-width: 0;
+}
+
+.field textarea,
+.field input,
+.field select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid var(--color-gray-300);
+  border-radius: 8px;
+  font: inherit;
+}
+
+.buttons {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+}
+
+.buttons a {
+  align-self: center;
+}
+
+.success {
+  color: #426014;
+}
+
+.error {
+  color: #ad2545;
+}

@@ -12,6 +12,8 @@ export type PlanNode = {
 };
 
 export type PlanDay = {
+  /** 서버의 일차별 완료 상태. 빈 일차는 완료할 수 없어요 */
+  isCompleted?: boolean;
   /** YYYY-MM-DD */
   date: string;
   /** 여행 구역 이름. 아직 고르지 않았으면 없음 */
