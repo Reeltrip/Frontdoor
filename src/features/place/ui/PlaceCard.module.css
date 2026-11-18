@@ -108,6 +108,14 @@
   white-space: nowrap;
 }
 
+/* Google 장소 정보의 리뷰 수. 없는 카드는 안 보여요 */
+.reviews {
+  font: var(--font-caption);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-300);
+  white-space: nowrap;
+}
+
 .memoButton {
   padding: 0;
   border: 0;

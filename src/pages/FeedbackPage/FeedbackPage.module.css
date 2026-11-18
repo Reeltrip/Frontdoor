@@ -141,7 +141,7 @@
   flex-direction: column;
   gap: 8px;
   margin-top: auto;
-  padding: 24px 20px calc(env(safe-area-inset-bottom) + 44px);
+  padding: 24px 20px calc(var(--home-bar-height) + 10px);
 }
 
 .notification {

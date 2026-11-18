@@ -117,5 +117,5 @@
 
 .save {
   margin-top: auto;
-  padding: 30px 20px calc(env(safe-area-inset-bottom) + 44px);
+  padding: 30px 20px calc(var(--home-bar-height) + 10px);
 }

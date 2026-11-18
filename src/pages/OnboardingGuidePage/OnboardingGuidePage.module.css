@@ -17,7 +17,7 @@
   flex-shrink: 0;
   width: 330px;
   height: 250px;
-  margin-top: calc(env(safe-area-inset-top) + 190px);
+  margin-top: calc(var(--status-bar-height) + 130px);
 }
 
 /* 제목 첫 줄 중심이 y 478에 오게: 그림 아래(440) + 18 = 458에서 시작 */
@@ -44,7 +44,7 @@
   width: 100%;
   height: 60px;
   margin-top: auto;
-  margin-bottom: calc(72px + env(safe-area-inset-bottom));
+  margin-bottom: calc(var(--home-bar-height) + 38px);
 }
 
 .stepRow {

@@ -1,5 +1,10 @@
 /* 디자인 토큰. 값은 피그마 '디자인시스템' 섹션(Typography, Sub/Gray COLORS)을 그대로 옮김 */
 :root {
+  /* 피그마 좌표의 위쪽 60px은 상태바 자리예요. 기기 상태바가 더 높을 때만 그만큼 늘려요 (둘을 더하면 여백이 두 배가 돼요) */
+  --status-bar-height: max(env(safe-area-inset-top), 60px);
+  /* 피그마 아래 여백에도 홈 막대 자리(34px)가 이미 들어 있어요. 아이폰에서 두 번 더하지 않게 큰 쪽만 써요 */
+  --home-bar-height: max(env(safe-area-inset-bottom), 34px);
+
   /* 포인트 색 (라임) */
   --color-lime-10: #f8ffe5;
   --color-lime-50: #efffbe;
@@ -72,6 +77,13 @@
 *::before,
 *::after {
   box-sizing: border-box;
+}
+
+/* 두 손가락 확대와 두 번 눌러 확대를 막아요. 지도는 자체 제스처로 확대돼서 영향이 없어요 */
+html {
+  touch-action: pan-x pan-y;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
