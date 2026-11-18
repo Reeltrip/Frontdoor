@@ -1,8 +1,8 @@
 .page {
     position: relative;
     min-height: 100dvh;
-    /* 피그마: 제목 줄이 상태바(60px) 아래에 있어요. 여행계획 화면과 같은 값 */
-    padding-top: 64px;
+    /* 제목이 여행목록과 같은 높이(48px)에 오게 해요. 제목 줄 안쪽 여백이 9px이라 39px이에요 */
+    padding-top: max(39px, env(safe-area-inset-top));
     overflow: hidden;
     background:
         radial-gradient(ellipse 424px 192px at 50% 48%, rgba(147, 147, 147, 0.438), transparent)
@@ -12,8 +12,8 @@
 
 .stage {
     position: absolute;
-    /* 피그마(390×844): 카드 위쪽이 171px. 화면이 낮아도 제목 줄(120px) 아래로는 안 올라가요 */
-    top: max(130px, calc(100dvh - 673px));
+    /* 피그마(390×844): 카드 위쪽이 171px. 화면이 낮아도 제목 줄(95px) 아래로는 안 올라가요 */
+    top: max(105px, calc(100dvh - 673px));
     right: 0;
     left: 0;
 }

@@ -1,10 +1,10 @@
-/* 피그마 '3-1 여행계획_생성' (390×844). 위 74px에는 상태바 60px이 들어 있어요 */
+/* 피그마 '3-1 여행계획_생성' (390×844). 위 여백은 여행목록과 같아요 */
 .page {
   position: relative;
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  padding: 74px 20px calc(var(--home-bar-height) + 10px);
+  padding: var(--page-top) 20px calc(var(--home-bar-height) + 10px);
   overflow: hidden;
   background: var(--color-gray-900);
   color: var(--color-white);

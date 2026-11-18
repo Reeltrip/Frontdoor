@@ -32,12 +32,12 @@
   color: var(--color-gray-500);
 }
 
-/* 피그마: 제목 줄이 위에서 84px, 일자·칩 줄이 141px */
 .top {
   position: relative;
   z-index: 3;
   flex-shrink: 0;
-  padding: calc(var(--status-bar-height) + 16px) 0 0;
+  /* 제목이 여행목록과 같은 높이(48px)에 오게 해요. 머리줄 안쪽 여백이 9px이라 39px이에요 */
+  padding: max(39px, env(safe-area-inset-top)) 0 0;
   background: var(--color-bg);
 }
 
