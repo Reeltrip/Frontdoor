@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { formatDayDate, listDates } from './planDays';
+import { chooseDestination, getConfirmedDestination, startDestination, typeDestination } from './planDestination';
 import type { CreatePlanRequest } from './plan.types';
 
 /** 기능명세서 4-1: 종료일이 시작일보다 앞일 때 */
@@ -29,7 +30,7 @@ const toLocalDate = (date: string | undefined) => {
  */
 export function usePlanCreateForm(initial?: PlanFormInitialValues) {
   const [title, setTitle] = useState(initial?.title ?? '');
-  const [destination, setDestination] = useState(initial?.destination ?? '');
+  const [destination, setDestination] = useState(() => startDestination(initial?.destination));
   const [startDate, setStartDate] = useState(() => toLocalDate(initial?.startDate));
   const [endDate, setEndDate] = useState(() => toLocalDate(initial?.endDate));
   const [hasPeriodError, setHasPeriodError] = useState(false);
@@ -57,10 +58,11 @@ export function usePlanCreateForm(initial?: PlanFormInitialValues) {
   const dayCount = start && end ? listDates(start, end).length : 0;
 
   const trimmedTitle = title.trim();
-  const trimmedDestination = destination.trim();
+  // 여행주소는 검색 결과에서 고른 값만 써요. 글자만 친 상태로는 요청을 만들지 않아요
+  const confirmedDestination = getConfirmedDestination(destination);
   const request: CreatePlanRequest | undefined =
-    trimmedTitle && trimmedDestination && start && end && dayCount > 0
-      ? { title: trimmedTitle, destination: trimmedDestination, startDate: start, endDate: end }
+    trimmedTitle && confirmedDestination && start && end && dayCount > 0
+      ? { title: trimmedTitle, destination: confirmedDestination, startDate: start, endDate: end }
       : undefined;
 
   // 기간 입력칸에 보여줄 글자. 시작일만 골랐으면 '11.21 (토) ~'까지만 보여요
@@ -73,8 +75,13 @@ export function usePlanCreateForm(initial?: PlanFormInitialValues) {
   return {
     title,
     setTitle,
-    destination,
-    setDestination,
+    /** 여행주소 입력칸에 보이는 글자 */
+    destination: destination.text,
+    /** 검색 결과에서 골라 확정했는지 */
+    isDestinationConfirmed: confirmedDestination !== undefined,
+    typeDestination: (text: string) => setDestination((current) => typeDestination(current, text)),
+    chooseDestination: (searchedQuery: string, resultName: string) =>
+      setDestination(chooseDestination(searchedQuery, resultName)),
     /** 달력에 초록 원으로 표시할 날짜 */
     selectedDates: [startDate, endDate].filter((date) => date !== undefined),
     selectDate,

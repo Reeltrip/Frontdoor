@@ -1,12 +1,12 @@
 import { useState, type SyntheticEvent } from 'react';
 import { Navigate, useLocation, useNavigate, useParams } from 'react-router';
 import backIcon from '@/shared/assets/icons/arrow-back-light.svg';
-import locationIcon from '@/shared/assets/icons/location-light.svg';
 import backgroundImage from '@/shared/assets/images/plan-create-bg.png';
 import { getErrorMessage } from '@/shared/api/client';
 import Button from '@/shared/components/Button';
 import Calendar from '@/shared/components/Calendar';
 import LabeledInput from '@/shared/components/LabeledInput';
+import DestinationField from '@/features/plan/ui/DestinationField';
 import { LoadingSpinner } from '@/shared/components/Loading';
 import type { Plan } from '@/features/plan/model/plan.types';
 import { changePlanPeriod, getPeriodChange, listDates } from '@/features/plan/model/planDays';
@@ -148,18 +148,12 @@ function PlanInfoEditForm({ plan, onLeave }: { plan: Plan; onLeave: () => void }
           )}
         </div>
 
-        <div className={formStyles.destination}>
-          <LabeledInput
-            label="여행주소"
-            value={form.destination}
-            onChange={form.setDestination}
-            placeholder="주소 검색하기"
-            maxLength={50}
-          />
-          <span className={formStyles.destinationIcon}>
-            <img src={locationIcon} alt="" />
-          </span>
-        </div>
+        <DestinationField
+          value={form.destination}
+          isConfirmed={form.isDestinationConfirmed}
+          onType={form.typeDestination}
+          onChoose={form.chooseDestination}
+        />
       </div>
 
       <div className={formStyles.actions}>
