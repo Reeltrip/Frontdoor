@@ -34,6 +34,9 @@
   /* 에러 문구 (피그마 로그인 오류 화면의 색) */
   --color-error: #f37490;
 
+  /* 터치 화면은 폭 제한 없이, 마우스를 쓰는 넓은 화면은 시연 폭으로 보여요 */
+  --app-max-width: none;
+
   /* 지도 노드 마커 배경 */
   --color-marker-bg: #c9da8a;
 
@@ -80,12 +83,19 @@ button {
   font-family: inherit;
 }
 
-/* 시연 기준인 폰 크기(390×844)로 화면을 가운데에 고정 */
+/* 폰에서는 화면 폭을 꽉 채워요. 390px로 묶으면 더 넓은 폰에서 양옆이 비어요 */
 #root {
-  max-width: 390px;
+  max-width: var(--app-max-width);
   min-height: 100dvh;
   margin: 0 auto;
   background: var(--color-bg);
+}
+
+/* 펼친 Fold와 가로 Flip도 넓어서, 폭만으로 PC를 구분하면 안 돼요 */
+@media (min-width: 600px) and (hover: hover) and (pointer: fine) {
+  :root {
+    --app-max-width: 390px;
+  }
 }
 
 .text-display { font: var(--font-display); letter-spacing: var(--tracking); }
