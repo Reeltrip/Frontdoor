@@ -1,34 +1,44 @@
 import type { MapNode, MapPosition, MapRouteStop } from './map.types';
 
 export type MapRoutePaths = {
-  /** 확정한 순서대로 이은 선 */
-  mainPath: MapPosition[];
-  /** 플랜B마다 선 하나: 앞 지점 → 플랜B 노드 → 다음 지점 */
-  planBPaths: MapPosition[][];
+  mainPaths: MapPosition[][];
+  inactivePaths: MapPosition[][];
+  previewPath?: MapPosition[];
 };
 
-/**
- * 동선을 지도에 그릴 좌표 목록으로 바꿔요.
- * nodes에 없는 지점(삭제된 장소 등)은 건너뛰고 남은 지점끼리 이어요.
- */
+const throughStop = (before: MapPosition | undefined, position: MapPosition, after: MapPosition | undefined) =>
+  [before, position, after].filter((point): point is MapPosition => point !== undefined);
+
+/** 미리보기는 고른 장소만 대체하고, 다른 구간은 기존 경로를 따라가요. */
 export function buildRoutePaths(nodes: MapNode[], route: MapRouteStop[]): MapRoutePaths {
   const positionById = new Map(nodes.map((node) => [node.id, node.position]));
-
   const stops = route.flatMap((stop) => {
     const position = positionById.get(stop.nodeId);
-    return position ? [{ position, planBNodeId: stop.planBNodeId }] : [];
+    return position ? [{ ...stop, position }] : [];
+  });
+  const main = stops.map((stop) => stop.position);
+  const previewIndex = stops.findIndex((stop) => stop.isPlanBPreview && stop.planBNodeId && positionById.has(stop.planBNodeId));
+  const inactivePaths: MapPosition[][] = [];
+  let previewPath: MapPosition[] | undefined;
+
+  stops.forEach((stop, index) => {
+    const alternative = stop.planBNodeId ? positionById.get(stop.planBNodeId) : undefined;
+    if (!alternative) return;
+    const before = main[index - 1];
+    const after = main[index + 1];
+    const alternativePath = throughStop(before, alternative, after);
+    if (index === previewIndex) {
+      previewPath = alternativePath;
+      inactivePaths.push(throughStop(before, stop.position, after));
+    } else {
+      inactivePaths.push(alternativePath);
+    }
   });
 
-  const planBPaths = stops.flatMap((stop, index) => {
-    const planBPosition = stop.planBNodeId ? positionById.get(stop.planBNodeId) : undefined;
-    if (!planBPosition) return [];
-
-    // 첫 지점·마지막 지점의 플랜B는 한쪽만 이어져요
-    const path = [stops[index - 1]?.position, planBPosition, stops[index + 1]?.position].filter(
-      (position): position is MapPosition => position !== undefined,
-    );
-    return path.length > 1 ? [path] : [];
-  });
-
-  return { mainPath: stops.map((stop) => stop.position), planBPaths };
+  const mainPaths = previewIndex < 0 ? [main] : [main.slice(0, previewIndex), main.slice(previewIndex + 1)];
+  return {
+    mainPaths: mainPaths.filter((path) => path.length > 1),
+    inactivePaths: inactivePaths.filter((path) => path.length > 1),
+    previewPath: previewPath && previewPath.length > 1 ? previewPath : undefined,
+  };
 }

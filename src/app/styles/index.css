@@ -6,6 +6,7 @@
   --home-bar-height: max(env(safe-area-inset-bottom), 34px);
 
   /* 포인트 색 (라임) */
+  --color-plan-route: #c3ea3b;
   --color-lime-10: #f8ffe5;
   --color-lime-50: #efffbe;
   --color-lime-100: #e5ff99;

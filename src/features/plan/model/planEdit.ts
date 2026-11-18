@@ -1,3 +1,4 @@
+import type { Place } from '@/features/place/model/place.types';
 import type { MapRouteStop } from '@/shared/components/Map';
 import type { PlanZone } from '../lib/planZones';
 import type { Plan, PlanDay, PlanNode } from './plan.types';
@@ -84,13 +85,39 @@ export function findOtherDayNumber(plan: Plan, dayIndex: number, placeId: string
 
 /** 일차 동선: 숙소에서 출발해 확정한 순서대로 돌고 숙소로 돌아와요 (기능명세서 4-3 숙소 선택) */
 export function buildDayRoute(plan: Plan, dayIndex: number): MapRouteStop[] {
-  const day = plan.days[dayIndex];
-  if (!day) return [];
-  const stops: MapRouteStop[] = day.nodes.map((node) => ({
-    nodeId: node.placeId,
-    planBNodeId: node.planB?.placeId,
-  }));
-  const lodgingId = plan.accommodationPlaceId;
-  if (!lodgingId || stops.length === 0) return stops;
-  return [{ nodeId: lodgingId }, ...stops, { nodeId: lodgingId }];
+  return buildPlanningRoute(plan, dayIndex, { isClosed: true });
+}
+
+export function canSetPlanB(plan: Plan, dayIndex: number, target: Place, candidate: Place): boolean {
+  return candidate.category === target.category &&
+    candidate.id !== plan.accommodationPlaceId &&
+    !plan.days[dayIndex]?.nodes.some((node) => node.placeId === candidate.id || node.planB?.placeId === candidate.id) &&
+    findOtherDayNumber(plan, dayIndex, candidate.id) === undefined;
+}
+
+type PlanningRouteOptions = {
+  previewPlaceId?: string;
+  previewPlanB?: { targetPlaceId: string; placeId: string };
+  isClosed?: boolean;
+};
+
+/** 편집 중엔 마지막으로 고른 장소까지, 완성 화면에선 숙소로 돌아오는 선까지 그려요. */
+export function buildPlanningRoute(
+  plan: Plan,
+  dayIndex: number,
+  { previewPlaceId, previewPlanB, isClosed }: PlanningRouteOptions = {},
+): MapRouteStop[] {
+  const stops: MapRouteStop[] = (plan.days[dayIndex]?.nodes ?? []).map((node) => {
+    if (previewPlanB && node.placeId === previewPlanB.targetPlaceId) {
+      return { nodeId: node.placeId, planBNodeId: previewPlanB.placeId, isPlanBPreview: true };
+    }
+    return { nodeId: node.placeId, planBNodeId: node.planB?.placeId };
+  });
+  if (previewPlaceId) stops.push({ nodeId: previewPlaceId });
+  if (plan.accommodationPlaceId && stops.length > 0) {
+    const lodging = { nodeId: plan.accommodationPlaceId };
+    stops.unshift(lodging);
+    if (isClosed) stops.push(lodging);
+  }
+  return stops;
 }

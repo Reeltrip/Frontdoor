@@ -30,3 +30,21 @@
   background: none;
   cursor: pointer;
 }
+.planStrip {
+  position: relative;
+  gap: 16px;
+  padding-top: 12px;
+  padding-bottom: 14px;
+}
+
+.planStrip .item {
+  width: min(300px, calc(100% - 20px));
+}
+
+.wideStrip .item {
+  width: 100%;
+}
+
+.planCard {
+  width: 100%;
+}

@@ -8,10 +8,11 @@ type DaySelectorProps = {
   days: PlanDay[];
   selectedIndex: number;
   onSelect: (dayIndex: number) => void;
+  isCompact?: boolean;
 };
 
 // 상단 '1일차 ▲'. 누르면 일차 목록이 열려 다른 일차로 옮겨 가요
-export default function DaySelector({ days, selectedIndex, onSelect }: DaySelectorProps) {
+export default function DaySelector({ days, selectedIndex, onSelect, isCompact = false }: DaySelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
 
@@ -30,7 +31,7 @@ export default function DaySelector({ days, selectedIndex, onSelect }: DaySelect
   };
 
   return (
-    <div ref={rootRef} className={styles.root}>
+    <div ref={rootRef} className={`${styles.root} ${isCompact ? styles.compact : ''}`}>
       <button
         type="button"
         className={styles.trigger}
@@ -43,7 +44,7 @@ export default function DaySelector({ days, selectedIndex, onSelect }: DaySelect
       </button>
       {isOpen && (
         <ul className={styles.menu} role="listbox" aria-label="일차 선택">
-          {days.map((day, index) => (
+          {days.map((day, index) => isCompact && days.length > 1 && index === selectedIndex ? null : (
             <li key={day.date}>
               <button
                 type="button"
@@ -53,7 +54,7 @@ export default function DaySelector({ days, selectedIndex, onSelect }: DaySelect
                 onClick={() => selectDay(index)}
               >
                 <span>{index + 1}일차</span>
-                <span className={styles.date}>{formatDayDate(day.date)}</span>
+                {!isCompact && <span className={styles.date}>{formatDayDate(day.date)}</span>}
               </button>
             </li>
           ))}

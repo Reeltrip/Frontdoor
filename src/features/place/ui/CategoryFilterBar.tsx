@@ -13,11 +13,13 @@ import styles from "./CategoryFilterBar.module.css";
 type CategoryFilterBarProps = {
   selected: PlaceCategory | "all";
   onChange: (category: PlaceCategory | "all") => void;
+  scrollToSelected?: boolean;
 };
 
 export default function CategoryFilterBar({
   selected,
   onChange,
+  scrollToSelected = false,
 }: CategoryFilterBarProps) {
   const barRef = useRef<HTMLDivElement>(null);
   const [hasMore, setHasMore] = useState(false);
@@ -74,6 +76,15 @@ export default function CategoryFilterBar({
     window.addEventListener("resize", updateHasMore);
     return () => window.removeEventListener("resize", updateHasMore);
   }, []);
+
+  useEffect(() => {
+    if (!scrollToSelected) return;
+    const bar = barRef.current;
+    const button = bar?.querySelector<HTMLButtonElement>('button[aria-pressed="true"]');
+    if (bar && button && button.offsetLeft + button.offsetWidth > bar.scrollLeft + bar.clientWidth) {
+      bar.scrollLeft = button.offsetLeft + button.offsetWidth - bar.clientWidth + 16;
+    }
+  }, [scrollToSelected, selected]);
 
   return (
     <div className={`${styles.wrapper} ${hasMore ? styles.hasMore : ""}`}>

@@ -8,6 +8,12 @@ type MapMarkerProps = {
   /** 다른 일자에 이미 들어간 노드는 회색으로 */
   isMuted?: boolean;
   onClick?: () => void;
+  isPlanning?: boolean;
+  isOnRoute?: boolean;
+  isInactiveRoute?: boolean;
+  isHighlighted?: boolean;
+  isDot?: boolean;
+  categoryIcon?: string;
 };
 
 // 지도 위 장소 노드. 물방울 모양 안에 장소 사진을 넣음
@@ -17,13 +23,28 @@ export default function MapMarker({
   size = 'sm',
   isMuted = false,
   onClick,
+  isPlanning,
+  isOnRoute,
+  isInactiveRoute,
+  isHighlighted,
+  isDot,
+  categoryIcon,
 }: MapMarkerProps) {
-  const classNames = [styles.marker, styles[size], isMuted && styles.muted].filter(Boolean).join(' ');
+  const classNames = [
+    styles.marker, styles[size], isMuted && styles.muted,
+    isPlanning && styles.planning, isDot && styles.dot,
+    isOnRoute && styles.onRoute, isInactiveRoute && styles.inactiveRoute, isHighlighted && styles.highlighted,
+  ].filter(Boolean).join(' ');
 
   return (
     <button type="button" className={classNames} onClick={onClick} aria-label={name}>
-      <span className={styles.pin} aria-hidden />
-      <img src={imageUrl} alt="" className={styles.photo} />
+      {!isDot && (
+        <>
+          <span className={styles.pin} aria-hidden />
+          {imageUrl && <img src={imageUrl} alt="" className={styles.photo} />}
+          {categoryIcon && <span className={styles.category}><img src={categoryIcon} alt="" /></span>}
+        </>
+      )}
     </button>
   );
 }
