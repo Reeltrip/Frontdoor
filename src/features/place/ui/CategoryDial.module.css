@@ -198,3 +198,36 @@
   opacity: 0.3;
   cursor: default;
 }
+
+/* 화살표 안내: 어두운 안내 화면 위로 올라와 아이콘·글자·화살표만 흰색으로 보임 */
+.arrowGuide {
+  z-index: 11;
+  background: none;
+}
+
+.arrowGuide .ringMask,
+.arrowGuide .indicator {
+  display: none;
+}
+
+.arrowGuide .bowl {
+  background: none;
+  box-shadow: none;
+}
+
+.arrowGuide .bowl::after {
+  opacity: 0.12;
+}
+
+.arrowGuide .icon,
+.arrowGuide .arrow img {
+  filter: brightness(0) invert(1);
+}
+
+.arrowGuide .label {
+  color: var(--color-gray-0);
+}
+
+.arrowGuide .arrow:disabled {
+  opacity: 1;
+}

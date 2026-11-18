@@ -14,6 +14,7 @@ type CategoryDialProps = {
   isTickHidden?: boolean;
   variant?: "default" | "summary";
   hasGlow?: boolean;
+  isArrowGuide?: boolean;
 };
 
 const DRAG_STEP_PX = 90;
@@ -40,6 +41,7 @@ export default function CategoryDial({
   isTickHidden = false,
   variant = "default",
   hasGlow = false,
+  isArrowGuide = false,
 }: CategoryDialProps) {
   const { position, isDragging, handlers } = useDragStepper({
     count: items.length,
@@ -65,6 +67,7 @@ export default function CategoryDial({
         isTickHidden && styles.tickHidden,
         variant === "summary" && styles.summary,
         hasGlow && styles.glow,
+        isArrowGuide && styles.arrowGuide,
       ]
         .filter(Boolean)
         .join(" ")}
