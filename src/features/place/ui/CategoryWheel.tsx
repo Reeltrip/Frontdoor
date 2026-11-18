@@ -7,6 +7,9 @@ import {
   type WheelEvent,
 } from "react";
 import { WHEEL_ICONS } from "../lib/wheelIcons";
+import { WHEEL_PHOTOS } from "../lib/wheelPhotos";
+import photoShade from "@/shared/assets/images/result/shade.svg";
+import foodPhotoShade from "@/shared/assets/images/result/shade-food.svg";
 import type { ResultCategoryItem } from "../model/result.types";
 import styles from "./CategoryWheel.module.css";
 
@@ -144,6 +147,7 @@ export default function CategoryWheel({
       {items.map((item, index) => {
         const isActive = index === activeIndex;
         const categoryIcon = WHEEL_ICONS[item.category];
+        const fallbackPhoto = WHEEL_PHOTOS[item.category];
 
         return (
           <div
@@ -159,9 +163,23 @@ export default function CategoryWheel({
               onClick={() => handleRowClick(index)}
             >
               <span className={styles.thumb}>
-                {item.imageUrl && (
-                  <img src={item.imageUrl} alt="" className={styles.photo} />
-                )}
+                <img
+                  src={item.imageUrl || fallbackPhoto}
+                  alt=""
+                  className={styles.photo}
+                  draggable={false}
+                  onError={(event) => {
+                    if (event.currentTarget.getAttribute("src") !== fallbackPhoto) {
+                      event.currentTarget.src = fallbackPhoto;
+                    }
+                  }}
+                />
+                <img
+                  src={item.category === "food" ? foodPhotoShade : photoShade}
+                  alt=""
+                  className={styles.photoShade}
+                  draggable={false}
+                />
                 {categoryIcon && (
                   <img
                     src={categoryIcon.src}
