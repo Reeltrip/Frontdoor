@@ -28,6 +28,8 @@ export type Place = {
   address?: string;
   tag?: string;
   reviewCount?: number;
+  /** 카드를 뽑아 온 원본 링크. 서버가 줄 때만 있어요 */
+  sourceUrl?: string;
 };
 
 /** GET /places 조건. 비우면 전체 */

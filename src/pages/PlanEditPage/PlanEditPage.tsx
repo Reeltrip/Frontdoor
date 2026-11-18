@@ -12,6 +12,7 @@ import { usePlaces } from '@/features/place/model/usePlaces';
 import type { Place, PlaceCategory } from '@/features/place/model/place.types';
 import CategoryFilterBar from '@/features/place/ui/CategoryFilterBar';
 import PlaceCardStrip from '@/features/place/ui/PlaceCardStrip';
+import { COPY_DONE_MESSAGE, COPY_FAILED_MESSAGE, copyPlace, openPlace } from '@/features/place/lib/placeActions';
 import { getDayZone, isPlaceInZone, type PlanZone } from '@/features/plan/lib/planZones';
 import { mergePlanPlaces } from '@/features/plan/model/planPlaces';
 import { completePlanDay, formatDayDate, withDraftIfEmptyDay } from '@/features/plan/model/planDays';
@@ -440,6 +441,10 @@ export default function PlanEditPage() {
               places={visiblePlaces.filter((place) => place.id !== plan.accommodationPlaceId)}
               selectedId={selectedId}
               onSelect={selectPlace}
+              onOpen={openPlace}
+              onCopy={async (place) =>
+                setToastMessage((await copyPlace(place)) ? COPY_DONE_MESSAGE : COPY_FAILED_MESSAGE)
+              }
             />
           </div>
         )}
