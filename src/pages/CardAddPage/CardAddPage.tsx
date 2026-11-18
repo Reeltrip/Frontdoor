@@ -70,7 +70,9 @@ export default function CardAddPage() {
   const [features, setFeatures] = useState<CardFeatures>(EMPTY_CARD_FEATURES);
   const [results, setResults] = useState<PlaceSearchResult[] | null>(null);
   /** 검색 결과에서 고른 장소. 지도에 올릴 좌표가 여기서 와요 */
-  const [pickedPlace, setPickedPlace] = useState<PlaceSearchResult | null>(null);
+  const [pickedPlace, setPickedPlace] = useState<PlaceSearchResult | null>(
+    null,
+  );
   const [isSearching, setIsSearching] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const queryClient = useQueryClient();
@@ -120,6 +122,7 @@ export default function CardAddPage() {
   });
   const [isImportModalOpen, setIsImportModalOpen] = useState(true);
   const [isTutorialOpen, setIsTutorialOpen] = useState(false);
+  const [isArrowTutorialOpen, setIsArrowTutorialOpen] = useState(false);
 
   const nameRef = useRef<HTMLTextAreaElement>(null);
 
@@ -154,6 +157,7 @@ export default function CardAddPage() {
 
   const handleNext = () => {
     setIsTutorialOpen(false);
+    setIsArrowTutorialOpen(false);
     setErrorMessage(null);
     if (step !== "features") {
       setStep(CARD_ADD_STEPS[stepIndex + 1]);
@@ -176,6 +180,18 @@ export default function CardAddPage() {
   const handleWriteDirectly = () => {
     setIsImportModalOpen(false);
     setIsTutorialOpen(true);
+  };
+
+  // 다이얼 안내가 끝나면 화살표 안내로 이어짐
+  const handleDialTutorialClose = () => {
+    setIsTutorialOpen(false);
+    setIsArrowTutorialOpen(true);
+  };
+
+  const handleCategoryChange = (index: number) => {
+    setCategoryIndex(index);
+    if (isTutorialOpen) handleDialTutorialClose();
+    else setIsArrowTutorialOpen(false);
   };
 
   const handleSearch = async () => {
@@ -328,7 +344,11 @@ export default function CardAddPage() {
           </p>
         )}
         <Button onClick={handleNext} disabled={!canGoNext}>
-          {saveCard.isPending ? "저장하는 중" : step === "features" ? "저장" : "다음"}
+          {saveCard.isPending
+            ? "저장하는 중"
+            : step === "features"
+              ? "저장"
+              : "다음"}
         </Button>
       </div>
 
@@ -337,21 +357,26 @@ export default function CardAddPage() {
           <CategoryDial
             items={CATEGORY_ITEMS}
             activeIndex={categoryIndex}
-            onChange={(index) => {
-              setCategoryIndex(index);
-              setIsTutorialOpen(false);
-            }}
+            onChange={handleCategoryChange}
             isRaised={isTutorialOpen}
             isTickHidden={isTutorialOpen}
             hasGlow={isTutorialOpen}
+            isArrowGuide={isArrowTutorialOpen}
           />
         </div>
       )}
 
       {isTutorialOpen && (
         <DialTutorial
-          onClose={() => setIsTutorialOpen(false)}
-          lines={["다이얼을 돌려", "카드 카테고리를 정해보세요!"]}
+          onClose={handleDialTutorialClose}
+          lines={["다이얼을 돌려", "세부 카드 내용들을 살펴보세요!"]}
+        />
+      )}
+      {isArrowTutorialOpen && (
+        <DialTutorial
+          variant="arrows"
+          onClose={() => setIsArrowTutorialOpen(false)}
+          lines={["화살표를 눌러", "카드 카테고리를 정해보세요!"]}
         />
       )}
 

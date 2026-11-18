@@ -4,6 +4,7 @@ import styles from "./DialTutorial.module.css";
 type DialTutorialProps = {
   onClose: () => void;
   lines?: [string, string];
+  variant?: "dial" | "arrows";
 };
 const DEFAULT_LINES: [string, string] = [
   "다이얼을 돌려",
@@ -13,7 +14,10 @@ const DEFAULT_LINES: [string, string] = [
 export default function DialTutorial({
   onClose,
   lines = DEFAULT_LINES,
+  variant = "dial",
 }: DialTutorialProps) {
+  const isArrows = variant === "arrows";
+
   return (
     <div className={styles.overlay} onClick={onClose} role="presentation">
       <div className={styles.guide}>
@@ -56,16 +60,22 @@ export default function DialTutorial({
           {}
           <path
             className={styles.green}
-            d="M84 552C120 528 175 512 217 509C257 512 285 526 302 543"
+            d={
+              isArrows
+                ? "M124 546H266"
+                : "M84 552C120 528 175 512 217 509C257 512 285 526 302 543"
+            }
             markerStart="url(#tutorial-head-green)"
             markerEnd="url(#tutorial-head-green)"
           />
         </svg>
 
-        <div className={styles.touch}>
-          <span className={styles.touchRing} />
-          <span className={styles.dot} />
-        </div>
+        {!isArrows && (
+          <div className={styles.touch}>
+            <span className={styles.touchRing} />
+            <span className={styles.dot} />
+          </div>
+        )}
         <img className={styles.hand} src={handImage} alt="" />
       </div>
     </div>
