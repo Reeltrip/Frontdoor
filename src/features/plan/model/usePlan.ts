@@ -1,7 +1,11 @@
-import { skipToken, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { skipToken, useIsMutating, useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { getViewStatus } from '@/shared/api/viewStatus';
 import { createAiDraft, createPlan, createShareLink, fetchPlan, fetchPlans, planKeys, updatePlan } from '../api/plans';
 import type { Plan, PlanListParams, ShareType } from './plan.types';
+
+type SaveBatch = { pending: number; confirmed: Plan | undefined };
+const saveBatches = new WeakMap<QueryClient, Map<string, SaveBatch>>();
+const saveScope = (planId: string) => ({ id: planKeys.update(planId).join(':') });
 
 /** 계획 목록. 조건이 없으면 내 계획과 공유받은 계획을 모두 줘요 */
 export function usePlans(params: PlanListParams = {}) {
@@ -50,6 +54,7 @@ export function useCreatePlan() {
 export function useCreateAiDraft(planId: string) {
   const queryClient = useQueryClient();
   return useMutation({
+    scope: saveScope(planId),
     mutationFn: () => createAiDraft(planId),
     onSuccess: (plan) => {
       queryClient.setQueryData(planKeys.detail(planId), plan);
@@ -63,37 +68,50 @@ export function useCreateShareLink(planId: string) {
   return useMutation({ mutationFn: (shareType: ShareType) => createShareLink(planId, shareType) });
 }
 
-/**
- * 계획 저장 (PUT). 화면을 먼저 바꾸고 저장해요. 실패하면 바꾸기 전으로 되돌려요.
- * 노드 순서를 빠르게 여러 번 바꿔도 마지막 저장이 끝난 뒤에만 서버 값을 다시 불러와요.
- */
+/** 여러 저장이 겹쳐도 마지막 편집을 보여주고, 실패하면 마지막 성공 값으로 복구해요. */
 export function useUpdatePlan(planId: string) {
   const queryClient = useQueryClient();
   const planKey = planKeys.detail(planId);
   const mutationKey = planKeys.update(planId);
+  const isSaving = useIsMutating({ mutationKey, exact: true }) > 0;
 
-  return useMutation({
+  const mutation = useMutation({
     mutationKey,
-    // 저장은 서버 값과 비교해 여러 요청을 차례로 보내서, 같은 계획의 저장은 한 번에 하나씩만 돌려요
-    scope: { id: mutationKey.join(':') },
+    scope: saveScope(planId),
     mutationFn: ({ id: _id, ...request }: Plan) => updatePlan(planId, request),
     onMutate: async (nextPlan) => {
-      await queryClient.cancelQueries({ queryKey: planKey });
-      const previousPlan = queryClient.getQueryData<Plan>(planKey);
-      queryClient.setQueryData(planKey, nextPlan);
-      return { previousPlan };
-    },
-    onError: (_error, _nextPlan, result) => {
-      if (result?.previousPlan) queryClient.setQueryData(planKey, result.previousPlan);
-    },
-    onSettled: () => {
-      if (queryClient.isMutating({ mutationKey }) === 1) {
-        // 이름·작성 상태가 바뀌었을 수 있어서 목록도 다시 불러와요
-        void queryClient.invalidateQueries({ queryKey: [...planKeys.all, 'list'] });
-        return queryClient.invalidateQueries({ queryKey: planKey });
+      await queryClient.cancelQueries({ queryKey: planKey, exact: true });
+      let batches = saveBatches.get(queryClient);
+      if (!batches) {
+        batches = new Map();
+        saveBatches.set(queryClient, batches);
       }
+      let batch = batches.get(planId);
+      if (!batch) {
+        batch = { pending: 0, confirmed: queryClient.getQueryData<Plan>(planKey) };
+        batches.set(planId, batch);
+      }
+      batch.pending += 1;
+      queryClient.setQueryData(planKey, nextPlan);
+      return { batch };
+    },
+    onSuccess: (saved, _nextPlan, context) => {
+      context.batch.confirmed = saved;
+    },
+    onSettled: (_data, _error, _nextPlan, context) => {
+      if (!context) return;
+      context.batch.pending -= 1;
+      if (context.batch.pending > 0) return;
+      // 이전 낙관적 값에는 실패한 편집이 섞여 있을 수 있어 마지막 성공 값만 써요.
+      if (context.batch.confirmed) queryClient.setQueryData(planKey, context.batch.confirmed);
+      saveBatches.get(queryClient)?.delete(planId);
+      return Promise.all([
+        queryClient.invalidateQueries({ queryKey: [...planKeys.all, 'list'] }),
+        queryClient.invalidateQueries({ queryKey: planKey, exact: true }),
+      ]);
     },
   });
+  return { ...mutation, isSaving };
 }
 
 /** 한 일차 안에서 노드 하나를 옮긴 새 계획을 돌려줘요 (원본은 그대로) */

@@ -1,5 +1,5 @@
 // 일차·기간·상태를 다루는 계산 함수. 모두 원본 계획은 그대로 두고 새 계획을 돌려줘요.
-import type { Plan, PlanDay, PlanNode } from './plan.types';
+import { isDraftPlanStatus, type Plan, type PlanDay, type PlanNode } from './plan.types';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
@@ -28,15 +28,34 @@ export function hasEmptyDay(plan: Pick<Plan, 'days'>): boolean {
 
 /**
  * 빈 일차가 있으면 '작성 중'으로 바꿔요 (기능명세서 5-3, 5-4).
- * 빈 일차가 없다고 '완성'으로 올리지는 않아요. 완성은 finishPlan에서만 해요.
+ * 빈 일차가 없다고 '완성'으로 올리지는 않아요. 완성 버튼을 눌러야 해요.
  */
 export function withDraftIfEmptyDay(plan: Plan): Plan {
-  return hasEmptyDay(plan) ? { ...plan, status: 'draft' } : plan;
+  return hasEmptyDay(plan)
+    ? {
+        ...plan,
+        status: 'draft',
+        days: plan.days.map((day) => day.nodes.length > 0 ? day : { ...day, isCompleted: false }),
+      }
+    : plan;
 }
 
 /** 노드 선택을 마쳤을 때. 건너뛴(빈) 일차가 하나라도 있으면 다른 일차가 완성됐어도 '작성 중'이에요 (5-3) */
 export function finishPlan(plan: Plan): Plan {
-  return { ...plan, status: hasEmptyDay(plan) ? 'draft' : 'complete' };
+  return {
+    ...plan,
+    status: hasEmptyDay(plan) ? 'draft' : 'complete',
+    days: plan.days.map((day) => ({ ...day, isCompleted: day.nodes.length > 0 })),
+  };
+}
+
+/** 완성 버튼을 누른 일차만 완료해요. 마지막 날을 먼저 눌러도 다른 날은 그대로예요. */
+export function completePlanDay(plan: Plan, dayIndex: number): Plan {
+  const days = plan.days.map((day, index) => ({
+    ...day,
+    isCompleted: day.nodes.length > 0 && (index === dayIndex || (day.isCompleted ?? !isDraftPlanStatus(plan.status))),
+  }));
+  return { ...plan, days, status: days.every((day) => day.isCompleted) ? 'complete' : 'draft' };
 }
 
 /** 한 일차의 노드를 정해요. 카드 0개로 건너뛰면 날짜만 있는 빈 일차가 돼요 (5-3) */

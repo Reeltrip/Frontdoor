@@ -1,6 +1,7 @@
 import type { MapRouteStop } from '@/shared/components/Map';
 import type { PlanZone } from '../lib/planZones';
 import type { Plan, PlanDay, PlanNode } from './plan.types';
+import { withDraftIfEmptyDay } from './planDays';
 
 // 여행계획 편집(기능명세서 4-3)에서 계획을 바꾸는 순수 함수들. 원본은 그대로 두고 새 계획을 돌려줘요
 
@@ -30,10 +31,12 @@ export function addNodeToDay(plan: Plan, dayIndex: number, placeId: string): Pla
 
 /** 노드를 빼면 앞뒤 노드끼리 다시 이어져요 */
 export function removeNodeFromDay(plan: Plan, dayIndex: number, placeId: string): Plan {
-  return updateDay(plan, dayIndex, (day) => ({
-    ...day,
-    nodes: day.nodes.filter((node) => node.placeId !== placeId),
-  }));
+  return withDraftIfEmptyDay(
+    updateDay(plan, dayIndex, (day) => ({
+      ...day,
+      nodes: day.nodes.filter((node) => node.placeId !== placeId),
+    })),
+  );
 }
 
 /** 노드는 카드 id로 찾아요. 저장 뒤 서버가 노드 id를 새로 매겨도 같은 노드를 가리켜요 */
