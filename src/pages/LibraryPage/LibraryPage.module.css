@@ -20,7 +20,7 @@
   align-items: center;
   justify-content: space-between;
   min-height: 56px;
-  padding: calc(env(safe-area-inset-top) + 84px) 16px 0 20px;
+  padding: calc(var(--status-bar-height) + 24px) 16px 0 20px;
   margin-bottom: 18px;
 }
 

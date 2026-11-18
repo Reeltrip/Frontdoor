@@ -39,7 +39,7 @@
   flex-direction: column;
   align-items: flex-start;
   flex-shrink: 0;
-  padding: calc(env(safe-area-inset-top) + 87px) 20px 0;
+  padding: calc(var(--status-bar-height) + 27px) 20px 0;
 }
 
 .title {

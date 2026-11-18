@@ -36,7 +36,7 @@
   position: relative;
   z-index: 3;
   flex-shrink: 0;
-  padding: calc(env(safe-area-inset-top) + 64px) 0 8px;
+  padding: calc(var(--status-bar-height) + 4px) 0 8px;
   background: var(--color-white);
 }
 

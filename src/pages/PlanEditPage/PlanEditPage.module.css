@@ -37,13 +37,13 @@
   position: relative;
   z-index: 3;
   flex-shrink: 0;
-  padding: calc(env(safe-area-inset-top) + 64px) 0 8px;
+  padding: calc(var(--status-bar-height) + 4px) 0 8px;
   background: var(--color-white);
 }
 
 .aiDraftButton {
   position: absolute;
-  top: calc(env(safe-area-inset-top) + 67px);
+  top: calc(var(--status-bar-height) + 7px);
   right: 18px;
   z-index: 4;
   padding: 7px 11px;

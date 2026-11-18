@@ -57,6 +57,9 @@ export default function PlaceCard({ place, onOpen, onCopy, onAddMemo, className 
 
         <div className={styles.meta}>
           <span className={styles.tag}>{displayOrDash(place.tag)}</span>
+          {place.reviewCount !== undefined && (
+            <span className={styles.reviews}>{place.reviewCount.toLocaleString('en-US')} Reviews</span>
+          )}
           <button type="button" className={styles.memoButton} onClick={() => onAddMemo?.(place)}>
             +메모추가
           </button>
