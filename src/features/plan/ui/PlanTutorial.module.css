@@ -1,0 +1,137 @@
+/* 피그마 'S4-5c-2 여행계획 튜토리얼', 'S4-5c 플랜 B 추가'의 어두운 막 */
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  background: rgba(26, 26, 26, 0.66);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  cursor: pointer;
+}
+
+.route {
+  position: absolute;
+  top: 46%;
+  left: 50%;
+  width: 240px;
+  height: 260px;
+  transform: translate(-42%, -50%);
+  pointer-events: none;
+}
+
+.glow {
+  fill: var(--color-lime-500);
+  opacity: 0.45;
+  filter: blur(14px);
+}
+
+.line {
+  fill: none;
+  stroke: var(--color-lime-400);
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+.dot {
+  fill: var(--color-lime-400);
+}
+
+.pin {
+  fill: rgba(254, 254, 254, 0.45);
+  stroke: var(--color-white);
+  stroke-width: 1.4;
+  stroke-dasharray: 1 3;
+  stroke-linecap: round;
+}
+
+.number {
+  fill: var(--color-white);
+  font: 600 26px/1 var(--font-family);
+  text-anchor: middle;
+}
+
+.text {
+  margin: 0;
+  font: var(--font-body2);
+  line-height: 24px;
+  letter-spacing: var(--tracking);
+  color: var(--color-white);
+}
+
+.accent {
+  font-weight: 600;
+  color: var(--color-lime-400);
+}
+
+.dotted,
+.head {
+  fill: none;
+  stroke: var(--color-gray-0);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.dotted {
+  stroke-width: 1.4;
+  stroke-dasharray: 1 3;
+}
+
+.head {
+  stroke-width: 1.5;
+}
+
+/* 버튼 바로 위: 글은 가운데, 화살표는 글 오른쪽 아래에서 버튼 쪽으로 */
+.confirmHint {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 0 20px 4px;
+  pointer-events: none;
+}
+
+.confirmArrow {
+  width: 44px;
+  height: 44px;
+  margin: 18px 0 -14px 6px;
+}
+
+/* 카드 바로 위. 화살표가 카드 위 버튼까지 내려가야 해서 카드보다 앞에 그려요 */
+.planBHint {
+  position: relative;
+  z-index: 1;
+  height: 98px;
+  /* 아래 간격(12px)을 없애 이 상자 아래 끝이 카드 위 끝이 되게 해요 */
+  margin-bottom: -12px;
+  pointer-events: none;
+}
+
+.planBHint .text {
+  position: absolute;
+  top: 0;
+  left: 32px;
+}
+
+.label {
+  position: absolute;
+  top: 34px;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-white);
+  white-space: nowrap;
+}
+
+.removeLabel {
+  left: 208px;
+}
+
+.openLabel {
+  left: 278px;
+}
+
+.planBArrows {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 390px;
+  height: 150px;
+}

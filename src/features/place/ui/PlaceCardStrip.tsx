@@ -12,6 +12,14 @@ type PlaceCardStripProps = {
   onDelete?: (place: Place) => void;
   onOpen?: (place: Place) => void;
   onCopy?: (place: Place) => void;
+  /** 여행계획에서 확정한 카드면 알약 글자와 동작을 돌려줘요. 아니면 undefined */
+  getNodeActions?: (place: Place) => PlaceNodeActions | undefined;
+};
+
+export type PlaceNodeActions = {
+  planBLabel: string;
+  onPlanB: () => void;
+  onRemove: () => void;
 };
 
 const ITEM_STEP_PX = 320;
@@ -24,6 +32,7 @@ export default function PlaceCardStrip({
   onDelete,
   onOpen,
   onCopy,
+  getNodeActions,
 }: PlaceCardStripProps) {
   const scrollerRef = useRef<HTMLDivElement>(null);
   const settleTimerRef = useRef<number>(undefined);
@@ -55,21 +64,31 @@ export default function PlaceCardStrip({
 
   return (
     <div ref={scrollerRef} className={styles.strip} onScroll={handleScroll}>
-      {places.map((place) => (
-        <div key={place.id} className={styles.item}>
-          <PlaceCardCompact place={place} onOpen={onOpen} onCopy={onCopy} />
-          {onDelete && (
-            <button
-              type="button"
-              className={styles.deleteButton}
-              onClick={() => onDelete(place)}
-              aria-label={`${place.name} 삭제`}
-            >
-              <img src={trashIcon} alt="" />
-            </button>
-          )}
-        </div>
-      ))}
+      {places.map((place) => {
+        const nodeActions = getNodeActions?.(place);
+        return (
+          <div key={place.id} className={styles.item}>
+            <PlaceCardCompact
+              place={place}
+              onOpen={onOpen}
+              onCopy={onCopy}
+              planBLabel={nodeActions?.planBLabel}
+              onPlanB={nodeActions?.onPlanB}
+              onRemove={nodeActions?.onRemove}
+            />
+            {onDelete && (
+              <button
+                type="button"
+                className={styles.deleteButton}
+                onClick={() => onDelete(place)}
+                aria-label={`${place.name} 삭제`}
+              >
+                <img src={trashIcon} alt="" />
+              </button>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

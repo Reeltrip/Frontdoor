@@ -166,6 +166,19 @@
   background: linear-gradient(to top, var(--color-white) 64%, rgba(250, 250, 250, 0));
 }
 
+/* 안내가 떠 있을 때: 어두운 막(z 5) 위로 올리고, 흰 그라데이션 대신 버튼에 빛을 줘요 */
+.bottomRaised {
+  z-index: 6;
+}
+
+.actionsOnTutorial {
+  background: none;
+}
+
+.actionsOnTutorial button {
+  box-shadow: 0 0 24px 4px rgba(254, 254, 254, 0.45);
+}
+
 .bottom > section + .actions {
   margin-top: -12px;
   padding-top: 0;

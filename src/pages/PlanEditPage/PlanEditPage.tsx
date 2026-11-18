@@ -14,6 +14,7 @@ import CategoryFilterBar from '@/features/place/ui/CategoryFilterBar';
 import PlaceCardStrip from '@/features/place/ui/PlaceCardStrip';
 import { COPY_DONE_MESSAGE, COPY_FAILED_MESSAGE, copyPlace, openPlace } from '@/features/place/lib/placeActions';
 import { getDayZone, isPlaceInZone, type PlanZone } from '@/features/plan/lib/planZones';
+import { hasSeenPlanTutorial, markPlanTutorialSeen, type PlanTutorialKind } from '@/features/plan/lib/planTutorialSeen';
 import { mergePlanPlaces } from '@/features/plan/model/planPlaces';
 import { completePlanDay, formatDayDate, withDraftIfEmptyDay } from '@/features/plan/model/planDays';
 import {
@@ -29,6 +30,7 @@ import {
 import type { Plan } from '@/features/plan/model/plan.types';
 import { useCreateAiDraft, usePlan, useUpdatePlan } from '@/features/plan/model/usePlan';
 import DaySelector from '@/features/plan/ui/DaySelector';
+import { PlanTutorialHint, PlanTutorialOverlay } from '@/features/plan/ui/PlanTutorial';
 import ZoneSheet from '@/features/plan/ui/ZoneSheet';
 import styles from './PlanEditPage.module.css';
 
@@ -79,6 +81,11 @@ export default function PlanEditPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isContinuing, setIsContinuing] = useState(false);
+  /** 한 번 닫은 안내는 다시 띄우지 않아요 */
+  const [seenTutorials, setSeenTutorials] = useState<Record<PlanTutorialKind, boolean>>(() => ({
+    confirm: hasSeenPlanTutorial('confirm'),
+    planB: hasSeenPlanTutorial('planB'),
+  }));
   const continuingRef = useRef(false);
   const saveAttempt = useRef(0);
   const failedSave = useRef<{ plan: Plan; onSaved?: () => void } | null>(null);
@@ -255,10 +262,22 @@ export default function PlanEditPage() {
     addPlace(selectedId);
   };
 
-  const removeSelectedPlace = () => {
-    if (!selectedId) return;
-    save(removeNodeFromDay(plan, dayIndex, selectedId));
-    setSelectedId(null);
+  /** 확정한 카드 사진 위에 올리는 [플랜 B추가]·휴지통 (피그마 'S4-5c-2 카드 확정 후') */
+  const getNodeActions = (place: Place) => {
+    if (currentStep !== 'nodes' || planBTargetId) return undefined;
+    const node = day.nodes.find((item) => item.placeId === place.id);
+    if (!node) return undefined;
+    return {
+      planBLabel: node.planB ? '플랜 B변경' : '플랜 B추가',
+      onPlanB: () => {
+        setPlanBTargetId(node.placeId);
+        setSelectedId(null);
+      },
+      onRemove: () => {
+        save(removeNodeFromDay(plan, dayIndex, node.placeId));
+        setSelectedId(null);
+      },
+    };
   };
 
   const addPlanB = () => {
@@ -322,23 +341,8 @@ export default function PlanEditPage() {
       );
     }
 
-    if (selectedNode) {
-      return (
-        <>
-          <Button
-            onClick={() => {
-              setPlanBTargetId(selectedNode.placeId);
-              setSelectedId(null);
-            }}
-          >
-            {selectedNode.planB ? '플랜 B 바꾸기' : '플랜 B 추가'}
-          </Button>
-          <button type="button" className={styles.textButton} onClick={removeSelectedPlace}>
-            계획에서 제거
-          </button>
-        </>
-      );
-    }
+    // 확정한 카드는 카드 위 버튼으로 플랜 B·제거를 해서 아래 버튼이 없어요
+    if (selectedNode) return null;
 
     if (selectedPlace && !isSelectedLodging) {
       return <Button onClick={confirmSelectedPlace}>이 장소로 확정</Button>;
@@ -348,7 +352,20 @@ export default function PlanEditPage() {
   };
 
   const isEmptyCategory = currentStep === 'nodes' && isPlacesLoaded && mapNodes.length === 0;
-  const isStripVisible = Boolean(selectedPlace) && !isSelectedLodging;
+  const isNodeIdle = currentStep === 'nodes' && !planBTargetId && !isContinuing && !aiDraft.isPending;
+  const getTutorialKind = (): PlanTutorialKind | null => {
+    if (!isNodeIdle || !selectedPlace || isSelectedLodging) return null;
+    if (selectedNode) return seenTutorials.planB ? null : 'planB';
+    return seenTutorials.confirm ? null : 'confirm';
+  };
+  const tutorialKind = getTutorialKind();
+  const closeTutorial = () => {
+    if (!tutorialKind) return;
+    markPlanTutorialSeen(tutorialKind);
+    setSeenTutorials((prev) => ({ ...prev, [tutorialKind]: true }));
+  };
+  // 확정 안내는 버튼만 보여줘요 (피그마에 카드가 없어요)
+  const isStripVisible = Boolean(selectedPlace) && !isSelectedLodging && tutorialKind !== 'confirm';
 
   return (
     <main className={styles.page}>
@@ -412,7 +429,14 @@ export default function PlanEditPage() {
         )}
       </div>
 
-      <div className={styles.bottom} inert={isContinuing || aiDraft.isPending}>
+      {tutorialKind && <PlanTutorialOverlay kind={tutorialKind} onClose={closeTutorial} />}
+
+      <div
+        className={`${styles.bottom} ${tutorialKind ? styles.bottomRaised : ''}`}
+        inert={isContinuing || aiDraft.isPending}
+        // 안내가 떠 있을 때 버튼을 누르면 그 동작을 하면서 안내도 닫아요
+        onClick={closeTutorial}
+      >
         {saveError && (
           <div className={styles.saveError} role="alert">
             <p>저장하지 못했어요. {saveError}</p>
@@ -435,6 +459,7 @@ export default function PlanEditPage() {
             }}
           />
         )}
+        {tutorialKind && <PlanTutorialHint kind={tutorialKind} />}
         {isStripVisible && (
           <div className={styles.strip}>
             <PlaceCardStrip
@@ -445,10 +470,11 @@ export default function PlanEditPage() {
               onCopy={async (place) =>
                 setToastMessage((await copyPlace(place)) ? COPY_DONE_MESSAGE : COPY_FAILED_MESSAGE)
               }
+              getNodeActions={getNodeActions}
             />
           </div>
         )}
-        <div className={styles.actions}>{renderActions()}</div>
+        <div className={`${styles.actions} ${tutorialKind ? styles.actionsOnTutorial : ''}`}>{renderActions()}</div>
       </div>
 
       <ConfirmModal
