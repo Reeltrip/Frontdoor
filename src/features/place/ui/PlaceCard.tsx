@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 import openIcon from '@/shared/assets/icons/open-arrow.svg';
 import copyIcon from '@/shared/assets/icons/copy-light.svg';
 import { displayOrDash, EMPTY_VALUE_TEXT, hasDisplayValue } from '@/shared/lib/displayValue';
+import { getPlaceSourceUrl } from '../lib/placeActions';
 import type { Place } from '../model/place.types';
 import styles from './PlaceCard.module.css';
 
@@ -16,6 +17,7 @@ type PlaceCardProps = {
 // 사진 위에 정보가 올라간 큰 요약 카드 (보관함 목록). 추출하지 못한 항목은 '-'로 보여요 (기능명세서 5-2)
 export default function PlaceCard({ place, onOpen, onCopy, onAddMemo, className }: PlaceCardProps) {
   const name = displayOrDash(place.name);
+  const hasSource = getPlaceSourceUrl(place) !== undefined;
   const summary = place.summary.filter(hasDisplayValue);
 
   return (
@@ -23,14 +25,17 @@ export default function PlaceCard({ place, onOpen, onCopy, onAddMemo, className 
       {place.imageUrl && <img src={place.imageUrl} alt="" className={styles.photo} />}
       <span className={styles.shade} aria-hidden />
 
-      <button
-        type="button"
-        className={styles.openButton}
-        onClick={() => onOpen?.(place)}
-        aria-label={`${name} 자세히 보기`}
-      >
-        <img src={openIcon} alt="" />
-      </button>
+      {/* 원본 링크가 없는 카드는 ↗ 버튼을 숨겨요 */}
+      {hasSource && (
+        <button
+          type="button"
+          className={styles.openButton}
+          onClick={() => onOpen?.(place)}
+          aria-label={`${name} 원본 링크 새 탭에서 열기`}
+        >
+          <img src={openIcon} alt="" />
+        </button>
+      )}
 
       <div className={styles.info}>
         <div className={styles.titleRow}>
