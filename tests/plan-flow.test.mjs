@@ -5,7 +5,7 @@ import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { QueryClient, QueryClientProvider, QueryObserver } from '@tanstack/react-query';
 
-let server, api, hooks, days, edits;
+let server, api, hooks, days, edits, mapRoute;
 const originalFetch = globalThis.fetch;
 const fixture = () => ({
   planId: 10, name: '원래 계획', city: '오사카', startDate: '2026-12-01', endDate: '2026-12-02', status: 'DRAFT', role: 'OWNER', tips: [],
@@ -32,6 +32,7 @@ before(async () => {
   hooks = await server.ssrLoadModule('/src/features/plan/model/usePlan.ts');
   days = await server.ssrLoadModule('/src/features/plan/model/planDays.ts');
   edits = await server.ssrLoadModule('/src/features/plan/model/planEdit.ts');
+  mapRoute = await server.ssrLoadModule('/src/shared/components/Map/mapRoute.ts');
 });
 after(async () => { globalThis.fetch = originalFetch; await server.close(); });
 
@@ -211,4 +212,30 @@ test('동선 미리보기는 계획을 바꾸지 않고 완성 화면에서만 �
 
   const finished = edits.buildPlanningRoute(plan, 0, { isClosed: true });
   assert.deepEqual(finished.map(({ nodeId }) => nodeId), ['90', '1', '2', '90']);
+});
+
+
+test('플랜 B 미리보기와 확정 상태에서 원래 경로와 대체 구간을 구별해요', () => {
+  const nodes = ['stay', 'original', 'alternative', 'next', 'last'].map((id, index) => ({
+    id, name: id, imageUrl: '', position: { lat: index, lng: index },
+  }));
+  const position = (index) => nodes[index].position;
+  const route = [
+    { nodeId: 'stay' }, { nodeId: 'original', planBNodeId: 'alternative', isPlanBPreview: true },
+    { nodeId: 'next' }, { nodeId: 'last' },
+  ];
+
+  const preview = mapRoute.buildRoutePaths(nodes, route);
+  assert.deepEqual(preview.mainPaths, [[position(3), position(4)]]);
+  assert.deepEqual(preview.inactivePaths, [[position(0), position(1), position(3)]]);
+  assert.deepEqual(preview.previewPath, [position(0), position(2), position(3)]);
+
+  route[1].isPlanBPreview = false;
+  const saved = mapRoute.buildRoutePaths(nodes, route);
+  assert.deepEqual(saved.mainPaths, [[position(0), position(1), position(3), position(4)]]);
+  assert.deepEqual(saved.inactivePaths, [[position(0), position(2), position(3)]]);
+  assert.equal(saved.previewPath, undefined);
+
+  route[1].isPlanBPreview = true;
+  assert.deepEqual(mapRoute.buildRoutePaths(nodes.filter(({ id }) => id !== 'alternative'), route).mainPaths, saved.mainPaths);
 });

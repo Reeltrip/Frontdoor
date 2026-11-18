@@ -1,4 +1,10 @@
 import handleIcon from '@/shared/assets/icons/sheet-handle.svg';
+import kebabIcon from '@/shared/assets/icons/kebab.svg';
+import instagramFrame from '../assets/share-instagram-frame.svg';
+import instagramLens from '../assets/share-instagram-lens.svg';
+import instagramFlash from '../assets/share-instagram-flash.svg';
+import linkIcon from '../assets/share-link.svg';
+import messageIcon from '../assets/share-message.svg';
 import type { ShareType } from '../model/plan.types';
 import styles from './ShareSheet.module.css';
 
@@ -64,11 +70,7 @@ export default function ShareSheet({
           <li>
             <button type="button" className={styles.channel} disabled={isPending} onClick={() => onShare('more')}>
               <span className={styles.channelIcon}>
-                <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-                  <circle cx="6" cy="12" r="1.8" fill="#4d4d4d" />
-                  <circle cx="12" cy="12" r="1.8" fill="#4d4d4d" />
-                  <circle cx="18" cy="12" r="1.8" fill="#4d4d4d" />
-                </svg>
+                <img className={styles.moreIcon} src={kebabIcon} alt="" />
               </span>
               더보기
             </button>
@@ -76,11 +78,9 @@ export default function ShareSheet({
           <li>
             <button type="button" className={styles.channel} disabled={isPending} onClick={() => onShare('instagram')}>
               <span className={`${styles.channelIcon} ${styles.instagram}`}>
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" aria-hidden="true">
-                  <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
-                  <circle cx="12" cy="12" r="4" />
-                  <circle cx="17" cy="7" r="1" fill="#fff" stroke="none" />
-                </svg>
+                <img src={instagramFrame} alt="" />
+                <img src={instagramLens} alt="" />
+                <img className={styles.instagramFlash} src={instagramFlash} alt="" />
               </span>
               instagram
             </button>
@@ -88,21 +88,14 @@ export default function ShareSheet({
           <li>
             <button type="button" className={styles.channel} disabled={isPending} onClick={() => onShare('copy')}>
               <span className={styles.channelIcon}>
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#4d4d4d" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-                  <path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1" />
-                  <path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" />
-                </svg>
+                <img src={linkIcon} alt="" />
               </span>
               링크복사
             </button>
           </li>
           <li>
             <button type="button" className={styles.channel} disabled={isPending} onClick={() => onShare('message')}>
-              <span className={`${styles.channelIcon} ${styles.messageIcon}`}>
-                <svg width="26" height="26" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M12 4C7.3 4 3.5 7.1 3.5 11c0 2.2 1.2 4.1 3.1 5.4L6 20l3.6-1.5c.8.2 1.6.3 2.4.3 4.7 0 8.5-3.1 8.5-7S16.7 4 12 4Z" fill="#fff" />
-                </svg>
-              </span>
+              <img className={styles.messageIcon} src={messageIcon} alt="" />
               메시지
             </button>
           </li>

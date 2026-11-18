@@ -10,6 +10,7 @@ type MapMarkerProps = {
   onClick?: () => void;
   isPlanning?: boolean;
   isOnRoute?: boolean;
+  isInactiveRoute?: boolean;
   isHighlighted?: boolean;
   isDot?: boolean;
   categoryIcon?: string;
@@ -24,6 +25,7 @@ export default function MapMarker({
   onClick,
   isPlanning,
   isOnRoute,
+  isInactiveRoute,
   isHighlighted,
   isDot,
   categoryIcon,
@@ -31,7 +33,7 @@ export default function MapMarker({
   const classNames = [
     styles.marker, styles[size], isMuted && styles.muted,
     isPlanning && styles.planning, isDot && styles.dot,
-    isOnRoute && styles.onRoute, isHighlighted && styles.highlighted,
+    isOnRoute && styles.onRoute, isInactiveRoute && styles.inactiveRoute, isHighlighted && styles.highlighted,
   ].filter(Boolean).join(' ');
 
   return (

@@ -107,12 +107,12 @@ export function buildPlanningRoute(
   dayIndex: number,
   { previewPlaceId, previewPlanB, isClosed }: PlanningRouteOptions = {},
 ): MapRouteStop[] {
-  const stops: MapRouteStop[] = (plan.days[dayIndex]?.nodes ?? []).map((node) => ({
-    nodeId: node.placeId,
-    planBNodeId: previewPlanB && node.placeId === previewPlanB.targetPlaceId
-      ? previewPlanB.placeId
-      : node.planB?.placeId,
-  }));
+  const stops: MapRouteStop[] = (plan.days[dayIndex]?.nodes ?? []).map((node) => {
+    if (previewPlanB && node.placeId === previewPlanB.targetPlaceId) {
+      return { nodeId: node.placeId, planBNodeId: previewPlanB.placeId, isPlanBPreview: true };
+    }
+    return { nodeId: node.placeId, planBNodeId: node.planB?.placeId };
+  });
   if (previewPlaceId) stops.push({ nodeId: previewPlaceId });
   if (plan.accommodationPlaceId && stops.length > 0) {
     const lodging = { nodeId: plan.accommodationPlaceId };

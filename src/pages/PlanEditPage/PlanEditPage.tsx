@@ -77,6 +77,7 @@ export default function PlanEditPage() {
   const [isAiDraftConfirmOpen, setIsAiDraftConfirmOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isReviewing, setIsReviewing] = useState(false);
+  const [hasFinishedPlan, setHasFinishedPlan] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
   const [isSearchingLodging, setIsSearchingLodging] = useState(false);
   const [lodgingResult, setLodgingResult] = useState<PlaceSearchResult>();
@@ -196,7 +197,10 @@ export default function PlanEditPage() {
     createLodging.reset();
     setDayIndex(nextDayIndex);
     setStep(nextStep);
-    if (nextStep !== 'nodes') setIsReviewing(false);
+    if (nextStep !== 'nodes') {
+      setIsReviewing(false);
+      setHasFinishedPlan(false);
+    }
     setCategory('all');
     setZoneError(null);
     setPendingZone(getDayZone(plan.days[nextDayIndex]));
@@ -214,7 +218,11 @@ export default function PlanEditPage() {
       if (isSearchingLodging) return setIsSearchingLodging(false);
       return goToDay(dayIndex);
     }
-    if (isReviewing) return setIsReviewing(false);
+    if (isReviewing) {
+      setIsReviewing(false);
+      setHasFinishedPlan(false);
+      return;
+    }
     if (currentStep === 'nodes') return goToStep('zone');
     if (currentStep === 'zone' && dayIndex > 0) return goToDay(dayIndex - 1);
     const returnTo = (location.state as { returnTo?: string } | null)?.returnTo;
@@ -246,16 +254,18 @@ export default function PlanEditPage() {
   const selectedNode = day.nodes.find((node) => node.placeId === selectedId);
   const isSelectedLodging = currentStep === 'nodes' && selectedId !== null && selectedId === plan.accommodationPlaceId;
   const planBTargetIndex = day.nodes.findIndex((node) => node.placeId === planBTargetId);
+  const planBStopNumber = planBTargetIndex + 1 + Number(Boolean(plan.accommodationPlaceId));
   const planBTargetPlace = places.find((place) => place.id === planBTargetId);
   const canPreviewPlace = currentStep === 'nodes' && selectedPlace && !isSelectedLodging && !dayPlaceIds.has(selectedPlace.id);
-  const canPreviewPlanB = selectedPlace && planBTargetPlace && canSetPlanB(plan, dayIndex, planBTargetPlace, selectedPlace);
+  const canPreviewPlanB = Boolean(canPreviewPlace && selectedPlace && findOtherDayNumber(plan, dayIndex, selectedPlace.id) === undefined);
+  const canSavePlanB = selectedPlace && planBTargetPlace && canSetPlanB(plan, dayIndex, planBTargetPlace, selectedPlace);
   const route = currentStep === 'nodes'
     ? buildPlanningRoute(plan, dayIndex, {
         previewPlaceId: isPreviewing && canPreviewPlace && !planBTargetId ? selectedPlace.id : undefined,
-        previewPlanB: isPreviewing && canPreviewPlanB && planBTargetId
+        previewPlanB: selectedPlace && canPreviewPlanB && planBTargetId
           ? { targetPlaceId: planBTargetId, placeId: selectedPlace.id }
           : undefined,
-        isClosed: isReviewing,
+        isClosed: hasFinishedPlan,
       })
     : undefined;
   const searchedLodgingPhoto = lodgingResult && lodgingPlaces.find((place) =>
@@ -271,7 +281,7 @@ export default function PlanEditPage() {
         return {
           ...node,
           isDot,
-          categoryIcon: currentStep === 'nodes' && !isPinned && !(isPreviewing && selectedId === node.id)
+          categoryIcon: currentStep === 'nodes' && !isPinned && !((isPreviewing || canPreviewPlanB && planBTargetId) && selectedId === node.id)
             ? place && CATEGORIES[place.category].icon?.src
             : undefined,
           isMuted: currentStep === 'nodes' && !isPinned && findOtherDayNumber(plan, dayIndex, node.id) !== undefined,
@@ -293,7 +303,7 @@ export default function PlanEditPage() {
   };
 
   const selectPlace = (placeId: string) => {
-    if (currentStep === 'zone' || lodgingResult) return;
+    if (currentStep === 'zone' || lodgingResult || isReviewing) return;
     const place = visiblePlaces.find((item) => item.id === placeId);
     if (!place) return;
     if (currentStep === 'nodes' && category !== 'all' && place.category !== category && !dayPlaceIds.has(placeId) && placeId !== lodgingPlace?.id) {
@@ -373,11 +383,10 @@ export default function PlanEditPage() {
   };
 
   const addPlanB = () => {
-    if (!planBTargetId || !selectedId || !canPreviewPlanB) return;
+    if (!planBTargetId || !selectedId || !canSavePlanB) return;
     void save(setPlanB(plan, dayIndex, planBTargetId, selectedId), () => {
-      setToastMessage(`${planBTargetIndex + 1}번 장소의 플랜 B를 정했어요.`);
-      setPlanBTargetId(null);
-      browsePlace(planBTargetId);
+      setToastMessage(`${planBStopNumber}번 장소의 플랜 B를 정했어요.`);
+      resetSelection();
     });
   };
 
@@ -413,7 +422,7 @@ export default function PlanEditPage() {
       return <Button aria-disabled={!selectedZone} onClick={confirmZone}>다음</Button>;
     }
     if (isPreviewing && planBTargetId) {
-      return <Button disabled={!canPreviewPlanB || Boolean(saveError)} onClick={addPlanB}>{planBTargetIndex + 1}번 장소의 플랜 B로 추가</Button>;
+      return <Button disabled={!canSavePlanB || Boolean(saveError)} onClick={addPlanB}>{planBStopNumber}번 장소의 플랜 B로 추가</Button>;
     }
     if (isPreviewing && canPreviewPlace) {
       return <Button disabled={Boolean(saveError)} onClick={confirmSelectedPlace}>이 장소로 확정</Button>;
@@ -421,9 +430,17 @@ export default function PlanEditPage() {
     if (selectedPlace && !isSelectedLodging) return null;
     if (planBTargetId) return <Button variant="outline" onClick={resetSelection}>취소</Button>;
     if (isReviewing) {
-      return <Button onClick={() => {
-        void save(completePlanDay(plan, plan.days.length - 1), () => navigate(`/plans/${plan.id}`, { replace: true }));
-      }}>여행계획 완성</Button>;
+      return hasFinishedPlan
+        ? (
+          <Button onClick={() => navigate(`/plans/${plan.id}`, { replace: true, state: { dayIndex, category } })}>
+            여행계획 보기
+          </Button>
+        )
+        : (
+          <Button onClick={() => {
+            void save(completePlanDay(plan, plan.days.length - 1), () => setHasFinishedPlan(true));
+          }}>여행계획 완성</Button>
+        );
     }
     return <Button disabled={day.nodes.length === 0} onClick={handleCompleteDay}>{dayIndex + 1}일차 완성</Button>;
   };
@@ -512,8 +529,7 @@ export default function PlanEditPage() {
           selectedNodeId={lodgingResult?.googlePlaceId ?? selectedId}
           route={route}
           isPlanning
-          isAddingPlanB={planBTargetId !== null}
-          highlightedNodeId={isPreviewing && !isReviewing ? selectedId : lodgingResult?.googlePlaceId}
+          highlightedNodeId={hasFinishedPlan ? day.nodes.at(-1)?.placeId : isPreviewing ? selectedId : lodgingResult?.googlePlaceId}
           enlargeSelectedNode={Boolean(isLodgingConfirmation)}
           onSelectNode={selectPlace}
           onClickMap={() => {
@@ -528,7 +544,7 @@ export default function PlanEditPage() {
         {planBTargetId && !selectedPlace && (
           <p className={styles.notice}>{planBTargetIndex + 1}번 장소 대신 갈 곳을 지도에서 골라 주세요.</p>
         )}
-        {planBTargetId && selectedPlace && selectedPlace.category !== planBTargetPlace?.category && (
+        {planBTargetId && selectedPlace && canPreviewPlanB && !canSavePlanB && (
           <p className={styles.notice}>플랜 B는 같은 종류의 장소만 넣을 수 있어요.</p>
         )}
         {placesStatus === 'loading' && (

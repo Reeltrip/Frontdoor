@@ -34,7 +34,6 @@ export type MapViewProps = {
   className?: string;
   /** 여행계획 편집에서 쓰는 동선 색과 사진 핀 상태 */
   isPlanning?: boolean;
-  isAddingPlanB?: boolean;
   highlightedNodeId?: string | null;
   enlargeSelectedNode?: boolean;
 };
@@ -72,40 +71,49 @@ type MapRouteLinesProps = {
   nodes: MapNode[];
   route: MapRouteStop[];
   isPlanning?: boolean;
-  isAddingPlanB?: boolean;
 };
 
-function MapRouteLines({ nodes, route, isPlanning, isAddingPlanB }: MapRouteLinesProps) {
-  const { mainPath, planBPaths } = useMemo(() => buildRoutePaths(nodes, route), [nodes, route]);
+function MapRouteLines({ nodes, route, isPlanning }: MapRouteLinesProps) {
+  const { mainPaths, inactivePaths, previewPath } = useMemo(() => buildRoutePaths(nodes, route), [nodes, route]);
   const colors = useMemo(
     () => ({
-      main: readColorToken(isPlanning && !isAddingPlanB ? '--color-plan-route' : '--color-gray-900'),
-      planB: readColorToken(isAddingPlanB ? '--color-plan-route' : '--color-lime-600'),
+      main: readColorToken(isPlanning ? '--color-plan-route' : '--color-gray-900'),
+      dash: readColorToken('--color-surface'),
+      shadow: readColorToken('--color-gray-900'),
     }),
-    [isPlanning, isAddingPlanB],
+    [isPlanning],
   );
+
+  const dash = {
+    path: 'M 0,-1 0,1',
+    strokeColor: colors.dash,
+    strokeWeight: ROUTE_STROKE_WEIGHT,
+    strokeOpacity: 1,
+    scale: 3.5,
+  };
+  const repeat = '15px';
 
   return (
     <>
-      {/* 추가할 때는 플랜 B가 기존 선과 겹쳐도 보이도록 위에 그려요. */}
-      {planBPaths.map((path, index) => (
+      {inactivePaths.map((path, index) => (
         <Polyline
           key={index}
           path={path}
-          strokeColor={colors.planB}
-          strokeWeight={ROUTE_STROKE_WEIGHT}
-          zIndex={isAddingPlanB ? 2 : 1}
+          strokeColor={colors.dash}
+          strokeOpacity={0}
+          icons={[
+            { icon: { ...dash, strokeColor: colors.shadow, strokeWeight: 6, strokeOpacity: 0.28 }, offset: '0', repeat },
+            { icon: dash, offset: '0', repeat },
+          ]}
+          zIndex={1}
           clickable={false}
         />
       ))}
-      {mainPath.length > 1 && (
-        <Polyline
-          path={mainPath}
-          strokeColor={colors.main}
-          strokeWeight={ROUTE_STROKE_WEIGHT}
-          zIndex={isAddingPlanB ? 1 : 2}
-          clickable={false}
-        />
+      {mainPaths.map((path, index) => (
+        <Polyline key={index} path={path} strokeColor={colors.main} strokeWeight={ROUTE_STROKE_WEIGHT} zIndex={2} clickable={false} />
+      ))}
+      {previewPath && (
+        <Polyline path={previewPath} strokeColor={colors.main} strokeWeight={ROUTE_STROKE_WEIGHT} zIndex={3} clickable={false} />
       )}
     </>
   );
@@ -120,13 +128,14 @@ function MapContent({
   onSelectNode,
   onClickMap,
   isPlanning,
-  isAddingPlanB,
   highlightedNodeId,
   enlargeSelectedNode = !isPlanning,
 }: Omit<MapViewProps, 'className'>) {
   const loadingStatus = useApiLoadingStatus();
   const hasAuthFailed = useMapAuthFailure();
-  const routeIds = new Set(route?.flatMap(({ nodeId, planBNodeId }) => planBNodeId ? [nodeId, planBNodeId] : [nodeId]));
+  const routeIds = new Set(route?.map((stop) => stop.isPlanBPreview ? stop.planBNodeId : stop.nodeId));
+  const inactiveIds = new Set(route?.map((stop) => stop.isPlanBPreview ? stop.nodeId : stop.planBNodeId));
+  const previewId = route?.find((stop) => stop.isPlanBPreview)?.planBNodeId;
 
   if (hasAuthFailed || loadingStatus === APILoadingStatus.FAILED) {
     return <MapStatus status="error" />;
@@ -145,7 +154,7 @@ function MapContent({
         className={styles.map}
       >
         <MapCamera center={center} zoom={zoom} />
-        {route && <MapRouteLines nodes={nodes} route={route} isPlanning={isPlanning} isAddingPlanB={isAddingPlanB} />}
+        {route && <MapRouteLines nodes={nodes} route={route} isPlanning={isPlanning} />}
         {nodes.map((node) => {
           const isSelected = node.id === selectedNodeId;
           const isOnRoute = routeIds.has(node.id);
@@ -165,7 +174,8 @@ function MapContent({
                 isMuted={node.isMuted}
                 isPlanning={isPlanning}
                 isOnRoute={isOnRoute}
-                isHighlighted={node.id === highlightedNodeId}
+                isInactiveRoute={inactiveIds.has(node.id)}
+                isHighlighted={node.id === (previewId ?? highlightedNodeId)}
                 isDot={node.isDot}
                 categoryIcon={node.categoryIcon}
               />
