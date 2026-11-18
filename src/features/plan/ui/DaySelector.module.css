@@ -81,3 +81,23 @@
 .date {
   color: var(--color-gray-500);
 }
+
+.compact .menu {
+  top: 0;
+  left: -7px;
+  z-index: -1;
+  min-width: 94px;
+  padding: 44px 6px 4px;
+  background: rgba(254, 254, 254, 0.82);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(254, 254, 254, 0.7);
+}
+
+.compact .trigger {
+  position: relative;
+  z-index: 1;
+}
+
+.compact {
+  z-index: 1;
+}

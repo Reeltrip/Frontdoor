@@ -12,6 +12,8 @@ export type MapNode = {
   position: MapPosition;
   /** 다른 일자에 이미 들어간 노드는 회색으로 */
   isMuted?: boolean;
+  isDot?: boolean;
+  categoryIcon?: string;
 };
 
 /** 동선의 한 지점. 배열 순서가 확정한 순서예요 */
@@ -19,4 +21,5 @@ export type MapRouteStop = {
   nodeId: string;
   /** 이 지점 대신 갈 수 있는 플랜B 노드. 앞 지점에서 갈라져 다음 지점에서 합쳐져요 */
   planBNodeId?: string;
+  isPlanBPreview?: boolean;
 };

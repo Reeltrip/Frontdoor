@@ -32,28 +32,78 @@
   color: var(--color-gray-500);
 }
 
-/* 여행목록과 같은 높이에 제목이 오게 해요. 뒤로가기 줄(56px)이 안쪽 여백이 9px이라 39px이에요 */
 .top {
   position: relative;
   z-index: 3;
   flex-shrink: 0;
-  padding: max(39px, env(safe-area-inset-top)) 0 8px;
-  background: var(--color-white);
+  /* 제목이 여행목록과 같은 높이(48px)에 오게 해요. 머리줄 안쪽 여백이 9px이라 39px이에요 */
+  padding: max(39px, env(safe-area-inset-top)) 0 0;
+  background: var(--color-bg);
 }
 
-.aiDraftButton {
-  position: absolute;
-  top: max(42px, calc(env(safe-area-inset-top) + 3px));
-  right: 18px;
-  z-index: 4;
-  padding: 7px 11px;
-  border: 1px solid var(--color-gray-200);
-  border-radius: 20px;
-  background: var(--color-white);
-  font: var(--font-caption);
-  letter-spacing: var(--tracking);
-  color: var(--color-gray-700);
+.top > header {
+  padding-top: 0;
+}
+
+.top > header > button {
+  display: grid;
+  width: 42px;
+  height: 44px;
+  place-items: center;
+}
+
+.top > header > button img {
+  width: 10px;
+  height: 17px;
+}
+
+.menuWrap {
+  position: relative;
+  margin-right: -10px;
+}
+
+.moreButton {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: transparent;
   cursor: pointer;
+}
+
+.moreButton img {
+  display: block;
+}
+
+.menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 6;
+  display: grid;
+  min-width: max-content;
+  padding: 6px;
+  border-radius: 14px;
+  background: var(--color-surface);
+  box-shadow: 0 0 20px rgba(26, 26, 26, 0.16);
+}
+
+.menu button {
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-gray-900);
+  font: var(--font-body2);
+  text-align: left;
+  cursor: pointer;
+}
+
+.menu button:is(:hover, :focus-visible) {
+  background: var(--color-gray-50);
 }
 
 .aiDraftLoading {
@@ -75,7 +125,7 @@
 .toolbar {
   display: flex;
   align-items: center;
-  margin-top: 4px;
+  margin-top: 7px;
   padding-left: 20px;
 }
 
@@ -84,8 +134,13 @@
   min-width: 0;
 }
 
+.filter > div > div {
+  padding-left: 19px;
+}
+
 .mapArea {
   position: relative;
+  z-index: 0;
   flex: 1;
   min-height: 0;
 }
@@ -93,6 +148,15 @@
 .map {
   position: absolute;
   inset: 0;
+}
+
+.mapArea::after {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 32px;
+  background: linear-gradient(var(--color-bg), transparent);
+  pointer-events: none;
+  content: '';
 }
 
 .notice,
@@ -120,12 +184,12 @@
   transform: translateX(-50%);
 }
 
-/* 피그마 '일자 · 구역 선택_예외'의 붉은 안내 띠. 디자인 토큰에 맞는 빨강이 없어 --color-error를 써요 */
 .errorBanner {
-  padding: 8px 12px;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--color-error) 18%, transparent);
-  color: var(--color-error);
+  top: 0;
+  padding: 8px 20px;
+  border-radius: 16px;
+  background: rgba(210, 117, 89, 0.16);
+  color: #93472f;
   text-align: left;
 }
 
@@ -144,7 +208,6 @@
   z-index: 2;
   display: flex;
   flex-direction: column;
-  gap: 12px;
   pointer-events: none;
 }
 
@@ -154,6 +217,8 @@
 
 .strip {
   width: 100%;
+  padding-bottom: calc(var(--home-bar-height) - 4px);
+  background: linear-gradient(to top, var(--color-bg), transparent 70%);
 }
 
 /* 피그마: 아래쪽은 흰색 그라데이션 위에 버튼 */
@@ -166,33 +231,44 @@
   background: linear-gradient(to top, var(--color-white) 64%, rgba(250, 250, 250, 0));
 }
 
-/* 안내가 떠 있을 때: 어두운 막(z 5) 위로 올리고, 흰 그라데이션 대신 버튼에 빛을 줘요 */
-.bottomRaised {
-  z-index: 6;
-}
-
-.actionsOnTutorial {
-  background: none;
-}
-
-.actionsOnTutorial button {
-  box-shadow: 0 0 24px 4px rgba(254, 254, 254, 0.45);
-}
-
 .bottom > section + .actions {
-  margin-top: -12px;
   padding-top: 0;
   background: var(--color-surface);
 }
 
-.textButton {
-  padding: 4px 8px;
-  border: 0;
-  background: none;
+.lodgingSheet {
+  position: relative;
+  padding: 28px 20px 14px;
+  border-radius: 12px 12px 0 0;
+  background: var(--color-surface);
+  box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.03);
+}
+
+.handle {
+  display: block;
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.lodgingSheet h2,
+.lodgingSheet p {
+  margin: 0;
   font: var(--font-body2);
   letter-spacing: var(--tracking);
-  color: var(--color-gray-400);
-  cursor: pointer;
+}
+
+.lodgingSheet h2 {
+  font-weight: 600;
+}
+
+.lodgingSheet p {
+  color: var(--color-gray-500);
+}
+
+.lodgingSheet p[role='alert'] {
+  color: var(--color-error);
 }
 
 .saveError {

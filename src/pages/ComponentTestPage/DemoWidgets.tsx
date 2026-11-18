@@ -107,7 +107,7 @@ export function ToastDemo() {
   );
 }
 
-export function CategoryDialDemo() {
+export function CategoryDialDemo({ variant }: { variant?: "summary" }) {
   const [activeIndex, setActiveIndex] = useState(DEMO_RESULT_INITIAL_INDEX);
   return (
     <div
@@ -122,6 +122,7 @@ export function CategoryDialDemo() {
         items={DEMO_RESULT_CATEGORIES}
         activeIndex={activeIndex}
         onChange={setActiveIndex}
+        variant={variant}
       />
     </div>
   );

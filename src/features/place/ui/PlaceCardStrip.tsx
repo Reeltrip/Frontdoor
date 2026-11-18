@@ -8,6 +8,9 @@ type PlaceCardStripProps = {
   places: Place[];
   selectedId: string | null;
   onSelect: (placeId: string) => void;
+  onPick?: (placeId: string) => void;
+  isPlanCard?: boolean;
+  isWide?: boolean;
   /** 없으면 삭제 버튼을 그리지 않아요 (여행계획 편집처럼 삭제가 없는 화면) */
   onDelete?: (place: Place) => void;
   onOpen?: (place: Place) => void;
@@ -22,13 +25,15 @@ export type PlaceNodeActions = {
   onRemove: () => void;
 };
 
-const ITEM_STEP_PX = 320;
 const SETTLE_MS = 120;
 
 export default function PlaceCardStrip({
   places,
   selectedId,
   onSelect,
+  onPick,
+  isPlanCard = false,
+  isWide = false,
   onDelete,
   onOpen,
   onCopy,
@@ -40,10 +45,10 @@ export default function PlaceCardStrip({
   useEffect(() => {
     const index = places.findIndex((place) => place.id === selectedId);
     if (index < 0) return;
-    scrollerRef.current?.scrollTo({
-      left: index * ITEM_STEP_PX,
-      behavior: "smooth",
-    });
+    const scroller = scrollerRef.current;
+    const item = scroller?.children[index] as HTMLElement | undefined;
+    const first = scroller?.firstElementChild as HTMLElement | null;
+    if (item && first) scroller?.scrollTo({ left: item.offsetLeft - first.offsetLeft, behavior: "instant" });
   }, [places, selectedId]);
 
   useEffect(() => () => window.clearTimeout(settleTimerRef.current), []);
@@ -53,23 +58,26 @@ export default function PlaceCardStrip({
     settleTimerRef.current = window.setTimeout(() => {
       const scroller = scrollerRef.current;
       if (!scroller) return;
-      const index = Math.min(
-        Math.max(Math.round(scroller.scrollLeft / ITEM_STEP_PX), 0),
-        places.length - 1,
-      );
+      const items = Array.from(scroller.children) as HTMLElement[];
+      const start = items[0]?.offsetLeft ?? 0;
+      const index = items.reduce((nearest, item, i) =>
+        Math.abs(item.offsetLeft - start - scroller.scrollLeft) <
+        Math.abs(items[nearest].offsetLeft - start - scroller.scrollLeft) ? i : nearest, 0);
       const place = places[index];
       if (place && place.id !== selectedId) onSelect(place.id);
     }, SETTLE_MS);
   };
 
   return (
-    <div ref={scrollerRef} className={styles.strip} onScroll={handleScroll}>
+    <div ref={scrollerRef} className={`${styles.strip} ${isPlanCard ? styles.planStrip : ""} ${isWide ? styles.wideStrip : ""}`} onScroll={handleScroll}>
       {places.map((place) => {
         const nodeActions = getNodeActions?.(place);
         return (
           <div key={place.id} className={styles.item}>
             <PlaceCardCompact
               place={place}
+              className={isPlanCard ? styles.planCard : undefined}
+              onPick={onPick && ((picked) => onPick(picked.id))}
               onOpen={onOpen}
               onCopy={onCopy}
               planBLabel={nodeActions?.planBLabel}

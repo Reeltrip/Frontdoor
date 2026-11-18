@@ -397,7 +397,10 @@ export const componentDemos: ComponentDemo[] = [
     name: "CategoryDial",
     path: "features/place/ui/CategoryDial",
     description: "좌우로 끌어서 돌리는 카테고리 다이얼. 눈금이 같이 돌아감",
-    variants: [{ label: "기본", render: () => <CategoryDialDemo /> }],
+    variants: [
+      { label: "기본", render: () => <CategoryDialDemo /> },
+      { label: "요약 카드 자세히 보기", render: () => <CategoryDialDemo variant="summary" /> },
+    ],
   },
   {
     name: "RecentCollectionCard",
@@ -437,6 +440,16 @@ export const componentDemos: ComponentDemo[] = [
             <MapMarker imageUrl={sampleDonut} name="I'm donut?" />
             <MapMarker imageUrl={sampleDonut} name="I'm donut?" size="lg" />
             <MapMarker imageUrl={sampleDonut} name="I'm donut?" isMuted />
+          </div>
+        ),
+      },
+      {
+        label: "여행계획 동선 · 미리보기 · 다른 카테고리",
+        render: () => (
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 28, padding: "12px 16px 32px" }}>
+            <MapMarker imageUrl={sampleDonut} name="확정한 장소" isPlanning isOnRoute />
+            <MapMarker imageUrl={sampleDonut} name="확정 전 미리보기" isPlanning isHighlighted />
+            <MapMarker imageUrl={sampleDonut} name="다른 카테고리 장소" isPlanning isDot />
           </div>
         ),
       },
