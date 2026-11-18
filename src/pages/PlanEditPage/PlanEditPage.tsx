@@ -254,7 +254,8 @@ export default function PlanEditPage() {
   const selectedNode = day.nodes.find((node) => node.placeId === selectedId);
   const isSelectedLodging = currentStep === 'nodes' && selectedId !== null && selectedId === plan.accommodationPlaceId;
   const planBTargetIndex = day.nodes.findIndex((node) => node.placeId === planBTargetId);
-  const planBStopNumber = planBTargetIndex + 1 + Number(Boolean(plan.accommodationPlaceId));
+  // 숙소는 번호를 매기지 않아요. 안내문·버튼·토스트가 같은 번호를 쓰고, 첫 장소가 1번이에요
+  const planBStopNumber = planBTargetIndex + 1;
   const planBTargetPlace = places.find((place) => place.id === planBTargetId);
   const canPreviewPlace = currentStep === 'nodes' && selectedPlace && !isSelectedLodging && !dayPlaceIds.has(selectedPlace.id);
   const canPreviewPlanB = Boolean(canPreviewPlace && selectedPlace && findOtherDayNumber(plan, dayIndex, selectedPlace.id) === undefined);
@@ -542,7 +543,7 @@ export default function PlanEditPage() {
           </p>
         )}
         {planBTargetId && !selectedPlace && (
-          <p className={styles.notice}>{planBTargetIndex + 1}번 장소 대신 갈 곳을 지도에서 골라 주세요.</p>
+          <p className={styles.notice}>{planBStopNumber}번 장소 대신 갈 곳을 지도에서 골라 주세요.</p>
         )}
         {planBTargetId && selectedPlace && canPreviewPlanB && !canSavePlanB && (
           <p className={styles.notice}>플랜 B는 같은 종류의 장소만 넣을 수 있어요.</p>
