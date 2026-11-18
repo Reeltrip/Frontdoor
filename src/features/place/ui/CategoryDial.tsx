@@ -12,6 +12,7 @@ type CategoryDialProps = {
   onChange: (index: number) => void;
   isRaised?: boolean;
   isTickHidden?: boolean;
+  variant?: "default" | "summary";
   hasGlow?: boolean;
 };
 
@@ -37,6 +38,7 @@ export default function CategoryDial({
   onChange,
   isRaised = false,
   isTickHidden = false,
+  variant = "default",
   hasGlow = false,
 }: CategoryDialProps) {
   const { position, isDragging, handlers } = useDragStepper({
@@ -61,6 +63,7 @@ export default function CategoryDial({
         styles.dial,
         isRaised && styles.raised,
         isTickHidden && styles.tickHidden,
+        variant === "summary" && styles.summary,
         hasGlow && styles.glow,
       ]
         .filter(Boolean)

@@ -397,7 +397,10 @@ export const componentDemos: ComponentDemo[] = [
     name: "CategoryDial",
     path: "features/place/ui/CategoryDial",
     description: "좌우로 끌어서 돌리는 카테고리 다이얼. 눈금이 같이 돌아감",
-    variants: [{ label: "기본", render: () => <CategoryDialDemo /> }],
+    variants: [
+      { label: "기본", render: () => <CategoryDialDemo /> },
+      { label: "요약 카드 자세히 보기", render: () => <CategoryDialDemo variant="summary" /> },
+    ],
   },
   {
     name: "RecentCollectionCard",
