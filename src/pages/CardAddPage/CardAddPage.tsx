@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import backIcon from "@/shared/assets/icons/back-arrow.svg";
 import Button from "@/shared/components/Button";
@@ -6,6 +6,10 @@ import ConfirmModal from "@/shared/components/ConfirmModal";
 import PlaceFeatureForm from "@/features/place/ui/PlaceFeatureForm";
 import CategoryDial from "@/features/place/ui/CategoryDial";
 import DialTutorial from "@/features/place/ui/DialTutorial";
+import AnalysisSteps from "@/features/source/ui/AnalysisSteps";
+import { LoadingBlob } from "@/shared/components/Loading";
+import { useProfile } from "@/features/account/model/useAccount";
+import analyzingStyles from "@/pages/LinkAnalyzingPage/LinkAnalyzingPage.module.css";
 import { readClipboardLink } from "@/features/source/lib/readClipboardLink";
 import type { AnalyzingState } from "@/features/source/model/source.types";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -61,6 +65,14 @@ const PROGRESS_PERCENTS: Record<CardAddStep, number> = {
   features: 80,
 };
 
+// 저장이 금방 끝나도 '카드를 만들고 있어요' 화면이 깜빡이고 사라지지 않게 최소 시간을 둬요
+const MIN_CREATING_MS = 1500;
+const CREATING_STEP_MS = 500;
+const CREATING_STEPS = ["입력한 내용 확인 중", "사진 올리는 중", "요약 카드 마무리 중"];
+const DEFAULT_NICKNAME = "여행자";
+
+const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
+
 export default function CardAddPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState<CardAddStep>("category");
@@ -79,7 +91,7 @@ export default function CardAddPage() {
   // 팁 카드는 지도에 올리지 않아서 좌표와 사진이 없어도 돼요
   const isTip = category === "tip";
 
-  const saveCard = useMutation({
+  const createCard = useMutation({
     mutationFn: async () => {
       const imageUrl = features.photoFile
         ? await uploadImage(features.photoFile)
@@ -111,6 +123,10 @@ export default function CardAddPage() {
           };
       return createPlaces([card]);
     },
+  });
+  const saveCard = useMutation({
+    // 실패하면 기다리지 않고 바로 입력 화면으로 돌아가요
+    mutationFn: async () => (await Promise.all([createCard.mutateAsync(), wait(MIN_CREATING_MS)]))[0],
     onSuccess: async (result) => {
       saveLastResult({ placeIds: result.placeIds, title: null });
       await queryClient.invalidateQueries({ queryKey: placeKeys.all });
@@ -121,7 +137,22 @@ export default function CardAddPage() {
   const [isImportModalOpen, setIsImportModalOpen] = useState(true);
   const [isTutorialOpen, setIsTutorialOpen] = useState(false);
 
+  const nickname = useProfile().data?.nickname ?? DEFAULT_NICKNAME;
+  const [creatingStep, setCreatingStep] = useState(0);
+
   const nameRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (!saveCard.isPending) return;
+    const timer = window.setInterval(
+      () => setCreatingStep((prev) => Math.min(prev + 1, CREATING_STEPS.length - 1)),
+      CREATING_STEP_MS,
+    );
+    return () => {
+      window.clearInterval(timer);
+      setCreatingStep(0);
+    };
+  }, [saveCard.isPending]);
 
   useLayoutEffect(() => {
     const element = nameRef.current;
@@ -198,6 +229,28 @@ export default function CardAddPage() {
     setAddress(picked.address ?? picked.name);
     setResults(null);
   };
+
+  // 피그마 '카드 직접 추가' 마지막 화면. 링크 분석 중 화면과 같은 모양이에요
+  if (saveCard.isPending) {
+    return (
+      <main className={analyzingStyles.page} role="status">
+        <header className={analyzingStyles.header}>
+          <h1 className={analyzingStyles.title}>
+            {nickname}님이 입력하신 내용으로
+            <br />
+            카드를 만들고 있어요 !
+          </h1>
+          <p className={analyzingStyles.description}>잠시만 기다려주세요...</p>
+        </header>
+        <div className={analyzingStyles.loading}>
+          <LoadingBlob />
+        </div>
+        <div className={analyzingStyles.steps}>
+          <AnalysisSteps steps={CREATING_STEPS} currentStep={creatingStep} />
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className={styles.page}>
