@@ -2,7 +2,6 @@ import openIcon from '@/shared/assets/icons/open-arrow-compact.svg';
 import trashIcon from '@/shared/assets/icons/trash-compact.svg';
 import copyIcon from '@/shared/assets/icons/copy-dark.svg';
 import { displayOrDash } from '@/shared/lib/displayValue';
-import { getPlaceSourceUrl } from '../lib/placeActions';
 import type { Place } from '../model/place.types';
 import styles from './PlaceCardCompact.module.css';
 
@@ -30,7 +29,6 @@ export default function PlaceCardCompact({
   className,
 }: PlaceCardCompactProps) {
   const name = displayOrDash(place.name);
-  const hasSource = getPlaceSourceUrl(place) !== undefined;
 
   return (
     <article className={[styles.card, className].filter(Boolean).join(' ')}>
@@ -52,17 +50,14 @@ export default function PlaceCardCompact({
             <img src={trashIcon} alt="" />
           </button>
         )}
-        {/* 원본 링크가 없는 카드는 ↗ 버튼을 숨겨요 */}
-        {hasSource && (
-          <button
-            type="button"
-            className={styles.openButton}
-            onClick={() => onOpen?.(place)}
-            aria-label={`${name} 원본 링크 새 탭에서 열기`}
-          >
-            <img src={openIcon} alt="" />
-          </button>
-        )}
+        <button
+          type="button"
+          className={styles.openButton}
+          onClick={() => onOpen?.(place)}
+          aria-label={`${name} 원본 링크 새 탭에서 열기`}
+        >
+          <img src={openIcon} alt="" />
+        </button>
       </div>
 
       <div className={styles.titleRow}>

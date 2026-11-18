@@ -2,7 +2,6 @@ import { Fragment, type KeyboardEvent } from "react";
 import openIcon from "@/shared/assets/icons/open-arrow.svg";
 import copyIcon from "@/shared/assets/icons/copy-light.svg";
 import { PLACE_EDIT_MAX_LENGTH, type PlaceDraft } from "../model/placeEdit";
-import { getPlaceSourceUrl } from "../lib/placeActions";
 import type { Place } from "../model/place.types";
 import cardStyles from "./PlaceCard.module.css";
 import styles from "./PlaceEditCard.module.css";
@@ -72,12 +71,9 @@ export default function PlaceEditCard({
       <img src={place.imageUrl} alt="" className={cardStyles.photo} />
       <span className={cardStyles.shade} aria-hidden />
 
-      {/* 보기 카드와 같은 자리를 지키는 장식. 원본 링크가 없으면 보기 카드처럼 숨겨요 */}
-      {getPlaceSourceUrl(place) && (
-        <span className={cardStyles.openButton} aria-hidden>
-          <img src={openIcon} alt="" />
-        </span>
-      )}
+      <span className={cardStyles.openButton} aria-hidden>
+        <img src={openIcon} alt="" />
+      </span>
 
       <div className={cardStyles.info}>
         <div className={cardStyles.titleRow}>
