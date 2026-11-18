@@ -44,7 +44,6 @@
   --app-max-width: none;
 
   /* 지도 노드 마커 배경 */
-  --color-marker-bg: #c9da8a;
 
   /* 기존 이름 유지 (다른 화면에서 쓰는 중) */
   --color-bg: var(--color-gray-0);

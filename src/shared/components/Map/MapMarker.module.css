@@ -1,12 +1,15 @@
-/* 틀 크기는 피그마와 같고(65×76, 101×118), 흰 테두리 8px은 틀 바깥으로 나감 */
+/* 핀 틀은 65×76 또는 101×118이고, 테두리 8px은 틀 바깥으로 나가요. */
 .marker {
   --size: 65px;
+  --photo-size: calc(var(--size) * 0.85);
+  --selected-fill: #c9da8a;
   position: relative;
   width: var(--size);
   height: calc(var(--size) * 1.17);
   padding: 0;
   border: 0;
   background: none;
+  color: #fff;
   cursor: pointer;
   filter: drop-shadow(0 2px 6px rgba(26, 26, 26, 0.18));
   transition: filter 0.2s ease;
@@ -20,27 +23,31 @@
   --size: 101px;
 }
 
-/* 한 모서리만 각진 정사각형을 45도 돌려 물방울 모양을 만듦 */
 .pin {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: var(--size);
-  height: var(--size);
-  border-radius: 50% 50% 50% 0;
-  background: var(--color-marker-bg);
-  box-shadow: 0 0 0 8px var(--color-gray-0);
-  transform: rotate(-45deg);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: currentColor;
+  stroke: #fff;
+  stroke-width: 16px;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
 }
 
-/* 사진 둘레로 초록 배경이 살짝 보이게 안쪽으로 들임 */
-.photo {
+/* 사진과 카테고리 표시가 같은 원을 채워요. */
+.photo,
+.category {
   position: absolute;
-  top: calc(var(--size) * 0.08);
-  left: calc(var(--size) * 0.08);
-  width: calc(var(--size) * 0.84);
-  height: calc(var(--size) * 0.84);
+  top: calc(var(--size) * 0.2);
+  left: calc((var(--size) - var(--photo-size)) / 2);
+  width: var(--photo-size);
+  height: var(--photo-size);
   border-radius: 50%;
+}
+
+.photo {
   object-fit: cover;
 }
 
@@ -48,8 +55,8 @@
   filter: grayscale(1) opacity(0.6);
 }
 
-.planning:not(.onRoute, .highlighted) .pin {
-  background: var(--color-white);
+.selected {
+  color: var(--selected-fill);
 }
 
 .planning::after {
@@ -62,16 +69,10 @@
   height: 20px;
   border-radius: 50%;
   border: 4px solid var(--color-white);
-  background: var(--color-gray-900);
+  background: var(--color-white);
 }
 
-.onRoute::after,
-.highlighted::after {
-  border-color: var(--color-plan-route);
-  background: var(--color-plan-route);
-}
-
-.planning.highlighted::before {
+.planning.highlighted:not(.dot)::before {
   content: '';
   position: absolute;
   bottom: -40px;
@@ -99,17 +100,18 @@
   background: var(--color-gray-900);
 }
 
+.planning.selected.dot {
+  background: var(--selected-fill);
+  box-shadow: 0 0 0 2px var(--color-surface);
+}
+
 .dot::after {
   content: none;
 }
 
 .category {
-  position: absolute;
-  inset: 8% 8% auto;
   display: grid;
   place-items: center;
-  height: 72%;
-  border-radius: 50%;
   background: rgba(51, 51, 51, 0.52);
 }
 
