@@ -7,6 +7,12 @@ import CategoryDial from "@/features/place/ui/CategoryDial";
 import DialTutorial from "@/features/place/ui/DialTutorial";
 import EditTutorial from "@/features/place/ui/EditTutorial";
 import PlaceCarousel from "@/features/place/ui/PlaceCarousel";
+import {
+  COPY_DONE_MESSAGE,
+  COPY_FAILED_MESSAGE,
+  copyPlace,
+  openPlace,
+} from "@/features/place/lib/placeActions";
 import ConfirmModal from "@/shared/components/ConfirmModal";
 import Toast from "@/shared/components/Toast";
 import PlaceEditCard from "@/features/place/ui/PlaceEditCard";
@@ -129,6 +135,10 @@ export default function CardBrowsePage() {
     );
   };
 
+  const handleCopy = async (place: Place) => {
+    setToastMessage((await copyPlace(place)) ? COPY_DONE_MESSAGE : COPY_FAILED_MESSAGE);
+  };
+
   const handleEdit = () => {
     closeEditTutorial();
     if (activePlace) setDraft(toDraft(activePlace));
@@ -169,6 +179,10 @@ export default function CardBrowsePage() {
             activeIndex={placeIndex}
             onChange={setPlaceIndex}
             isLocked={isEditing}
+            onOpen={openPlace}
+            onCopy={handleCopy}
+            // 메모는 카드 편집에서 적어요
+            onAddMemo={handleEdit}
             renderCard={(place, isActive) =>
               isActive && draft ? (
                 <PlaceEditCard
@@ -189,6 +203,7 @@ export default function CardBrowsePage() {
           activeIndex={categoryIndex}
           onChange={handleCategoryChange}
           isRaised={isTutorialOpen}
+          variant="summary"
         />
       </div>
       {isEditing ? (

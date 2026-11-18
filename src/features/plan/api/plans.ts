@@ -33,6 +33,8 @@ type ApiPlanSummary = {
   city: string | null;
   status: ApiPlanStatus;
   coverImageUrl?: string | null;
+  /** 목록 응답에만 있어요 */
+  placeCount?: number;
 };
 
 type ApiNode = {
@@ -133,6 +135,8 @@ const toSummary = (plan: ApiPlanSummary): PlanSummary => ({
   endDate: plan.endDate,
   ...(plan.city ? { destination: plan.city } : {}),
   status: plan.status,
+  ...(plan.coverImageUrl ? { coverImageUrl: plan.coverImageUrl } : {}),
+  ...(typeof plan.placeCount === 'number' ? { placeCount: plan.placeCount } : {}),
 });
 
 const planPath = (id: string) => `/plans/${encodeURIComponent(id)}`;

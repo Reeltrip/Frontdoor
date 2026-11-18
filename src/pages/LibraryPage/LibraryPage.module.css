@@ -20,7 +20,7 @@
   align-items: center;
   justify-content: space-between;
   min-height: 56px;
-  padding: calc(env(safe-area-inset-top) + 84px) 16px 0 20px;
+  padding: var(--page-top) 16px 0 20px;
   margin-bottom: 18px;
 }
 
@@ -141,7 +141,7 @@
 .bottom {
   position: absolute;
   right: 0;
-  bottom: calc(24px + env(safe-area-inset-bottom));
+  bottom: calc(var(--home-bar-height) + 10px);
   left: 0;
   z-index: 2;
   display: flex;

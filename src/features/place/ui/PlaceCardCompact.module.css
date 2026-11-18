@@ -40,6 +40,37 @@
   height: 30px;
 }
 
+/* 피그마 'S4-5c 플랜 B 추가': 확정 카드 사진 위의 흰 알약과 휴지통 */
+.planBButton,
+.removeButton {
+  position: absolute;
+  top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 30px;
+  padding: 0;
+  border: 0;
+  background: var(--color-white);
+  color: var(--color-gray-900);
+  cursor: pointer;
+}
+
+.planBButton {
+  left: 12px;
+  padding: 0 12px;
+  border-radius: 15px;
+  font: 500 12px/1 var(--font-family);
+  letter-spacing: var(--tracking);
+  white-space: nowrap;
+}
+
+.removeButton {
+  right: 50px;
+  width: 30px;
+  border-radius: 50%;
+}
+
 .titleRow {
   display: flex;
   align-items: center;
@@ -100,4 +131,38 @@
   letter-spacing: var(--tracking);
   color: var(--color-gray-500);
   white-space: nowrap;
+}
+
+.pickButton {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.pickButton:focus-visible {
+  outline-offset: -4px;
+}
+
+.planBButton,
+.removeButton {
+  height: 38px;
+  border-radius: 22px;
+  background: rgba(51, 51, 51, 0.45);
+  color: var(--color-white);
+  backdrop-filter: blur(8px);
+}
+
+.planBButton {
+  left: 10px;
+  padding: 0 10px;
+  border: 1px solid rgba(254, 254, 254, 0.32);
+}
+
+.removeButton {
+  right: 46px;
+  width: 38px;
 }

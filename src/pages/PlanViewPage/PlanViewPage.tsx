@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useEffect, useRef, useState } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router';
 import { getErrorMessage } from '@/shared/api/client';
 import Button from '@/shared/components/Button';
 import Header from '@/shared/components/Header';
@@ -9,13 +9,13 @@ import editIcon from '@/shared/assets/icons/edit-circle.svg';
 import handleIcon from '@/shared/assets/icons/sheet-handle.svg';
 import { toMapNodes } from '@/features/place/lib/mapNodes';
 import { usePlaces } from '@/features/place/model/usePlaces';
-import type { Place } from '@/features/place/model/place.types';
+import CategoryFilterBar from '@/features/place/ui/CategoryFilterBar';
+import type { Place, PlaceCategory } from '@/features/place/model/place.types';
 import { hasAuthTokens } from '@/shared/lib/authToken';
 import { getDayZone } from '@/features/plan/lib/planZones';
 import { mergePlanPlaces } from '@/features/plan/model/planPlaces';
 import ShareSheet, { type ShareChannel } from '@/features/plan/ui/ShareSheet';
 import kebabIcon from '@/shared/assets/icons/kebab.svg';
-import { formatDayDate } from '@/features/plan/model/planDays';
 import { buildDayRoute } from '@/features/plan/model/planEdit';
 import { useCreateShareLink, usePlan } from '@/features/plan/model/usePlan';
 import type { ShareType } from '@/features/plan/model/plan.types';
@@ -25,6 +25,8 @@ import styles from './PlanViewPage.module.css';
 
 /** 아래 시트가 지도 아래쪽을 가려서, 동선 가운데보다 조금 남쪽을 지도 가운데로 잡아요 */
 const SHEET_LAT_OFFSET = 0.004;
+
+const DAY_FORMAT = new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric', weekday: 'short', timeZone: 'UTC' });
 
 const getRouteCenter = (places: Place[]): MapPosition | undefined => {
   const positions = places.flatMap((place) => (place.location ? [place.location] : []));
@@ -41,6 +43,7 @@ const getRouteCenter = (places: Place[]): MapPosition | undefined => {
 export default function PlanViewPage() {
   const { planId = '' } = useParams();
   const navigate = useNavigate();
+  const entry = useLocation().state as { dayIndex?: number; category?: PlaceCategory | 'all' } | null;
   const { plan, viewStatus, error, refetch } = usePlan(planId);
   // 공유 링크(/plan/{id})는 로그인 없이도 열려요. 그때는 보관함을 부르지 않고 계획에 든 카드로 그려요
   const isLoggedIn = hasAuthTokens();
@@ -51,9 +54,31 @@ export default function PlanViewPage() {
   const [shareType, setShareType] = useState<ShareType>('READ_ONLY');
   const [sharedUrl, setSharedUrl] = useState<string | null>(null);
   const [shareMessage, setShareMessage] = useState<string | null>(null);
-  const [dayIndex, setDayIndex] = useState(0);
-  const [isPlanBVisible, setIsPlanBVisible] = useState(false);
+  const [selectedDay, setSelectedDay] = useState(entry?.dayIndex ?? 0);
+  const [category, setCategory] = useState<PlaceCategory | 'all'>(entry?.category ?? 'all');
+  const [isPlanBVisible, setIsPlanBVisible] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // 메뉴 바깥을 누르거나 Esc를 누르면 닫아요 (보관함 ⋮ 메뉴와 같은 방식)
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) setIsMenuOpen(false);
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsMenuOpen(false);
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown, true);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown, true);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isMenuOpen]);
 
   if (viewStatus === 'loading') {
     return (
@@ -75,12 +100,15 @@ export default function PlanViewPage() {
     );
   }
 
-  const day = plan.days[dayIndex] ?? plan.days[0];
+  const dayIndex = Math.min(selectedDay, plan.days.length - 1);
+  const day = plan.days[dayIndex];
   const placeById = new Map(places.map((place) => [place.id, place]));
   const lodging = plan.accommodationPlaceId ? placeById.get(plan.accommodationPlaceId) : undefined;
   const editPath = `/plans/${plan.id}/edit`;
   // 읽기 전용으로 공유받았거나 로그인하지 않았으면 고치지 못해요
   const canEdit = isLoggedIn && plan.role !== undefined && plan.role !== 'VIEWER';
+  // 공유 링크는 계획을 만든 사람만 만들 수 있어요 (서버 규칙)
+  const canShare = plan.role === 'OWNER';
 
   const share = (channel: ShareChannel) => {
     setShareMessage(null);
@@ -115,6 +143,7 @@ export default function PlanViewPage() {
   };
 
   const openShare = () => {
+    setIsMenuOpen(false);
     setSharedUrl(null);
     setShareMessage(null);
     setIsShareOpen(true);
@@ -137,13 +166,17 @@ export default function PlanViewPage() {
     isPlanBVisible ? stop : { nodeId: stop.nodeId },
   );
   const routePlaceIds = new Set(route.flatMap((stop) => [stop.nodeId, ...(stop.planBNodeId ? [stop.planBNodeId] : [])]));
-  const mapNodes = toMapNodes(places.filter((place) => routePlaceIds.has(place.id)));
+  const mainIds = new Set(route.map((stop) => stop.nodeId));
+  const mapNodes = toMapNodes(places.filter((place) => routePlaceIds.has(place.id))).map((node) => ({
+    ...node,
+    isDot: !mainIds.has(node.id) && category !== 'all' && placeById.get(node.id)?.category !== category,
+  }));
   const hasPlanB = day.nodes.some((node) => node.planB);
 
   const mapCenter = getRouteCenter(stops.map((stop) => stop.place)) ?? getDayZone(day)?.center ?? DEFAULT_MAP_CENTER;
 
   const selectDay = (nextIndex: number) => {
-    setDayIndex(nextIndex);
+    setSelectedDay(nextIndex);
     setSelectedId(null);
   };
 
@@ -154,30 +187,59 @@ export default function PlanViewPage() {
           title="여행계획"
           onBack={() => (isLoggedIn ? navigate(-1) : navigate('/'))}
           action={
-            // 공유 링크는 계획을 만든 사람만 만들 수 있어요 (서버 규칙)
-            plan.role === 'OWNER' && (
-              <button type="button" className={styles.moreButton} aria-label="공유하기" onClick={openShare}>
-                <img src={kebabIcon} alt="" />
-              </button>
+            // 고를 항목이 하나도 없으면(로그인하지 않은 공유 링크 등) ⋮ 자체를 숨겨요
+            (canShare || canEdit || hasPlanB) && (
+              <div ref={menuRef} className={styles.menuWrap}>
+                <button
+                  type="button"
+                  className={styles.moreButton}
+                  aria-label="더보기"
+                  aria-haspopup="menu"
+                  aria-expanded={isMenuOpen}
+                  onClick={() => setIsMenuOpen((isOpen) => !isOpen)}
+                >
+                  <img src={kebabIcon} alt="" />
+                </button>
+                {isMenuOpen && (
+                  <div className={styles.menu} role="menu">
+                    {canShare && (
+                      <button type="button" role="menuitem" className={styles.menuItem} onClick={openShare}>
+                        공유하기
+                      </button>
+                    )}
+                    {hasPlanB && (
+                      <button type="button" role="menuitem" className={styles.menuItem} onClick={() => {
+                        setIsPlanBVisible((visible) => !visible);
+                        setIsMenuOpen(false);
+                      }}>
+                        {isPlanBVisible ? '플랜 B 숨기기' : '플랜 B 같이 보기'}
+                      </button>
+                    )}
+                    {canEdit && (
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className={styles.menuItem}
+                        onClick={() => navigate(`/plans/${plan.id}/info`)}
+                      >
+                        계획 편집
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             )
           }
         />
         <div className={styles.toolbar}>
-          <DaySelector days={plan.days} selectedIndex={dayIndex} onSelect={selectDay} />
-          {hasPlanB && (
-            <button
-              type="button"
-              className={isPlanBVisible ? styles.planBToggleOn : styles.planBToggle}
-              aria-pressed={isPlanBVisible}
-              onClick={() => setIsPlanBVisible((visible) => !visible)}
-            >
-              플랜B 같이 보기
-            </button>
-          )}
+          <DaySelector days={plan.days} selectedIndex={dayIndex} onSelect={selectDay} isCompact />
+          <div className={styles.filter}>
+            <CategoryFilterBar selected={category} onChange={setCategory} scrollToSelected />
+          </div>
           {!isLoggedIn && (
             <button
               type="button"
-              className={styles.planBToggle}
+              className={styles.signIn}
               onClick={() => navigate('/login', { state: { from: `/plan/${plan.id}` } })}
             >
               로그인하고 함께 보기
@@ -194,6 +256,7 @@ export default function PlanViewPage() {
           nodes={mapNodes}
           selectedNodeId={selectedId}
           route={route}
+          isPlanning
           onSelectNode={setSelectedId}
           onClickMap={() => setSelectedId(null)}
         />
@@ -206,8 +269,7 @@ export default function PlanViewPage() {
                 {plan.destination ?? plan.title} {dayIndex + 1}일차
               </h2>
               <p className={styles.sheetDate}>
-                {formatDayDate(day.date)}
-                {day.zone ? ` · ${day.zone}` : ''}
+                {DAY_FORMAT.format(new Date(`${day.date}T00:00:00Z`))}
               </p>
             </div>
             {canEdit && (

@@ -87,23 +87,8 @@
 
 .page .tabBar {
     position: sticky;
-    bottom: calc(24px + env(safe-area-inset-bottom));
+    bottom: calc(var(--home-bar-height) + 10px);
     align-self: center;
     margin-top: auto;
-    margin-bottom: calc(24px + env(safe-area-inset-bottom));
-}
-
-/* 튜토리얼이 떠 있는 동안 제목과 링크 불러오기 버튼만 어둡게 가려지지 않게 위로 올림 */
-.title,
-.loadButton {
-    position: relative;
-}
-
-.titleOnTutorial,
-.aboveTutorial {
-    z-index: 12;
-}
-
-.titleOnTutorial {
-    color: var(--color-white);
+    margin-bottom: calc(var(--home-bar-height) + 10px);
 }

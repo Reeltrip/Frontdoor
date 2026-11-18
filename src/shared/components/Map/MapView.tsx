@@ -32,6 +32,10 @@ export type MapViewProps = {
   /** 노드가 아닌 지도 바탕을 눌렀을 때 (선택 풀기 등) */
   onClickMap?: () => void;
   className?: string;
+  /** 여행계획 편집에서 쓰는 동선 색과 사진 핀 상태 */
+  isPlanning?: boolean;
+  highlightedNodeId?: string | null;
+  enlargeSelectedNode?: boolean;
 };
 
 const ROUTE_STROKE_WEIGHT = 4;
@@ -66,36 +70,50 @@ function MapCamera({ center, zoom }: MapCameraProps) {
 type MapRouteLinesProps = {
   nodes: MapNode[];
   route: MapRouteStop[];
+  isPlanning?: boolean;
 };
 
-function MapRouteLines({ nodes, route }: MapRouteLinesProps) {
-  const { mainPath, planBPaths } = useMemo(() => buildRoutePaths(nodes, route), [nodes, route]);
+function MapRouteLines({ nodes, route, isPlanning }: MapRouteLinesProps) {
+  const { mainPaths, inactivePaths, previewPath } = useMemo(() => buildRoutePaths(nodes, route), [nodes, route]);
   const colors = useMemo(
-    () => ({ main: readColorToken('--color-gray-900'), planB: readColorToken('--color-lime-600') }),
-    [],
+    () => ({
+      main: readColorToken(isPlanning ? '--color-plan-route' : '--color-gray-900'),
+      dash: readColorToken('--color-surface'),
+      shadow: readColorToken('--color-gray-900'),
+    }),
+    [isPlanning],
   );
+
+  const dash = {
+    path: 'M 0,-1 0,1',
+    strokeColor: colors.dash,
+    strokeWeight: ROUTE_STROKE_WEIGHT,
+    strokeOpacity: 1,
+    scale: 3.5,
+  };
+  const repeat = '15px';
 
   return (
     <>
-      {/* 플랜B 선을 아래에 깔아서 갈라지고 합쳐지는 지점에서 메인 동선이 끊겨 보이지 않게 해요 */}
-      {planBPaths.map((path, index) => (
+      {inactivePaths.map((path, index) => (
         <Polyline
           key={index}
           path={path}
-          strokeColor={colors.planB}
-          strokeWeight={ROUTE_STROKE_WEIGHT}
+          strokeColor={colors.dash}
+          strokeOpacity={0}
+          icons={[
+            { icon: { ...dash, strokeColor: colors.shadow, strokeWeight: 6, strokeOpacity: 0.28 }, offset: '0', repeat },
+            { icon: dash, offset: '0', repeat },
+          ]}
           zIndex={1}
           clickable={false}
         />
       ))}
-      {mainPath.length > 1 && (
-        <Polyline
-          path={mainPath}
-          strokeColor={colors.main}
-          strokeWeight={ROUTE_STROKE_WEIGHT}
-          zIndex={2}
-          clickable={false}
-        />
+      {mainPaths.map((path, index) => (
+        <Polyline key={index} path={path} strokeColor={colors.main} strokeWeight={ROUTE_STROKE_WEIGHT} zIndex={2} clickable={false} />
+      ))}
+      {previewPath && (
+        <Polyline path={previewPath} strokeColor={colors.main} strokeWeight={ROUTE_STROKE_WEIGHT} zIndex={3} clickable={false} />
       )}
     </>
   );
@@ -109,9 +127,15 @@ function MapContent({
   route,
   onSelectNode,
   onClickMap,
+  isPlanning,
+  highlightedNodeId,
+  enlargeSelectedNode = !isPlanning,
 }: Omit<MapViewProps, 'className'>) {
   const loadingStatus = useApiLoadingStatus();
   const hasAuthFailed = useMapAuthFailure();
+  const routeIds = new Set(route?.map((stop) => stop.isPlanBPreview ? stop.planBNodeId : stop.nodeId));
+  const inactiveIds = new Set(route?.map((stop) => stop.isPlanBPreview ? stop.nodeId : stop.planBNodeId));
+  const previewId = route?.find((stop) => stop.isPlanBPreview)?.planBNodeId;
 
   if (hasAuthFailed || loadingStatus === APILoadingStatus.FAILED) {
     return <MapStatus status="error" />;
@@ -130,23 +154,30 @@ function MapContent({
         className={styles.map}
       >
         <MapCamera center={center} zoom={zoom} />
-        {route && <MapRouteLines nodes={nodes} route={route} />}
+        {route && <MapRouteLines nodes={nodes} route={route} isPlanning={isPlanning} />}
         {nodes.map((node) => {
           const isSelected = node.id === selectedNodeId;
+          const isOnRoute = routeIds.has(node.id);
           return (
             <AdvancedMarker
               key={node.id}
               position={node.position}
               title={node.name}
-              zIndex={getNodeZIndex(node, isSelected)}
-              className={styles.node}
+              zIndex={isOnRoute && !isSelected ? 3 : getNodeZIndex(node, isSelected) + (isSelected ? 1 : 0)}
+              className={node.isDot ? undefined : styles.node}
               onClick={() => onSelectNode?.(node.id)}
             >
               <MapMarker
                 imageUrl={node.imageUrl}
                 name={node.name}
-                size={isSelected ? 'lg' : 'sm'}
+                size={isSelected && enlargeSelectedNode ? 'lg' : 'sm'}
                 isMuted={node.isMuted}
+                isPlanning={isPlanning}
+                isSelected={isSelected}
+                isInactiveRoute={inactiveIds.has(node.id)}
+                isHighlighted={node.id === (previewId ?? highlightedNodeId)}
+                isDot={node.isDot}
+                categoryIcon={node.categoryIcon}
               />
             </AdvancedMarker>
           );

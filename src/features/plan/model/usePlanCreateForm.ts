@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { formatDayDate, listDates } from './planDays';
+import { chooseDestination, getConfirmedDestination, startDestination, typeDestination } from './planDestination';
 import type { CreatePlanRequest } from './plan.types';
 
 /** 기능명세서 4-1: 종료일이 시작일보다 앞일 때 */
@@ -12,15 +13,26 @@ const toDateString = (date: Date) => {
   return `${date.getFullYear()}-${month}-${day}`;
 };
 
+/** 계획 편집 화면처럼 이미 있는 값으로 시작할 때 넘겨요. 날짜는 YYYY-MM-DD */
+export type PlanFormInitialValues = Partial<CreatePlanRequest>;
+
+// 'YYYY-MM-DD'를 new Date()에 바로 넣으면 UTC 자정이 돼서 달력(기기 시간대)과 하루 어긋날 수 있음
+const toLocalDate = (date: string | undefined) => {
+  if (!date) return undefined;
+  const [year, month, day] = date.split('-').map(Number);
+  const parsed = new Date(year, month - 1, day);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+};
+
 /**
- * 여행계획 생성 화면의 입력값 (기능명세서 4-1).
+ * 여행계획 생성 화면의 입력값 (기능명세서 4-1). initial을 넘기면 그 값으로 시작해요 (계획 편집).
  * 기간은 달력에서 시작일 → 종료일 순으로 골라요. 둘 다 고른 뒤 다시 누르면 시작일부터 새로 골라요.
  */
-export function usePlanCreateForm() {
-  const [title, setTitle] = useState('');
-  const [destination, setDestination] = useState('');
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
+export function usePlanCreateForm(initial?: PlanFormInitialValues) {
+  const [title, setTitle] = useState(initial?.title ?? '');
+  const [destination, setDestination] = useState(() => startDestination(initial?.destination));
+  const [startDate, setStartDate] = useState(() => toLocalDate(initial?.startDate));
+  const [endDate, setEndDate] = useState(() => toLocalDate(initial?.endDate));
   const [hasPeriodError, setHasPeriodError] = useState(false);
 
   /** 종료일까지 다 골랐으면 true를 돌려줘요 (달력을 닫을 때 씀) */
@@ -46,10 +58,11 @@ export function usePlanCreateForm() {
   const dayCount = start && end ? listDates(start, end).length : 0;
 
   const trimmedTitle = title.trim();
-  const trimmedDestination = destination.trim();
+  // 여행주소는 검색 결과에서 고른 값만 써요. 글자만 친 상태로는 요청을 만들지 않아요
+  const confirmedDestination = getConfirmedDestination(destination);
   const request: CreatePlanRequest | undefined =
-    trimmedTitle && trimmedDestination && start && end && dayCount > 0
-      ? { title: trimmedTitle, destination: trimmedDestination, startDate: start, endDate: end }
+    trimmedTitle && confirmedDestination && start && end && dayCount > 0
+      ? { title: trimmedTitle, destination: confirmedDestination, startDate: start, endDate: end }
       : undefined;
 
   // 기간 입력칸에 보여줄 글자. 시작일만 골랐으면 '11.21 (토) ~'까지만 보여요
@@ -62,8 +75,13 @@ export function usePlanCreateForm() {
   return {
     title,
     setTitle,
-    destination,
-    setDestination,
+    /** 여행주소 입력칸에 보이는 글자 */
+    destination: destination.text,
+    /** 검색 결과에서 골라 확정했는지 */
+    isDestinationConfirmed: confirmedDestination !== undefined,
+    typeDestination: (text: string) => setDestination((current) => typeDestination(current, text)),
+    chooseDestination: (searchedQuery: string, resultName: string) =>
+      setDestination(chooseDestination(searchedQuery, resultName)),
     /** 달력에 초록 원으로 표시할 날짜 */
     selectedDates: [startDate, endDate].filter((date) => date !== undefined),
     selectDate,

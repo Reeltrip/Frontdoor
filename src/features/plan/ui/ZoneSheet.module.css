@@ -2,7 +2,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: 28px 20px 24px;
+  padding: 28px 20px 19px;
   border-radius: 12px 12px 0 0;
   background: var(--color-surface);
   box-shadow: 0 -4px 6px 0 rgba(0, 0, 0, 0.03);
@@ -114,4 +114,12 @@
   font: var(--font-body2);
   letter-spacing: var(--tracking);
   color: var(--color-gray-500);
+}
+
+.result small {
+  display: block;
+  overflow: hidden;
+  color: var(--color-gray-500);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

@@ -19,5 +19,5 @@
 
 .actions {
     margin-top: auto;
-    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+    padding-bottom: max(24px, calc(env(safe-area-inset-bottom) + 8px));
 }

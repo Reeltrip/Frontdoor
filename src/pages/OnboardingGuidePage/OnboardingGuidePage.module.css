@@ -1,0 +1,91 @@
+/* 피그마 '앱 사용안내' 3장. 좌표는 390×844 프레임 기준이에요 */
+.page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 100dvh;
+  padding: 0 20px;
+  overflow-x: hidden;
+  /* 그림 바탕색(#fafafa)과 같아야 그림 테두리가 안 보여요 */
+  background: var(--color-white);
+  text-align: center;
+}
+
+/* 피그마에서 내보낸 그림. 프레임의 x 30~360, y 190~440 영역이에요 */
+.art {
+  display: block;
+  flex-shrink: 0;
+  width: 330px;
+  height: 250px;
+  margin-top: calc(var(--page-top) + 46px);
+}
+
+/* 제목 첫 줄 중심이 y 478에 오게: 그림 아래(440) + 18 = 458에서 시작 */
+.title {
+  margin: 18px 0 0;
+  font: var(--font-h2);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-900);
+  white-space: pre-line;
+}
+
+.description {
+  margin: 20px 0 24px;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-500);
+  white-space: pre-line;
+}
+
+/* 닉네임 화면의 [시작하기]와 같은 자리 (AuthStepLayout 아래 여백 44 + 28) */
+.actions {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 60px;
+  margin-top: auto;
+  margin-bottom: calc(var(--home-bar-height) + 38px);
+}
+
+.stepRow {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  /* 페이지 여백 20 + 20 = 피그마 좌우 여백 40 */
+  padding: 0 20px;
+}
+
+.textButton {
+  /* 글자 위치는 그대로 두고 누르는 영역만 넓혀요 */
+  margin: -12px;
+  padding: 12px;
+  border: 0;
+  background: none;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-900);
+  cursor: pointer;
+}
+
+.dots {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  gap: 8px;
+  transform: translate(-50%, -50%);
+}
+
+.dot,
+.dotActive {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #e3e7ec;
+}
+
+.dotActive {
+  background: var(--color-lime-600);
+}

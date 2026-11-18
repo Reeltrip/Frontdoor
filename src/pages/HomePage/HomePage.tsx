@@ -5,25 +5,30 @@ import RecentCollectionCard from "@/features/source/ui/RecentCollectionCard";
 import { useRecentCollections } from "@/features/source/model/useRecentCollections";
 import styles from "./HomePage.module.css";
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { sourceKeys } from "@/features/source/api/sources";
+import HomeTutorial from "@/features/source/ui/HomeTutorial";
 import ConfirmModal from "@/shared/components/ConfirmModal";
 import { readClipboardLink } from "@/features/source/lib/readClipboardLink";
 import type { LinkAddState } from "@/features/source/model/source.types";
-import LinkTutorial from "@/features/source/ui/LinkTutorial";
 
-const LINK_TUTORIAL_SEEN_KEY = "reeltrip:link-tutorial-seen";
+const HOME_TUTORIAL_SEEN_KEY = "wayvi.homeTutorialSeen";
 
-function hasSeenLinkTutorial(): boolean {
+/** 홈 사용 안내를 이미 닫은 적이 있는지. 저장소를 못 읽으면 처음 보는 것으로 봐요 */
+function hasSeenHomeTutorial(): boolean {
   try {
-    return sessionStorage.getItem(LINK_TUTORIAL_SEEN_KEY) === "1";
+    return localStorage.getItem(HOME_TUTORIAL_SEEN_KEY) === "1";
   } catch {
     return false;
   }
 }
 
-function markLinkTutorialSeen() {
+function markHomeTutorialSeen(): void {
   try {
-    sessionStorage.setItem(LINK_TUTORIAL_SEEN_KEY, "1");
-  } catch {}
+    localStorage.setItem(HOME_TUTORIAL_SEEN_KEY, "1");
+  } catch {
+    // 저장이 막힌 환경(사생활 보호 모드 등)에서는 이번 화면에서만 닫혀요
+  }
 }
 
 export default function HomePage() {
@@ -32,26 +37,24 @@ export default function HomePage() {
   const recentCollections = useRecentCollections();
   const hasRecentCollections = recentCollections.length > 0;
 
+  // 불러오기가 끝났는데 0개일 때만 사용 안내를 띄워요. 불러오는 중·실패와 구분하려고 쿼리 상태를 직접 봐요
+  const queryClient = useQueryClient();
+  const isRecentLoaded =
+    queryClient.getQueryState(sourceKeys.recent())?.status === "success";
+  const [hasSeenTutorial, setHasSeenTutorial] = useState(hasSeenHomeTutorial);
+  const isTutorialOpen =
+    !hasSeenTutorial && isRecentLoaded && !hasRecentCollections;
+
   const [clipboardLink, setClipboardLink] = useState<string | null>(null);
 
   // 클립보드에 링크가 있으면 팝업을 띄우고, 없으면 바로 링크 추가 화면으로 감
   const handleLoadLinkClick = async () => {
-    closeTutorial();
     const link = await readClipboardLink();
     if (link === null) {
       navigate("/links/new");
       return;
     }
     setClipboardLink(link);
-  };
-
-  const [isTutorialOpen, setIsTutorialOpen] = useState(
-    () => !hasSeenLinkTutorial(),
-  );
-
-  const closeTutorial = () => {
-    markLinkTutorialSeen();
-    setIsTutorialOpen(false);
   };
 
   const handleClipboardConfirm = () => {
@@ -62,6 +65,17 @@ export default function HomePage() {
 
   const handleClipboardCancel = () => navigate("/links/new");
 
+  const handleTutorialClose = () => {
+    markHomeTutorialSeen();
+    setHasSeenTutorial(true);
+  };
+
+  // 안내를 먼저 닫은 뒤 홈 버튼과 같은 흐름(클립보드 확인)을 따라요
+  const handleTutorialLoadLink = () => {
+    handleTutorialClose();
+    void handleLoadLinkClick();
+  };
+
   return (
     <main className={styles.page}>
       <div className={styles.backgroundFrame} aria-hidden>
@@ -69,9 +83,7 @@ export default function HomePage() {
       </div>
 
       <header className={styles.header}>
-        <h1
-          className={`${styles.title} ${isTutorialOpen ? styles.titleOnTutorial : ""}`}
-        >
+        <h1 className={styles.title}>
           모아둔 여행 영상 링크를
           <br />
           보여주세요!
@@ -81,7 +93,7 @@ export default function HomePage() {
         </p>
         <button
           type="button"
-          className={`${styles.loadButton} ${isTutorialOpen ? styles.aboveTutorial : ""}`}
+          className={styles.loadButton}
           onClick={handleLoadLinkClick}
         >
           링크 불러오기
@@ -101,9 +113,6 @@ export default function HomePage() {
           </ul>
         </section>
       )}
-      {isTutorialOpen && (
-        <LinkTutorial onClose={closeTutorial} onTry={handleLoadLinkClick} />
-      )}
       <ConfirmModal
         isOpen={clipboardLink !== null}
         icon="link"
@@ -115,6 +124,12 @@ export default function HomePage() {
         onConfirm={handleClipboardConfirm}
       />
       <TabBar activeTab="sources" className={styles.tabBar} />
+      {isTutorialOpen && (
+        <HomeTutorial
+          onClose={handleTutorialClose}
+          onLoadLink={handleTutorialLoadLink}
+        />
+      )}
     </main>
   );
 }

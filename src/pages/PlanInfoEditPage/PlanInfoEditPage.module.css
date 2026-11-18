@@ -1,0 +1,25 @@
+/* 레이아웃은 PlanCreatePage.module.css를 같이 써요. 여기에는 불러오는 중·실패 화면만 있어요 */
+.status {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.statusTitle {
+  margin: 0;
+  font: var(--font-h3);
+  letter-spacing: var(--tracking);
+  color: var(--color-white);
+}
+
+.statusText {
+  margin: 0 0 16px;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-300);
+}

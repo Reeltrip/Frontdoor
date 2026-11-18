@@ -2,6 +2,8 @@
     display: flex;
     flex-direction: column;
     min-height: 100dvh;
+    /* 제목이 여행목록과 같은 높이(48px)에 오게 해요. 제목 줄 안쪽 여백이 9px이라 39px이에요 */
+    padding-top: max(39px, env(safe-area-inset-top));
 }
 
 .wheelArea {
@@ -12,5 +14,5 @@
 }
 
 .actions {
-    padding: 16px 20px calc(24px + env(safe-area-inset-bottom));
+    padding: 16px 20px calc(var(--home-bar-height) + 10px);
 }

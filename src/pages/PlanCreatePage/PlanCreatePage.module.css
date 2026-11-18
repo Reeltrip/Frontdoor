@@ -1,10 +1,10 @@
-/* 피그마 '3-1 여행계획_생성' (390×844). 위 74px에는 상태바 60px이 들어 있어요 */
+/* 피그마 '3-1 여행계획_생성' (390×844). 위 여백은 여행목록과 같아요 */
 .page {
   position: relative;
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  padding: 74px 20px calc(44px + env(safe-area-inset-bottom));
+  padding: var(--page-top) 20px calc(var(--home-bar-height) + 10px);
   overflow: hidden;
   background: var(--color-gray-900);
   color: var(--color-white);
@@ -87,31 +87,6 @@
   margin: 0 0 24px;
   font: var(--font-body2);
   color: var(--color-gray-300);
-}
-
-.destination {
-  position: relative;
-}
-
-/* 입력칸(56px) 안 왼쪽에 24px 아이콘 자리를 두고 글자를 그만큼 밀어요 */
-.destination input {
-  padding-left: 54px;
-}
-
-.destinationIcon {
-  position: absolute;
-  bottom: 16px;
-  left: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  pointer-events: none;
-}
-
-.destinationIcon img {
-  display: block;
 }
 
 .actions {

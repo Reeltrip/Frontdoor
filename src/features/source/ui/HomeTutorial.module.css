@@ -1,0 +1,137 @@
+/* 피그마 '2-2 클립보드 링크 불러오기_최근 내역 없는 경우_튜토' */
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: rgba(26, 26, 26, 0.5);
+  cursor: pointer;
+}
+
+.guide {
+  position: absolute;
+  inset: 0;
+}
+
+.backButton {
+  position: absolute;
+  top: calc(98px - 12px);
+  left: calc(26px - 12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* 아이콘 위치는 피그마대로 두고 누르는 영역만 넓혀요 */
+  padding: 12px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.backIcon {
+  width: 10px;
+  height: 17px;
+  /* 검은 꺾쇠 아이콘을 흰색으로 바꿔 써요 */
+  filter: brightness(0) invert(1);
+}
+
+/* 아래 header·title·description·loadButton은 HomePage.module.css와 같은 값이에요.
+   홈 쪽 값을 바꾸면 여기도 같이 바꿔야 겹쳐 보여요 */
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 100px;
+  padding: 0 20px;
+  text-align: center;
+  pointer-events: none;
+}
+
+.title {
+  margin: 0;
+  font: var(--font-h1);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-0);
+}
+
+/* 자리만 차지해요. 버튼 높이를 홈과 맞추는 용도 */
+.description {
+  visibility: hidden;
+  margin: 8px 0 0;
+  font: var(--font-body2);
+  font-weight: 400;
+  letter-spacing: var(--tracking);
+}
+
+.loadButton {
+  width: 106px;
+  height: 37px;
+  margin-top: 19px;
+  padding: 6px 16px;
+  border: none;
+  border-radius: 41px;
+  background: var(--color-gray-900);
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-white);
+  cursor: pointer;
+  pointer-events: auto;
+  /* 버튼보다 4px 바깥까지 오는 라임색 고리 */
+  outline: 2px solid var(--color-lime-600);
+  outline-offset: 2px;
+}
+
+/* 화살표·안내 글은 390 폭 기준 좌표라 가운데 390 영역에 놓아요 */
+.arrow {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 390px;
+  height: 844px;
+  margin-left: -195px;
+  fill: none;
+  pointer-events: none;
+}
+
+.dotted {
+  stroke: var(--color-gray-0);
+  stroke-width: 1.4;
+  stroke-dasharray: 1 5;
+  stroke-linecap: round;
+}
+
+.head {
+  fill: none;
+  stroke: var(--color-gray-0);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.text {
+  position: absolute;
+  top: 330px;
+  left: 50%;
+  margin: 0 0 0 calc(116px - 195px);
+  font: 400 13px/28px var(--font-family);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-0);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.tryButton {
+  position: absolute;
+  /* 글자 중심 y 661. 화면이 낮으면 탭바 위로 올려요 */
+  top: min(637px, calc(100dvh - 160px));
+  left: 50%;
+  padding: 12px;
+  border: 0;
+  background: none;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-0);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  cursor: pointer;
+}

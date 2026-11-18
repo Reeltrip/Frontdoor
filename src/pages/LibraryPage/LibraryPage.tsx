@@ -18,6 +18,12 @@ import { useDeletePlace, usePlaces } from "@/features/place/model/usePlaces";
 import type { Place, PlaceCategory } from "@/features/place/model/place.types";
 import CategoryFilterBar from "@/features/place/ui/CategoryFilterBar";
 import PlaceCardStrip from "@/features/place/ui/PlaceCardStrip";
+import {
+  COPY_DONE_MESSAGE,
+  COPY_FAILED_MESSAGE,
+  copyPlace,
+  openPlace,
+} from "@/features/place/lib/placeActions";
 import styles from "./LibraryPage.module.css";
 
 export default function LibraryPage() {
@@ -197,6 +203,10 @@ export default function LibraryPage() {
               selectedId={selectedId}
               onSelect={selectPlace}
               onDelete={setDeleteTarget}
+              onOpen={openPlace}
+              onCopy={async (place) =>
+                setToastMessage((await copyPlace(place)) ? COPY_DONE_MESSAGE : COPY_FAILED_MESSAGE)
+              }
             />
           </div>
         )}

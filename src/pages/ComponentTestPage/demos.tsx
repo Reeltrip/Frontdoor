@@ -33,6 +33,8 @@ import {
 import sampleFood from "@/shared/assets/images/sample-food.png";
 import sampleHotel from "@/shared/assets/images/sample-hotel.jpg";
 import sampleDonut from "@/shared/assets/images/sample-donut.jpg";
+import mapMarkerReferenceSmall from "./assets/map-marker-reference-small.png";
+import mapMarkerReferenceLarge from "./assets/map-marker-reference-large.png";
 import RecentCollectionCard from "@/features/source/ui/RecentCollectionCard";
 
 export type ComponentDemo = {
@@ -397,7 +399,10 @@ export const componentDemos: ComponentDemo[] = [
     name: "CategoryDial",
     path: "features/place/ui/CategoryDial",
     description: "좌우로 끌어서 돌리는 카테고리 다이얼. 눈금이 같이 돌아감",
-    variants: [{ label: "기본", render: () => <CategoryDialDemo /> }],
+    variants: [
+      { label: "기본", render: () => <CategoryDialDemo /> },
+      { label: "요약 카드 자세히 보기", render: () => <CategoryDialDemo variant="summary" /> },
+    ],
   },
   {
     name: "RecentCollectionCard",
@@ -424,7 +429,16 @@ export const componentDemos: ComponentDemo[] = [
     description: "지도 위 장소 노드",
     variants: [
       {
-        label: "기본 · 선택 · 다른 일자",
+        label: "Figma 선택 마커 원본",
+        render: () => (
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 4, paddingInline: 12 }}>
+            <img src={mapMarkerReferenceSmall} width={98} height={108} alt="Figma 선택 마커 작은 크기" />
+            <img src={mapMarkerReferenceLarge} width={134} height={150} alt="Figma 선택 마커 큰 크기" />
+          </div>
+        ),
+      },
+      {
+        label: "기본 흰색 · 선택 시 라임 안쪽 · 다른 일자",
         render: () => (
           <div
             style={{
@@ -435,8 +449,18 @@ export const componentDemos: ComponentDemo[] = [
             }}
           >
             <MapMarker imageUrl={sampleDonut} name="I'm donut?" />
-            <MapMarker imageUrl={sampleDonut} name="I'm donut?" size="lg" />
+            <MapMarker imageUrl={sampleDonut} name="선택한 장소" size="lg" isSelected />
             <MapMarker imageUrl={sampleDonut} name="I'm donut?" isMuted />
+          </div>
+        ),
+      },
+      {
+        label: "여행계획 기본 · 선택 미리보기 · 다른 카테고리",
+        render: () => (
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 28, padding: "12px 16px 32px" }}>
+            <MapMarker imageUrl={sampleDonut} name="확정한 장소" isPlanning />
+            <MapMarker imageUrl={sampleDonut} name="확정 전 미리보기" isPlanning isSelected isHighlighted />
+            <MapMarker imageUrl={sampleDonut} name="다른 카테고리 장소" isPlanning isDot />
           </div>
         ),
       },
