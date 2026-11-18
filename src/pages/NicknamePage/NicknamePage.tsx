@@ -21,7 +21,7 @@ export default function NicknamePage() {
     setIsPrivacyAgreed,
     isMarketingAgreed,
     setIsMarketingAgreed,
-  } = useNicknameForm(() => navigate('/home'));
+  } = useNicknameForm(() => navigate('/welcome', { replace: true }));
 
   const handleFormSubmit = (event: SyntheticEvent) => {
     event.preventDefault();
