@@ -33,6 +33,8 @@ import {
 import sampleFood from "@/shared/assets/images/sample-food.png";
 import sampleHotel from "@/shared/assets/images/sample-hotel.jpg";
 import sampleDonut from "@/shared/assets/images/sample-donut.jpg";
+import mapMarkerReferenceSmall from "./assets/map-marker-reference-small.png";
+import mapMarkerReferenceLarge from "./assets/map-marker-reference-large.png";
 import RecentCollectionCard from "@/features/source/ui/RecentCollectionCard";
 
 export type ComponentDemo = {
@@ -426,6 +428,15 @@ export const componentDemos: ComponentDemo[] = [
     path: "shared/components/Map/MapMarker",
     description: "지도 위 장소 노드",
     variants: [
+      {
+        label: "Figma 선택 마커 원본",
+        render: () => (
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 4, paddingInline: 12 }}>
+            <img src={mapMarkerReferenceSmall} width={98} height={108} alt="Figma 선택 마커 작은 크기" />
+            <img src={mapMarkerReferenceLarge} width={134} height={150} alt="Figma 선택 마커 큰 크기" />
+          </div>
+        ),
+      },
       {
         label: "기본 흰색 · 선택 시 라임 안쪽 · 다른 일자",
         render: () => (

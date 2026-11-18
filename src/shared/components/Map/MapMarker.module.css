@@ -1,13 +1,15 @@
 /* 핀 틀은 65×76 또는 101×118이고, 테두리 8px은 틀 바깥으로 나가요. */
 .marker {
   --size: 65px;
-  --photo-inset: calc(var(--size) * 0.06);
+  --photo-size: calc(var(--size) * 0.85);
+  --selected-fill: #c9da8a;
   position: relative;
   width: var(--size);
   height: calc(var(--size) * 1.17);
   padding: 0;
   border: 0;
   background: none;
+  color: #fff;
   cursor: pointer;
   filter: drop-shadow(0 2px 6px rgba(26, 26, 26, 0.18));
   transition: filter 0.2s ease;
@@ -21,27 +23,27 @@
   --size: 101px;
 }
 
-/* 한 모서리만 각진 정사각형을 45도 돌려 물방울 모양을 만듦 */
 .pin {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: var(--size);
-  height: var(--size);
-  border-radius: 50% 50% 50% 0;
-  background: var(--color-surface);
-  box-shadow: 0 0 0 8px var(--color-surface);
-  transform: rotate(-45deg);
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  fill: currentColor;
+  stroke: #fff;
+  stroke-width: 16px;
+  stroke-linejoin: round;
+  paint-order: stroke fill;
 }
 
 /* 사진과 카테고리 표시가 같은 원을 채워요. */
 .photo,
 .category {
   position: absolute;
-  top: var(--photo-inset);
-  left: var(--photo-inset);
-  width: calc(var(--size) - 2 * var(--photo-inset));
-  height: calc(var(--size) - 2 * var(--photo-inset));
+  top: calc(var(--size) * 0.2);
+  left: calc((var(--size) - var(--photo-size)) / 2);
+  width: var(--photo-size);
+  height: var(--photo-size);
   border-radius: 50%;
 }
 
@@ -53,8 +55,8 @@
   filter: grayscale(1) opacity(0.6);
 }
 
-.selected .pin {
-  background: var(--color-plan-route);
+.selected {
+  color: var(--selected-fill);
 }
 
 .planning::after {
@@ -99,7 +101,7 @@
 }
 
 .planning.selected.dot {
-  background: var(--color-plan-route);
+  background: var(--selected-fill);
   box-shadow: 0 0 0 2px var(--color-surface);
 }
 

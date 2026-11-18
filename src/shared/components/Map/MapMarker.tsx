@@ -41,7 +41,12 @@ export default function MapMarker({
     <button type="button" className={classNames} onClick={onClick} aria-label={name} aria-pressed={isSelected}>
       {!isDot && (
         <>
-          <span className={styles.pin} aria-hidden />
+          <svg className={styles.pin} viewBox="0 0 65 76" preserveAspectRatio="none" aria-hidden="true">
+            <path
+              d="M32.5 0C50.45 0 65 14.55 65 32.5c0 16.7-10.1 29.5-24.9 39.5-3.3 2.2-5.5 3.5-7.6 3.5s-4.3-1.3-7.6-3.5C10.1 62 0 49.2 0 32.5 0 14.55 14.55 0 32.5 0Z"
+              vectorEffect="non-scaling-stroke"
+            />
+          </svg>
           {imageUrl && <img src={imageUrl} alt="" className={styles.photo} />}
           {categoryIcon && <span className={styles.category}><img src={categoryIcon} alt="" /></span>}
         </>
