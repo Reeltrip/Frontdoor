@@ -4,7 +4,10 @@
     /* 피그마: 제목 줄이 상태바(60px) 아래에 있어요. 여행계획 화면과 같은 값 */
     padding-top: 64px;
     overflow: hidden;
-    background: var(--color-bg);
+    background:
+        radial-gradient(ellipse 424px 192px at 50% 48%, rgba(147, 147, 147, 0.438), transparent)
+        center bottom 181px / 815px 369px no-repeat,
+        var(--color-bg);
 }
 
 .stage {

@@ -203,6 +203,7 @@ export default function CardBrowsePage() {
           activeIndex={categoryIndex}
           onChange={handleCategoryChange}
           isRaised={isTutorialOpen}
+          variant="summary"
         />
       </div>
       {isEditing ? (

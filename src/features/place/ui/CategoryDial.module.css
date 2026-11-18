@@ -16,6 +16,10 @@
   z-index: 11;
 }
 
+.summary {
+  background: none;
+}
+
 .ringMask {
   position: absolute;
   top: 0;
@@ -96,6 +100,15 @@
 
 .raised .bowl {
   background: #ffffff;
+}
+
+.summary .bowl {
+  top: 68px;
+  width: 429px;
+  height: 429px;
+  margin-left: -213px;
+  background: #fafafa;
+  box-shadow: 0 0 25px rgba(211, 211, 211, 0.34);
 }
 
 .tickHidden .ringMask,
