@@ -427,7 +427,7 @@ export const componentDemos: ComponentDemo[] = [
     description: "지도 위 장소 노드",
     variants: [
       {
-        label: "기본 · 선택 · 다른 일자",
+        label: "기본 흰색 · 선택 시 라임 안쪽 · 다른 일자",
         render: () => (
           <div
             style={{

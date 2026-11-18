@@ -1,6 +1,7 @@
 /* 핀 틀은 65×76 또는 101×118이고, 테두리 8px은 틀 바깥으로 나가요. */
 .marker {
   --size: 65px;
+  --photo-inset: calc(var(--size) * 0.06);
   position: relative;
   width: var(--size);
   height: calc(var(--size) * 1.17);
@@ -33,14 +34,18 @@
   transform: rotate(-45deg);
 }
 
-/* 사진 주변은 흰색으로 남겨요. */
-.photo {
+/* 사진과 카테고리 표시가 같은 원을 채워요. */
+.photo,
+.category {
   position: absolute;
-  top: calc(var(--size) * 0.08);
-  left: calc(var(--size) * 0.08);
-  width: calc(var(--size) * 0.84);
-  height: calc(var(--size) * 0.84);
+  top: var(--photo-inset);
+  left: var(--photo-inset);
+  width: calc(var(--size) - 2 * var(--photo-inset));
+  height: calc(var(--size) - 2 * var(--photo-inset));
   border-radius: 50%;
+}
+
+.photo {
   object-fit: cover;
 }
 
@@ -49,7 +54,7 @@
 }
 
 .selected .pin {
-  box-shadow: 0 0 0 8px var(--color-plan-route);
+  background: var(--color-plan-route);
 }
 
 .planning::after {
@@ -94,7 +99,8 @@
 }
 
 .planning.selected.dot {
-  box-shadow: 0 0 0 3px var(--color-plan-route);
+  background: var(--color-plan-route);
+  box-shadow: 0 0 0 2px var(--color-surface);
 }
 
 .dot::after {
@@ -102,12 +108,8 @@
 }
 
 .category {
-  position: absolute;
-  inset: 8% 8% auto;
   display: grid;
   place-items: center;
-  height: 72%;
-  border-radius: 50%;
   background: rgba(51, 51, 51, 0.52);
 }
 
