@@ -173,7 +173,7 @@ function MapContent({
                 size={isSelected && enlargeSelectedNode ? 'lg' : 'sm'}
                 isMuted={node.isMuted}
                 isPlanning={isPlanning}
-                isOnRoute={isOnRoute}
+                isSelected={isSelected}
                 isInactiveRoute={inactiveIds.has(node.id)}
                 isHighlighted={node.id === (previewId ?? highlightedNodeId)}
                 isDot={node.isDot}

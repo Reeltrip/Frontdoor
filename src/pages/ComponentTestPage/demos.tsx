@@ -438,17 +438,17 @@ export const componentDemos: ComponentDemo[] = [
             }}
           >
             <MapMarker imageUrl={sampleDonut} name="I'm donut?" />
-            <MapMarker imageUrl={sampleDonut} name="I'm donut?" size="lg" />
+            <MapMarker imageUrl={sampleDonut} name="선택한 장소" size="lg" isSelected />
             <MapMarker imageUrl={sampleDonut} name="I'm donut?" isMuted />
           </div>
         ),
       },
       {
-        label: "여행계획 동선 · 미리보기 · 다른 카테고리",
+        label: "여행계획 기본 · 선택 미리보기 · 다른 카테고리",
         render: () => (
           <div style={{ display: "flex", alignItems: "flex-end", gap: 28, padding: "12px 16px 32px" }}>
-            <MapMarker imageUrl={sampleDonut} name="확정한 장소" isPlanning isOnRoute />
-            <MapMarker imageUrl={sampleDonut} name="확정 전 미리보기" isPlanning isHighlighted />
+            <MapMarker imageUrl={sampleDonut} name="확정한 장소" isPlanning />
+            <MapMarker imageUrl={sampleDonut} name="확정 전 미리보기" isPlanning isSelected isHighlighted />
             <MapMarker imageUrl={sampleDonut} name="다른 카테고리 장소" isPlanning isDot />
           </div>
         ),

@@ -3,13 +3,13 @@ import styles from './MapMarker.module.css';
 type MapMarkerProps = {
   imageUrl: string;
   name: string;
-  /** sm: 기본 노드, lg: 선택한 노드 */
+  /** sm: 일반 크기, lg: 상세 확인 크기 */
   size?: 'sm' | 'lg';
   /** 다른 일자에 이미 들어간 노드는 회색으로 */
   isMuted?: boolean;
   onClick?: () => void;
   isPlanning?: boolean;
-  isOnRoute?: boolean;
+  isSelected?: boolean;
   isInactiveRoute?: boolean;
   isHighlighted?: boolean;
   isDot?: boolean;
@@ -24,7 +24,7 @@ export default function MapMarker({
   isMuted = false,
   onClick,
   isPlanning,
-  isOnRoute,
+  isSelected = false,
   isInactiveRoute,
   isHighlighted,
   isDot,
@@ -33,11 +33,12 @@ export default function MapMarker({
   const classNames = [
     styles.marker, styles[size], isMuted && styles.muted,
     isPlanning && styles.planning, isDot && styles.dot,
-    isOnRoute && styles.onRoute, isInactiveRoute && styles.inactiveRoute, isHighlighted && styles.highlighted,
+    isSelected && styles.selected, isInactiveRoute && styles.inactiveRoute,
+    isSelected && isHighlighted && styles.highlighted,
   ].filter(Boolean).join(' ');
 
   return (
-    <button type="button" className={classNames} onClick={onClick} aria-label={name}>
+    <button type="button" className={classNames} onClick={onClick} aria-label={name} aria-pressed={isSelected}>
       {!isDot && (
         <>
           <span className={styles.pin} aria-hidden />
