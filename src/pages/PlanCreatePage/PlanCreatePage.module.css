@@ -89,31 +89,6 @@
   color: var(--color-gray-300);
 }
 
-.destination {
-  position: relative;
-}
-
-/* 입력칸(56px) 안 왼쪽에 24px 아이콘 자리를 두고 글자를 그만큼 밀어요 */
-.destination input {
-  padding-left: 54px;
-}
-
-.destinationIcon {
-  position: absolute;
-  bottom: 16px;
-  left: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  pointer-events: none;
-}
-
-.destinationIcon img {
-  display: block;
-}
-
 .actions {
   display: flex;
   flex-direction: column;
