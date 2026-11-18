@@ -24,6 +24,8 @@ import ProfilePage from "@/pages/ProfilePage/ProfilePage";
 import AccountPolicyPage from "@/pages/AccountPolicyPage/AccountPolicyPage";
 import FeedbackPage from "@/pages/FeedbackPage/FeedbackPage";
 import AccountSettingsPage from "@/pages/AccountSettingsPage/AccountSettingsPage";
+import OnboardingGuidePage from "@/pages/OnboardingGuidePage/OnboardingGuidePage";
+import PlanInfoEditPage from "@/pages/PlanInfoEditPage/PlanInfoEditPage";
 
 export const routes: RouteObject[] = [
   { path: "/", element: <RootRoute /> },
@@ -40,6 +42,8 @@ export const routes: RouteObject[] = [
       </RequireAuth>
     ),
     children: [
+      // 가입 직후 한 번 보여주는 앱 사용안내 3장
+      { path: "/welcome", element: <OnboardingGuidePage /> },
       { path: "/home", element: <HomePage /> },
       { path: "/library", element: <LibraryPage /> },
       { path: "/library/trash", element: <LibraryTrashPage /> },
@@ -60,6 +64,8 @@ export const routes: RouteObject[] = [
       { path: "/plans/new", element: <PlanCreatePage /> },
       { path: "/plans/:planId", element: <PlanViewPage /> },
       { path: "/plans/:planId/edit", element: <PlanEditPage /> },
+      // 계획 편집: 여행 이름·기간·주소를 고쳐요 (동선 편집은 위 /edit)
+      { path: "/plans/:planId/info", element: <PlanInfoEditPage /> },
     ],
   },
   // 컴포넌트 테스트 페이지는 로컬과 Vercel 미리보기에서만 열림 (제출용 main 배포에는 안 나옴)

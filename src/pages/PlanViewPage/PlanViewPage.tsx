@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { getErrorMessage } from '@/shared/api/client';
 import Button from '@/shared/components/Button';
@@ -54,6 +54,27 @@ export default function PlanViewPage() {
   const [dayIndex, setDayIndex] = useState(0);
   const [isPlanBVisible, setIsPlanBVisible] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // 메뉴 바깥을 누르거나 Esc를 누르면 닫아요 (보관함 ⋮ 메뉴와 같은 방식)
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) setIsMenuOpen(false);
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsMenuOpen(false);
+    };
+
+    document.addEventListener('pointerdown', handlePointerDown, true);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', handlePointerDown, true);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isMenuOpen]);
 
   if (viewStatus === 'loading') {
     return (
@@ -81,6 +102,8 @@ export default function PlanViewPage() {
   const editPath = `/plans/${plan.id}/edit`;
   // 읽기 전용으로 공유받았거나 로그인하지 않았으면 고치지 못해요
   const canEdit = isLoggedIn && plan.role !== undefined && plan.role !== 'VIEWER';
+  // 공유 링크는 계획을 만든 사람만 만들 수 있어요 (서버 규칙)
+  const canShare = plan.role === 'OWNER';
 
   const share = (channel: ShareChannel) => {
     setShareMessage(null);
@@ -115,6 +138,7 @@ export default function PlanViewPage() {
   };
 
   const openShare = () => {
+    setIsMenuOpen(false);
     setSharedUrl(null);
     setShareMessage(null);
     setIsShareOpen(true);
@@ -154,11 +178,39 @@ export default function PlanViewPage() {
           title="여행계획"
           onBack={() => (isLoggedIn ? navigate(-1) : navigate('/'))}
           action={
-            // 공유 링크는 계획을 만든 사람만 만들 수 있어요 (서버 규칙)
-            plan.role === 'OWNER' && (
-              <button type="button" className={styles.moreButton} aria-label="공유하기" onClick={openShare}>
-                <img src={kebabIcon} alt="" />
-              </button>
+            // 고를 항목이 하나도 없으면(로그인하지 않은 공유 링크 등) ⋮ 자체를 숨겨요
+            (canShare || canEdit) && (
+              <div ref={menuRef} className={styles.menuWrap}>
+                <button
+                  type="button"
+                  className={styles.moreButton}
+                  aria-label="더보기"
+                  aria-haspopup="menu"
+                  aria-expanded={isMenuOpen}
+                  onClick={() => setIsMenuOpen((isOpen) => !isOpen)}
+                >
+                  <img src={kebabIcon} alt="" />
+                </button>
+                {isMenuOpen && (
+                  <div className={styles.menu} role="menu">
+                    {canShare && (
+                      <button type="button" role="menuitem" className={styles.menuItem} onClick={openShare}>
+                        공유하기
+                      </button>
+                    )}
+                    {canEdit && (
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className={styles.menuItem}
+                        onClick={() => navigate(`/plans/${plan.id}/info`)}
+                      >
+                        계획 편집
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             )
           }
         />

@@ -182,3 +182,43 @@
   background: none;
   cursor: pointer;
 }
+
+/* ⋮ 메뉴. 보관함(LibraryPage)의 '휴지통 보기' 메뉴와 같은 모양이에요 */
+.menuWrap {
+  position: relative;
+  z-index: 1;
+}
+
+.menu {
+  position: absolute;
+  z-index: 1;
+  top: 1px;
+  right: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-sizing: border-box;
+  width: 213px;
+  padding: 5px 64px 5px 7px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 32.15px 0 rgba(26, 26, 26, 0.13);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-900);
+  white-space: nowrap;
+  cursor: pointer;
+}

@@ -12,15 +12,26 @@ const toDateString = (date: Date) => {
   return `${date.getFullYear()}-${month}-${day}`;
 };
 
+/** 계획 편집 화면처럼 이미 있는 값으로 시작할 때 넘겨요. 날짜는 YYYY-MM-DD */
+export type PlanFormInitialValues = Partial<CreatePlanRequest>;
+
+// 'YYYY-MM-DD'를 new Date()에 바로 넣으면 UTC 자정이 돼서 달력(기기 시간대)과 하루 어긋날 수 있음
+const toLocalDate = (date: string | undefined) => {
+  if (!date) return undefined;
+  const [year, month, day] = date.split('-').map(Number);
+  const parsed = new Date(year, month - 1, day);
+  return Number.isNaN(parsed.getTime()) ? undefined : parsed;
+};
+
 /**
- * 여행계획 생성 화면의 입력값 (기능명세서 4-1).
+ * 여행계획 생성 화면의 입력값 (기능명세서 4-1). initial을 넘기면 그 값으로 시작해요 (계획 편집).
  * 기간은 달력에서 시작일 → 종료일 순으로 골라요. 둘 다 고른 뒤 다시 누르면 시작일부터 새로 골라요.
  */
-export function usePlanCreateForm() {
-  const [title, setTitle] = useState('');
-  const [destination, setDestination] = useState('');
-  const [startDate, setStartDate] = useState<Date>();
-  const [endDate, setEndDate] = useState<Date>();
+export function usePlanCreateForm(initial?: PlanFormInitialValues) {
+  const [title, setTitle] = useState(initial?.title ?? '');
+  const [destination, setDestination] = useState(initial?.destination ?? '');
+  const [startDate, setStartDate] = useState(() => toLocalDate(initial?.startDate));
+  const [endDate, setEndDate] = useState(() => toLocalDate(initial?.endDate));
   const [hasPeriodError, setHasPeriodError] = useState(false);
 
   /** 종료일까지 다 골랐으면 true를 돌려줘요 (달력을 닫을 때 씀) */
