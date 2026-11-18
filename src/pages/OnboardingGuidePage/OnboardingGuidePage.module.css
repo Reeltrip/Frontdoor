@@ -44,7 +44,7 @@
   width: 100%;
   height: 60px;
   margin-top: auto;
-  margin-bottom: calc(72px + env(safe-area-inset-bottom));
+  margin-bottom: calc(var(--home-bar-height) + 38px);
 }
 
 .stepRow {

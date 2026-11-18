@@ -2,6 +2,8 @@
 :root {
   /* 피그마 좌표의 위쪽 60px은 상태바 자리예요. 기기 상태바가 더 높을 때만 그만큼 늘려요 (둘을 더하면 여백이 두 배가 돼요) */
   --status-bar-height: max(env(safe-area-inset-top), 60px);
+  /* 피그마 아래 여백에도 홈 막대 자리(34px)가 이미 들어 있어요. 아이폰에서 두 번 더하지 않게 큰 쪽만 써요 */
+  --home-bar-height: max(env(safe-area-inset-bottom), 34px);
 
   /* 포인트 색 (라임) */
   --color-lime-10: #f8ffe5;

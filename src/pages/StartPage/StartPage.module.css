@@ -23,7 +23,7 @@
 }
 
 .actions {
-    padding: 0 24px calc(24px + env(safe-area-inset-bottom));
+    padding: 0 24px max(24px, calc(env(safe-area-inset-bottom) + 8px));
 }
 
 .actions .loginButton {

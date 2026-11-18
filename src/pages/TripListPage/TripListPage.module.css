@@ -123,7 +123,7 @@
 .otherTitle { margin: 22px 0 10px; }
 .empty, .state, .emptyShared { padding: 30px 16px; color: var(--color-gray-500); text-align: center; font: var(--font-body2); }
 .state button, .createButton { margin-top: 12px; padding: 10px 16px; border: 0; border-radius: 24px; background: var(--color-gray-900); color: white; cursor: pointer; }
-.tabBar { position: absolute; bottom: calc(44px + env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); }
+.tabBar { position: absolute; bottom: calc(var(--home-bar-height) + 10px); left: 50%; transform: translateX(-50%); }
 
 @media (max-height: 740px) {
   .featured { height: 220px; }

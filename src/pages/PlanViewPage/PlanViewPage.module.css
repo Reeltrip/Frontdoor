@@ -88,7 +88,7 @@
   display: flex;
   flex-direction: column;
   max-height: 281px;
-  padding: 28px 20px calc(16px + env(safe-area-inset-bottom));
+  padding: 28px 20px max(16px, calc(env(safe-area-inset-bottom) + 8px));
   border-radius: 12px 12px 0 0;
   background: var(--color-surface);
   box-shadow: 0 -4px 6px 0 rgba(0, 0, 0, 0.03);
