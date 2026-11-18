@@ -1,13 +1,16 @@
 .page {
     position: relative;
     min-height: 100dvh;
+    /* 피그마: 제목 줄이 상태바(60px) 아래에 있어요. 여행계획 화면과 같은 값 */
+    padding-top: 64px;
     overflow: hidden;
     background: var(--color-bg);
 }
 
 .stage {
     position: absolute;
-    top: max(95px, calc(100dvh - 749px));
+    /* 피그마(390×844): 카드 위쪽이 171px. 화면이 낮아도 제목 줄(120px) 아래로는 안 올라가요 */
+    top: max(130px, calc(100dvh - 673px));
     right: 0;
     left: 0;
 }
