@@ -34,6 +34,7 @@ export type MapViewProps = {
   className?: string;
   /** 여행계획 편집에서 쓰는 동선 색과 사진 핀 상태 */
   isPlanning?: boolean;
+  isAddingPlanB?: boolean;
   highlightedNodeId?: string | null;
   enlargeSelectedNode?: boolean;
 };
@@ -71,25 +72,29 @@ type MapRouteLinesProps = {
   nodes: MapNode[];
   route: MapRouteStop[];
   isPlanning?: boolean;
+  isAddingPlanB?: boolean;
 };
 
-function MapRouteLines({ nodes, route, isPlanning }: MapRouteLinesProps) {
+function MapRouteLines({ nodes, route, isPlanning, isAddingPlanB }: MapRouteLinesProps) {
   const { mainPath, planBPaths } = useMemo(() => buildRoutePaths(nodes, route), [nodes, route]);
   const colors = useMemo(
-    () => ({ main: readColorToken(isPlanning ? '--color-plan-route' : '--color-gray-900'), planB: readColorToken('--color-lime-600') }),
-    [isPlanning],
+    () => ({
+      main: readColorToken(isPlanning && !isAddingPlanB ? '--color-plan-route' : '--color-gray-900'),
+      planB: readColorToken(isAddingPlanB ? '--color-plan-route' : '--color-lime-600'),
+    }),
+    [isPlanning, isAddingPlanB],
   );
 
   return (
     <>
-      {/* 플랜B 선을 아래에 깔아서 갈라지고 합쳐지는 지점에서 메인 동선이 끊겨 보이지 않게 해요 */}
+      {/* 추가할 때는 플랜 B가 기존 선과 겹쳐도 보이도록 위에 그려요. */}
       {planBPaths.map((path, index) => (
         <Polyline
           key={index}
           path={path}
           strokeColor={colors.planB}
           strokeWeight={ROUTE_STROKE_WEIGHT}
-          zIndex={1}
+          zIndex={isAddingPlanB ? 2 : 1}
           clickable={false}
         />
       ))}
@@ -98,7 +103,7 @@ function MapRouteLines({ nodes, route, isPlanning }: MapRouteLinesProps) {
           path={mainPath}
           strokeColor={colors.main}
           strokeWeight={ROUTE_STROKE_WEIGHT}
-          zIndex={2}
+          zIndex={isAddingPlanB ? 1 : 2}
           clickable={false}
         />
       )}
@@ -115,6 +120,7 @@ function MapContent({
   onSelectNode,
   onClickMap,
   isPlanning,
+  isAddingPlanB,
   highlightedNodeId,
   enlargeSelectedNode = !isPlanning,
 }: Omit<MapViewProps, 'className'>) {
@@ -139,7 +145,7 @@ function MapContent({
         className={styles.map}
       >
         <MapCamera center={center} zoom={zoom} />
-        {route && <MapRouteLines nodes={nodes} route={route} isPlanning={isPlanning} />}
+        {route && <MapRouteLines nodes={nodes} route={route} isPlanning={isPlanning} isAddingPlanB={isAddingPlanB} />}
         {nodes.map((node) => {
           const isSelected = node.id === selectedNodeId;
           const isOnRoute = routeIds.has(node.id);

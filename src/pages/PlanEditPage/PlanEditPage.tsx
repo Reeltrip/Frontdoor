@@ -512,6 +512,7 @@ export default function PlanEditPage() {
           selectedNodeId={lodgingResult?.googlePlaceId ?? selectedId}
           route={route}
           isPlanning
+          isAddingPlanB={planBTargetId !== null}
           highlightedNodeId={isPreviewing && !isReviewing ? selectedId : lodgingResult?.googlePlaceId}
           enlargeSelectedNode={Boolean(isLodgingConfirmation)}
           onSelectNode={selectPlace}
