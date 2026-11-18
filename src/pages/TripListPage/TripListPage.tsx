@@ -4,6 +4,7 @@ import { getErrorMessage } from '@/shared/api/client';
 import { isDraftPlanStatus, type PlanSummary } from '@/features/plan/model/plan.types';
 import { usePlans } from '@/features/plan/model/usePlan';
 import TabBar from '@/shared/components/TabBar';
+import Button from '@/shared/components/Button';
 import styles from './TripListPage.module.css';
 
 type PlanTab = 'mine' | 'shared';
@@ -117,9 +118,19 @@ export default function TripListPage() {
           </div>
         ) : (
           <div role="tabpanel" className={styles.planContent}>
-            {upcoming[0] && (
+            {upcoming[0] ? (
               <section className={styles.upcoming} aria-label="다가오는 여행">
                 <FeaturedPlanCard plan={upcoming[0]} onOpen={openPlan} />
+              </section>
+            ) : (
+              <section className={styles.emptyUpcoming} aria-labelledby="empty-upcoming-title">
+                <h2 id="empty-upcoming-title" className={styles.emptyUpcomingTitle}>
+                  <span>모아둔 여행자료로</span>
+                  <span>여행계획을 만들어 보세요.</span>
+                </h2>
+                <Button size="md" isFullWidth={false} className={styles.createButton} onClick={() => navigate('/plans/new')}>
+                  여행계획 생성하기
+                </Button>
               </section>
             )}
 
@@ -147,7 +158,6 @@ export default function TripListPage() {
                   </ul>
                 </>
               )}
-              {plans.length === 0 && <button type="button" className={styles.createButton} onClick={() => navigate('/plans/new')}>여행계획 만들기</button>}
             </section>
           </div>
         )}
