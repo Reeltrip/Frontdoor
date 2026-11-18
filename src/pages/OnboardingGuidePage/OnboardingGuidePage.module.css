@@ -6,194 +6,23 @@
   min-height: 100dvh;
   padding: 0 20px;
   overflow-x: hidden;
+  /* 그림 바탕색(#fafafa)과 같아야 그림 테두리가 안 보여요 */
+  background: var(--color-white);
   text-align: center;
 }
 
-/* 폰 그림 자리 (278×230). 카드가 폰 밖으로 튀어나올 수 있어 자르지 않아요 */
+/* 피그마에서 내보낸 그림. 프레임의 x 30~360, y 190~440 영역이에요 */
 .art {
-  position: relative;
+  display: block;
   flex-shrink: 0;
-  width: 278px;
-  height: 230px;
-  margin-top: calc(env(safe-area-inset-top) + 194px);
+  width: 330px;
+  height: 250px;
+  margin-top: calc(env(safe-area-inset-top) + 190px);
 }
 
-/* 폰 외곽선. 아래쪽은 배경으로 서서히 사라져요 */
-.phone {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  -webkit-mask-image: linear-gradient(180deg, #000 30%, transparent 100%);
-  mask-image: linear-gradient(180deg, #000 30%, transparent 100%);
-}
-
-.phone::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 420px;
-  border: 2px solid #e3e7ec;
-  border-radius: 36px;
-  background: var(--color-gray-0);
-}
-
-.notch {
-  position: absolute;
-  top: 14px;
-  left: 50%;
-  width: 84px;
-  height: 22px;
-  border-radius: 11px;
-  background: #e3e7ec;
-  transform: translateX(-50%);
-}
-
-/* 1장: 점선 알약 두 개 */
-.linkPills {
-  position: absolute;
-  top: 70px;
-  left: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  width: 100%;
-}
-
-.linkPill {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 186px;
-  height: 46px;
-  border: 1.5px dashed var(--color-gray-200);
-  border-radius: 23px;
-  background: var(--color-gray-0);
-  font: var(--font-caption);
-  letter-spacing: var(--tracking);
-  color: var(--color-gray-400);
-  transform: rotate(-3deg);
-}
-
-.linkPill + .linkPill {
-  transform: rotate(2deg);
-}
-
-/* 2장: 폰 왼쪽 밖으로 살짝 튀어나온 카테고리 카드 */
-.categoryCard {
-  position: absolute;
-  top: 78px;
-  left: -26px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 270px;
-  height: 98px;
-  padding: 0 14px 0 10px;
-  border-radius: 49px;
-  background: var(--color-gray-0);
-  box-shadow: 0 4px 20px rgba(26, 26, 26, 0.12);
-  text-align: left;
-}
-
-.categoryPhoto {
-  position: relative;
-  flex-shrink: 0;
-  width: 78px;
-  height: 78px;
-  overflow: hidden;
-  border-radius: 50%;
-}
-
-.categoryImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.categoryIcon {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 30px;
-  height: 30px;
-  transform: translate(-50%, -50%);
-}
-
-.categoryText {
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  min-width: 0;
-  letter-spacing: var(--tracking);
-}
-
-.categoryName {
-  font: 600 14px/1.5 var(--font-family);
-  color: var(--color-gray-900);
-  white-space: nowrap;
-}
-
-.categoryHint {
-  font: 400 11px/1.5 var(--font-family);
-  color: var(--color-gray-500);
-  white-space: nowrap;
-}
-
-.categoryView {
-  flex-shrink: 0;
-  padding: 4px 12px;
-  border-radius: 20px;
-  /* 피그마: 흰 바탕에 옅은 그림자가 있는 알약 */
-  background: var(--color-surface);
-  box-shadow: 0 1px 6px rgba(26, 26, 26, 0.12);
-  font: 500 11px/1.5 var(--font-family);
-  letter-spacing: var(--tracking);
-  color: var(--color-gray-900);
-}
-
-/* 3장: 다가오는 여행 사진 카드 */
-.tripCard {
-  position: absolute;
-  top: 52px;
-  left: 50%;
-  width: 172px;
-  height: 168px;
-  margin-left: -86px;
-  overflow: hidden;
-  border-radius: 20px;
-  box-shadow: 0 4px 20px rgba(26, 26, 26, 0.12);
-}
-
-.tripImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* 밝은 사진 위에서도 흰 글자가 읽히게 위쪽만 살짝 어둡게 해요 */
-.tripCard::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(26, 26, 26, 0.35) 0%, transparent 45%);
-}
-
-.tripLabel {
-  position: absolute;
-  top: 12px;
-  left: 14px;
-  z-index: 1;
-  font: 500 10px/1.5 var(--font-family);
-  letter-spacing: var(--tracking);
-  color: var(--color-white);
-}
-
-/* 제목 첫 줄 중심이 y 478에 오게: 폰 아래(424) + 34 = 458에서 시작 */
+/* 제목 첫 줄 중심이 y 478에 오게: 그림 아래(440) + 18 = 458에서 시작 */
 .title {
-  margin: 34px 0 0;
+  margin: 18px 0 0;
   font: var(--font-h2);
   letter-spacing: var(--tracking);
   color: var(--color-gray-900);
