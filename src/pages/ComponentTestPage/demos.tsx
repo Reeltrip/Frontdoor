@@ -16,6 +16,7 @@ import {
   CalendarDemo,
   CategoryFilterDemo,
   CategoryDialDemo,
+  CategoryWheelDemo,
   PlaceCarouselDemo,
   PlaceEditCardDemo,
   ToastDemo,
@@ -382,6 +383,16 @@ export const componentDemos: ComponentDemo[] = [
     variants: [{ label: "저장 안내", render: () => <ToastDemo /> }],
   },
 
+  {
+    name: "CategoryWheel",
+    path: "features/place/ui/CategoryWheel",
+    description: "결과 화면의 카테고리 메뉴. 장소 사진이 없거나 실패하면 시안의 사진을 표시",
+    variants: [
+      { label: "사진 없음 (Figma 기본 사진)", render: () => <CategoryWheelDemo /> },
+      { label: "장소 사진 있음", render: () => <CategoryWheelDemo photoState="loaded" /> },
+      { label: "사진 불러오기 실패", render: () => <CategoryWheelDemo photoState="error" /> },
+    ],
+  },
   {
     name: "CategoryDial",
     path: "features/place/ui/CategoryDial",

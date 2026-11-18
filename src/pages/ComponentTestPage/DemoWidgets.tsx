@@ -127,12 +127,25 @@ export function CategoryDialDemo() {
   );
 }
 
-export function CategoryWheelDemo() {
+export function CategoryWheelDemo({
+  photoState = "missing",
+}: {
+  photoState?: "missing" | "loaded" | "error";
+}) {
   const [activeIndex, setActiveIndex] = useState(DEMO_RESULT_INITIAL_INDEX);
+  const items = DEMO_RESULT_CATEGORIES.map((item) => ({
+    ...item,
+    imageUrl:
+      photoState === "loaded"
+        ? DEMO_PLACES[0].imageUrl
+        : photoState === "error"
+          ? "/missing-wheel-photo.png"
+          : undefined,
+  }));
   return (
-    <div style={{ height: 640 }}>
+    <div style={{ width: 390, maxWidth: "100%", height: 640 }}>
       <CategoryWheel
-        items={DEMO_RESULT_CATEGORIES}
+        items={items}
         activeIndex={activeIndex}
         onChange={setActiveIndex}
         onView={() => {}}
