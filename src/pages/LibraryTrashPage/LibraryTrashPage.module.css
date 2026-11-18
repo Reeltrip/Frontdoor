@@ -11,7 +11,7 @@
     flex-shrink: 0;
     align-items: center;
     gap: 12px;
-    padding: calc(var(--status-bar-height) + 24px) 16px 0 16px;
+    padding: var(--page-top) 16px 0 16px;
 }
 
 .iconButton {

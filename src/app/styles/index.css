@@ -1,7 +1,7 @@
 /* 디자인 토큰. 값은 피그마 '디자인시스템' 섹션(Typography, Sub/Gray COLORS)을 그대로 옮김 */
 :root {
-  /* 피그마 좌표의 위쪽 60px은 상태바 자리예요. 기기 상태바가 더 높을 때만 그만큼 늘려요 (둘을 더하면 여백이 두 배가 돼요) */
-  --status-bar-height: max(env(safe-area-inset-top), 60px);
+  /* 제목 줄의 위 여백이에요. 모든 화면이 여행목록과 같은 높이에서 시작해요. 아이폰은 상태바 바로 아래 8px이에요 */
+  --page-top: max(48px, calc(env(safe-area-inset-top) + 8px));
   /* 피그마 아래 여백에도 홈 막대 자리(34px)가 이미 들어 있어요. 아이폰에서 두 번 더하지 않게 큰 쪽만 써요 */
   --home-bar-height: max(env(safe-area-inset-bottom), 34px);
 
