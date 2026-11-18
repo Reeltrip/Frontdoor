@@ -8,6 +8,23 @@ import { useState } from "react";
 import ConfirmModal from "@/shared/components/ConfirmModal";
 import { readClipboardLink } from "@/features/source/lib/readClipboardLink";
 import type { LinkAddState } from "@/features/source/model/source.types";
+import LinkTutorial from "@/features/source/ui/LinkTutorial";
+
+const LINK_TUTORIAL_SEEN_KEY = "reeltrip:link-tutorial-seen";
+
+function hasSeenLinkTutorial(): boolean {
+  try {
+    return sessionStorage.getItem(LINK_TUTORIAL_SEEN_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markLinkTutorialSeen() {
+  try {
+    sessionStorage.setItem(LINK_TUTORIAL_SEEN_KEY, "1");
+  } catch {}
+}
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -19,12 +36,22 @@ export default function HomePage() {
 
   // 클립보드에 링크가 있으면 팝업을 띄우고, 없으면 바로 링크 추가 화면으로 감
   const handleLoadLinkClick = async () => {
+    closeTutorial();
     const link = await readClipboardLink();
     if (link === null) {
       navigate("/links/new");
       return;
     }
     setClipboardLink(link);
+  };
+
+  const [isTutorialOpen, setIsTutorialOpen] = useState(
+    () => !hasSeenLinkTutorial(),
+  );
+
+  const closeTutorial = () => {
+    markLinkTutorialSeen();
+    setIsTutorialOpen(false);
   };
 
   const handleClipboardConfirm = () => {
@@ -42,7 +69,9 @@ export default function HomePage() {
       </div>
 
       <header className={styles.header}>
-        <h1 className={styles.title}>
+        <h1
+          className={`${styles.title} ${isTutorialOpen ? styles.titleOnTutorial : ""}`}
+        >
           모아둔 여행 영상 링크를
           <br />
           보여주세요!
@@ -52,7 +81,7 @@ export default function HomePage() {
         </p>
         <button
           type="button"
-          className={styles.loadButton}
+          className={`${styles.loadButton} ${isTutorialOpen ? styles.aboveTutorial : ""}`}
           onClick={handleLoadLinkClick}
         >
           링크 불러오기
@@ -71,6 +100,9 @@ export default function HomePage() {
             ))}
           </ul>
         </section>
+      )}
+      {isTutorialOpen && (
+        <LinkTutorial onClose={closeTutorial} onTry={handleLoadLinkClick} />
       )}
       <ConfirmModal
         isOpen={clipboardLink !== null}
