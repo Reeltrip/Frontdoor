@@ -9,6 +9,8 @@ export type PlanNode = {
   placeId: string;
   /** 이 노드 대신 갈 수 있는 곳. 앞 노드에서 갈라져 다음 노드에서 합쳐져요 */
   planB?: { placeId: string };
+  /** 서버엔 플랜B가 여러 개일 수 있어요. 화면은 첫 번째만 쓰고, 나머지는 저장할 때 지우지 않고 돌려줘요 */
+  extraPlanBIds?: string[];
 };
 
 export type PlanDay = {

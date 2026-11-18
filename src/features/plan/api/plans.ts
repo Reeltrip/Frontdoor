@@ -6,6 +6,7 @@ import {
   type CreatePlanRequest,
   type Plan,
   type PlanDay,
+  type PlanNode,
   type PlanListParams,
   type PlanRole,
   type PlanSummary,
@@ -122,6 +123,9 @@ function toPlan(plan: ApiPlan): Plan {
           id: String(node.planNodeId),
           placeId: String(node.placeId),
           ...(node.alternatives[0] ? { planB: { placeId: String(node.alternatives[0].placeId) } } : {}),
+          ...(node.alternatives.length > 1
+            ? { extraPlanBIds: node.alternatives.slice(1).map((alternative) => String(alternative.placeId)) }
+            : {}),
         })),
       };
     }),
@@ -172,8 +176,12 @@ export function deletePlan(id: string): Promise<void> {
   return apiRequest<void>(planPath(id), { method: 'DELETE' });
 }
 
-const dayNodeKey = (nodes: { placeId: string; planB?: { placeId: string } }[]) =>
-  nodes.map((node) => `${node.placeId}:${node.planB?.placeId ?? ''}`).join(',');
+/** 이 노드가 서버에 보낼 플랜B 카드 id. 화면이 쓰는 첫 플랜B 뒤에 추가 플랜B를 붙여요 */
+const getAlternativeIds = (node: PlanNode) => (node.planB ? [node.planB.placeId, ...(node.extraPlanBIds ?? [])] : []);
+const getNodePlaceIds = (node: PlanNode) => [node.placeId, ...getAlternativeIds(node)];
+
+const dayNodeKey = (nodes: PlanNode[]) =>
+  nodes.map((node) => `${node.placeId}:${getAlternativeIds(node).join('|')}`).join(',');
 
 /**
  * 화면은 계획 전체를 한 번에 저장하지만 서버는 기본 정보·숙소·구역·일자별 노드를 따로 받아요.
@@ -210,13 +218,22 @@ export async function updatePlan(id: string, request: UpdatePlanRequest): Promis
   }
 
   const isDraft = isDraftPlanStatus(request.status);
-  const days = request.days.slice(0, current.days.length);
+  const requestDays = request.days.slice(0, current.days.length);
 
   // 같은 카드가 두 일차에 있으면 서버가 거절해요. 요청을 보내기 전에 막아서 앞선 저장만 반영되는 일을 없애요
-  const allIds = days.flatMap((day) => day.nodes.flatMap((node) => [node.placeId, ...(node.planB ? [node.planB.placeId] : [])]));
+  const allIds = requestDays.flatMap((day) => day.nodes.flatMap((node) => [node.placeId, ...(node.planB ? [node.planB.placeId] : [])]));
   if (new Set(allIds).size !== allIds.length) {
     throw new ApiError({ status: 409, code: 'DUPLICATE_PLAN_PLACE', message: '이미 다른 일자에 넣은 장소예요.' });
   }
+  // 추가 플랜B는 화면이 모르는 카드예요. 그 카드를 계획의 다른 곳에 넣었거나 플랜B를 뗐으면 같이 빼요
+  const days = requestDays.map((day): PlanDay => ({
+    ...day,
+    nodes: day.nodes.map((node): PlanNode => {
+      const { extraPlanBIds, ...rest } = node;
+      const keptIds = node.planB ? (extraPlanBIds ?? []).filter((placeId) => !allIds.includes(placeId)) : [];
+      return keptIds.length > 0 ? { ...rest, extraPlanBIds: keptIds } : rest;
+    }),
+  }));
   const isCompletedDay = (day: PlanDay) => day.nodes.length > 0 && (day.isCompleted ?? !isDraft);
   const changedIndexes = days.flatMap((day, index) => {
     const before = current.days[index];
@@ -242,7 +259,7 @@ export async function updatePlan(id: string, request: UpdatePlanRequest): Promis
       body: {
         nodes: day.nodes.map((node) => ({
           placeId: Number(node.placeId),
-          alternativePlaceIds: node.planB ? [Number(node.planB.placeId)] : [],
+          alternativePlaceIds: getAlternativeIds(node).map(Number),
         })),
         isCompleted,
       },
@@ -250,7 +267,7 @@ export async function updatePlan(id: string, request: UpdatePlanRequest): Promis
 
   // 같은 카드는 한 계획에 한 번만 들어가요. 카드가 다른 일차로 옮겨 가면 원래 일차에서 먼저 빼야 서버가 받아요.
   // 그래서 카드가 빠져나가는 일차만, 새로 들어오는 카드 없이 "남는 노드"로 먼저 저장해요 (남는 노드는 지우지 않아요)
-  const usedIds = (day: PlanDay) => day.nodes.flatMap((node) => [node.placeId, ...(node.planB ? [node.planB.placeId] : [])]);
+  const usedIds = (day: PlanDay) => day.nodes.flatMap(getNodePlaceIds);
   for (const index of changedIndexes) {
     const beforeIds = new Set(usedIds(current.days[index]));
     const leavingIds = [...beforeIds].filter(
@@ -261,7 +278,11 @@ export async function updatePlan(id: string, request: UpdatePlanRequest): Promis
       ...days[index],
       nodes: days[index].nodes
         .filter((node) => beforeIds.has(node.placeId))
-        .map((node) => (node.planB && !beforeIds.has(node.planB.placeId) ? { id: node.id, placeId: node.placeId } : node)),
+        .map((node): PlanNode => {
+          if (!node.planB || !beforeIds.has(node.planB.placeId)) return { id: node.id, placeId: node.placeId };
+          const keptIds = (node.extraPlanBIds ?? []).filter((placeId) => beforeIds.has(placeId));
+          return { id: node.id, placeId: node.placeId, planB: node.planB, ...(keptIds.length > 0 ? { extraPlanBIds: keptIds } : {}) };
+        }),
     };
     await putDay(index, staying, false);
   }

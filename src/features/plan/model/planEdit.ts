@@ -21,10 +21,10 @@ export function setDayZone(plan: Plan, dayIndex: number, zone: PlanZone): Plan {
   return updateDay(plan, dayIndex, (day) => ({ ...day, zone: zone.name, zoneCenter: zone.center }));
 }
 
-/** 확정한 순서대로 뒤에 붙여요. 이미 이 일차에 있으면 그대로 */
+/** 확정한 순서대로 뒤에 붙여요. 이미 이 일차의 노드나 플랜B로 있으면 그대로 */
 export function addNodeToDay(plan: Plan, dayIndex: number, placeId: string): Plan {
   return updateDay(plan, dayIndex, (day) =>
-    day.nodes.some((node) => node.placeId === placeId)
+    day.nodes.some((node) => node.placeId === placeId || node.planB?.placeId === placeId)
       ? day
       : { ...day, nodes: [...day.nodes, { id: createNodeId(), placeId }] },
   );
