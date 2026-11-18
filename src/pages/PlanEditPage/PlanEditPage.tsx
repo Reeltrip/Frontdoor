@@ -1,12 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router';
+import { useLocation, useNavigate, useParams } from 'react-router';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import kebabIcon from '@/shared/assets/icons/kebab.svg';
+import handleIcon from '@/shared/assets/icons/sheet-handle.svg';
+import { createPlaces, placeKeys, type PlaceSearchResult } from '@/features/place/api/places';
 import { getErrorMessage } from '@/shared/api/client';
 import Button from '@/shared/components/Button';
 import ConfirmModal from '@/shared/components/ConfirmModal';
 import Header from '@/shared/components/Header';
 import { LoadingSpinner } from '@/shared/components/Loading';
-import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, MapView, type MapPosition } from '@/shared/components/Map';
+import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, MapView } from '@/shared/components/Map';
 import Toast from '@/shared/components/Toast';
+import { CATEGORIES } from '@/features/place/lib/categories';
 import { getFirstNodePosition, toMapNodes } from '@/features/place/lib/mapNodes';
 import { usePlaces } from '@/features/place/model/usePlaces';
 import type { Place, PlaceCategory } from '@/features/place/model/place.types';
@@ -14,12 +19,12 @@ import CategoryFilterBar from '@/features/place/ui/CategoryFilterBar';
 import PlaceCardStrip from '@/features/place/ui/PlaceCardStrip';
 import { COPY_DONE_MESSAGE, COPY_FAILED_MESSAGE, copyPlace, openPlace } from '@/features/place/lib/placeActions';
 import { getDayZone, isPlaceInZone, type PlanZone } from '@/features/plan/lib/planZones';
-import { hasSeenPlanTutorial, markPlanTutorialSeen, type PlanTutorialKind } from '@/features/plan/lib/planTutorialSeen';
 import { mergePlanPlaces } from '@/features/plan/model/planPlaces';
 import { completePlanDay, formatDayDate, withDraftIfEmptyDay } from '@/features/plan/model/planDays';
 import {
   addNodeToDay,
-  buildDayRoute,
+  buildPlanningRoute,
+  canSetPlanB,
   findOtherDayNumber,
   moveNodeToDay,
   removeNodeFromDay,
@@ -30,7 +35,6 @@ import {
 import type { Plan } from '@/features/plan/model/plan.types';
 import { useCreateAiDraft, usePlan, useUpdatePlan } from '@/features/plan/model/usePlan';
 import DaySelector from '@/features/plan/ui/DaySelector';
-import { PlanTutorialHint, PlanTutorialOverlay } from '@/features/plan/ui/PlanTutorial';
 import ZoneSheet from '@/features/plan/ui/ZoneSheet';
 import styles from './PlanEditPage.module.css';
 
@@ -45,18 +49,13 @@ const STEP_TITLES: Record<EditStep, string> = {
 
 const TOAST_MS = 2000;
 
-/** 처음 들어왔을 때: 아직 아무것도 안 했으면 숙소부터, 아니면 1일차 */
-const getInitialStep = (plan: Plan): EditStep => {
-  const isUntouched = !plan.accommodationPlaceId && plan.days.every((day) => day.nodes.length === 0 && !day.zone);
-  if (isUntouched) return 'lodging';
-  return plan.days[0]?.zone ? 'nodes' : 'zone';
-};
-
 const isOnMap = (place: Place) => toMapNodes([place]).length > 0;
 
 export default function PlanEditPage() {
   const { planId = '' } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
+  const queryClient = useQueryClient();
   const { plan, viewStatus, error, refetch } = usePlan(planId);
   const { places: libraryPlaces, viewStatus: placesStatus } = usePlaces();
   // 공유받은 계획의 카드는 내 보관함에 없어서 계획 응답에 든 카드로 채워요
@@ -64,28 +63,44 @@ export default function PlanEditPage() {
   const updatePlan = useUpdatePlan(planId);
   const aiDraft = useCreateAiDraft(planId);
 
-  // null이면 계획을 보고 정해요 (불러오기 전에는 알 수 없어서)
+  // 구역을 정한 적 있는 계획은 해당 일차의 동선부터 보여줘요.
   const [step, setStep] = useState<EditStep | null>(null);
   const [dayIndex, setDayIndex] = useState(0);
   const [category, setCategory] = useState<PlaceCategory | 'all'>('all');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [centerOverride, setCenterOverride] = useState<MapPosition | null>(null);
-  const [pendingZone, setPendingZone] = useState<PlanZone | undefined>();
+  const [pendingZone, setPendingZone] = useState<PlanZone | null>();
   const [zoneError, setZoneError] = useState<string | null>(null);
   /** 플랜B를 붙일 확정 노드의 카드 id. 있으면 지도에서 대신 갈 곳을 고르는 중이에요 */
   const [planBTargetId, setPlanBTargetId] = useState<string | null>(null);
   const [otherDayConfirm, setOtherDayConfirm] = useState<{ placeId: string; dayNumber: number } | null>(null);
   const [isSkipDayOpen, setIsSkipDayOpen] = useState(false);
   const [isAiDraftConfirmOpen, setIsAiDraftConfirmOpen] = useState(false);
-  const [isNoLodgingDismissed, setIsNoLodgingDismissed] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isReviewing, setIsReviewing] = useState(false);
+  const [isPreviewing, setIsPreviewing] = useState(false);
+  const [isSearchingLodging, setIsSearchingLodging] = useState(false);
+  const [lodgingResult, setLodgingResult] = useState<PlaceSearchResult>();
+  const [createdLodging, setCreatedLodging] = useState<{ googlePlaceId: string; placeId: string }>();
+  const menuRef = useRef<HTMLDivElement>(null);
+  const createLodging = useMutation({
+    mutationFn: async (result: PlaceSearchResult) => {
+      const created = await createPlaces([{
+        category: 'STAY',
+        name: result.name,
+        address: result.address,
+        latitude: result.latitude,
+        longitude: result.longitude,
+        googlePlaceId: result.googlePlaceId,
+      }]);
+      const [placeId] = created.placeIds;
+      if (!placeId) throw new Error('숙소 카드를 저장하지 못했어요.');
+      await queryClient.invalidateQueries({ queryKey: placeKeys.all });
+      return placeId;
+    },
+  });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isContinuing, setIsContinuing] = useState(false);
-  /** 한 번 닫은 안내는 다시 띄우지 않아요 */
-  const [seenTutorials, setSeenTutorials] = useState<Record<PlanTutorialKind, boolean>>(() => ({
-    confirm: hasSeenPlanTutorial('confirm'),
-    planB: hasSeenPlanTutorial('planB'),
-  }));
   const continuingRef = useRef(false);
   const saveAttempt = useRef(0);
   const failedSave = useRef<{ plan: Plan; onSaved?: () => void } | null>(null);
@@ -95,6 +110,22 @@ export default function PlanEditPage() {
     const timer = window.setTimeout(() => setToastMessage(null), TOAST_MS);
     return () => window.clearTimeout(timer);
   }, [toastMessage]);
+
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const closeOutside = (event: PointerEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) setIsMenuOpen(false);
+    };
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setIsMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', closeOutside);
+    document.addEventListener('keydown', closeOnEscape);
+    return () => {
+      document.removeEventListener('pointerdown', closeOutside);
+      document.removeEventListener('keydown', closeOnEscape);
+    };
+  }, [isMenuOpen]);
 
   if (viewStatus === 'loading') {
     return (
@@ -116,12 +147,11 @@ export default function PlanEditPage() {
     );
   }
 
-  const currentStep = step ?? getInitialStep(plan);
+  const currentStep = step ?? (plan.days[0]?.zone ? 'nodes' : 'zone');
   const hasExistingRoute = plan.days.some((planDay) => planDay.nodes.length > 0);
   const day = plan.days[dayIndex] ?? plan.days[0];
-  const dayLabel = `${dayIndex + 1}일차 · ${formatDayDate(day.date)}`;
+  const dayLabel = `${dayIndex + 1}일차 · ${formatDayDate(day.date).replace(' (', '(')}`;
   const isLastDay = dayIndex === plan.days.length - 1;
-  const isPlacesLoaded = placesStatus === 'success' || placesStatus === 'empty';
 
   const save = async (nextPlan: Plan, onSaved?: () => void) => {
     if (continuingRef.current) return;
@@ -155,13 +185,18 @@ export default function PlanEditPage() {
   const resetSelection = () => {
     setSelectedId(null);
     setPlanBTargetId(null);
-    setCenterOverride(null);
+    setIsPreviewing(false);
   };
 
   const goToStep = (nextStep: EditStep, nextDayIndex = dayIndex) => {
     resetSelection();
+    setIsMenuOpen(false);
+    setIsSearchingLodging(false);
+    setLodgingResult(undefined);
+    createLodging.reset();
     setDayIndex(nextDayIndex);
     setStep(nextStep);
+    if (nextStep !== 'nodes') setIsReviewing(false);
     setCategory('all');
     setZoneError(null);
     setPendingZone(getDayZone(plan.days[nextDayIndex]));
@@ -171,85 +206,141 @@ export default function PlanEditPage() {
     goToStep(plan.days[nextDayIndex]?.zone ? 'nodes' : 'zone', nextDayIndex);
 
   const handleBack = () => {
-    if (continuingRef.current) return;
+    if (continuingRef.current || createLodging.isPending) return;
+    if (isPreviewing) return setIsPreviewing(false);
+    if (selectedId || planBTargetId) return resetSelection();
+    if (currentStep === 'lodging') {
+      if (lodgingResult) return setLodgingResult(undefined);
+      if (isSearchingLodging) return setIsSearchingLodging(false);
+      return goToDay(dayIndex);
+    }
+    if (isReviewing) return setIsReviewing(false);
     if (currentStep === 'nodes') return goToStep('zone');
-    if (currentStep === 'zone' && dayIndex > 0) return goToStep('nodes', dayIndex - 1);
-    if (currentStep === 'zone') return goToStep('lodging');
-    navigate(-1);
+    if (currentStep === 'zone' && dayIndex > 0) return goToDay(dayIndex - 1);
+    const returnTo = (location.state as { returnTo?: string } | null)?.returnTo;
+    if (returnTo === 'plans') navigate('/plans', { replace: true });
+    else if (location.key === 'default') navigate('/plans', { replace: true });
+    else navigate(-1);
   };
 
   // ── 화면에 올릴 장소 ──
   const lodgingPlaces = places.filter((place) => place.category === 'accommodation' && isOnMap(place));
   const lodgingPlace = places.find((place) => place.id === plan.accommodationPlaceId);
   const dayZone = getDayZone(day);
+  const selectedZone = pendingZone === undefined ? dayZone : pendingZone ?? undefined;
   const dayPlaceIds = new Set(day.nodes.flatMap((node) => [node.placeId, ...(node.planB ? [node.planB.placeId] : [])]));
 
   const getVisiblePlaces = (): Place[] => {
     if (currentStep === 'lodging') return lodgingPlaces;
-    const zone = currentStep === 'zone' ? pendingZone : dayZone;
+    const zone = currentStep === 'zone' ? selectedZone : dayZone;
     const zonePlaces = zone ? places.filter((place) => isOnMap(place) && isPlaceInZone(place, zone)) : [];
     if (currentStep === 'zone') return zonePlaces;
-
-    const filtered = zonePlaces.filter((place) => category === 'all' || place.category === category);
-    // 확정한 노드와 숙소는 필터와 상관없이 늘 보여야 동선이 끊기지 않아요
+    // 지도 위에서 참조할 수 있도록 다른 종류의 장소도 작은 점으로 남겨요.
     const pinned = places.filter((place) => dayPlaceIds.has(place.id) || place.id === lodgingPlace?.id);
-    return [...new Map([...pinned, ...filtered].map((place) => [place.id, place])).values()].filter(isOnMap);
+    return [...new Map([...pinned, ...zonePlaces].map((place) => [place.id, place])).values()].filter(isOnMap);
   };
 
   const visiblePlaces = getVisiblePlaces();
-  const mapNodes = toMapNodes(visiblePlaces).map((node) => ({
-    ...node,
-    isMuted:
-      currentStep === 'nodes' && !dayPlaceIds.has(node.id) && findOtherDayNumber(plan, dayIndex, node.id) !== undefined,
-  }));
-  const route = currentStep === 'nodes' ? buildDayRoute(plan, dayIndex) : undefined;
+  const lodgingResultPosition = lodgingResult && { lat: lodgingResult.latitude, lng: lodgingResult.longitude };
+  const selectedPlace = visiblePlaces.find((place) => place.id === selectedId);
+  const selectedNode = day.nodes.find((node) => node.placeId === selectedId);
+  const isSelectedLodging = currentStep === 'nodes' && selectedId !== null && selectedId === plan.accommodationPlaceId;
+  const planBTargetIndex = day.nodes.findIndex((node) => node.placeId === planBTargetId);
+  const planBTargetPlace = places.find((place) => place.id === planBTargetId);
+  const canPreviewPlace = currentStep === 'nodes' && selectedPlace && !isSelectedLodging && !dayPlaceIds.has(selectedPlace.id);
+  const canPreviewPlanB = selectedPlace && planBTargetPlace && canSetPlanB(plan, dayIndex, planBTargetPlace, selectedPlace);
+  const route = currentStep === 'nodes'
+    ? buildPlanningRoute(plan, dayIndex, {
+        previewPlaceId: isPreviewing && canPreviewPlace && !planBTargetId ? selectedPlace.id : undefined,
+        previewPlanB: isPreviewing && canPreviewPlanB && planBTargetId
+          ? { targetPlaceId: planBTargetId, placeId: selectedPlace.id }
+          : undefined,
+        isClosed: isReviewing,
+      })
+    : undefined;
+  const searchedLodgingPhoto = lodgingResult && lodgingPlaces.find((place) =>
+    place.name === lodgingResult.name && place.location?.lat === lodgingResult.latitude && place.location.lng === lodgingResult.longitude,
+  )?.imageUrl;
+  const mapNodes = lodgingResult && lodgingResultPosition
+    ? [{ id: lodgingResult.googlePlaceId, name: lodgingResult.name, imageUrl: searchedLodgingPhoto ?? '', position: lodgingResultPosition }]
+    : toMapNodes(visiblePlaces).map((node) => {
+        const place = visiblePlaces.find((item) => item.id === node.id);
+        const isPinned = dayPlaceIds.has(node.id) || node.id === lodgingPlace?.id;
+        const isCategoryMatch = category === 'all' || place?.category === category;
+        const isDot = currentStep === 'zone' || (currentStep === 'nodes' && !isPinned && !isCategoryMatch);
+        return {
+          ...node,
+          isDot,
+          categoryIcon: currentStep === 'nodes' && !isPinned && !(isPreviewing && selectedId === node.id)
+            ? place && CATEGORIES[place.category].icon?.src
+            : undefined,
+          isMuted: currentStep === 'nodes' && !isPinned && findOtherDayNumber(plan, dayIndex, node.id) !== undefined,
+        };
+      });
 
-  const zoneCenter = (currentStep === 'zone' ? pendingZone : dayZone)?.center;
-  // 구역·숙소를 아직 안 골랐으면 지금 보이는 카드, 그것도 없으면 보관함 카드가 있는 곳을 보여줘요
+  const zoneCenter = (currentStep === 'zone' ? selectedZone ?? dayZone : dayZone)?.center;
   const mapCenter =
-    centerOverride ??
+    lodgingResultPosition ??
     zoneCenter ??
     lodgingPlace?.location ??
     getFirstNodePosition(visiblePlaces) ??
     getFirstNodePosition(places) ??
     DEFAULT_MAP_CENTER;
 
-  const selectedPlace = visiblePlaces.find((place) => place.id === selectedId);
-  const selectedNode = day.nodes.find((node) => node.placeId === selectedId);
-  const isSelectedLodging = selectedId !== null && selectedId === plan.accommodationPlaceId;
-  const planBTargetIndex = day.nodes.findIndex((node) => node.placeId === planBTargetId);
-  const planBTargetPlace = places.find((place) => place.id === planBTargetId);
+  const browsePlace = (placeId: string | null) => {
+    setIsPreviewing(false);
+    setSelectedId(placeId);
+  };
 
   const selectPlace = (placeId: string) => {
-    if (currentStep === 'zone') return;
+    if (currentStep === 'zone' || lodgingResult) return;
     const place = visiblePlaces.find((item) => item.id === placeId);
-    setSelectedId(placeId);
-    if (place?.location) setCenterOverride(place.location);
+    if (!place) return;
+    if (currentStep === 'nodes' && category !== 'all' && place.category !== category && !dayPlaceIds.has(placeId) && placeId !== lodgingPlace?.id) {
+      setCategory(place.category);
+    }
+    if (selectedId === placeId && !isPreviewing && (currentStep === 'lodging' || (planBTargetId ? canPreviewPlanB : canPreviewPlace))) {
+      setIsPreviewing(true);
+      return;
+    }
+    browsePlace(placeId);
   };
 
   // ── 숙소 ──
-  const confirmLodging = (placeId: string | undefined) => {
-    void save(setAccommodation(plan, placeId), () => goToStep(plan.days[0]?.zone ? 'nodes' : 'zone', 0));
+  const confirmLodging = (placeId: string) => {
+    void save(setAccommodation(plan, placeId), () => goToDay(dayIndex));
   };
 
-  const isNoLodgingOpen =
-    currentStep === 'lodging' && isPlacesLoaded && lodgingPlaces.length === 0 && !isNoLodgingDismissed;
+  const confirmSearchedLodging = async () => {
+    if (!lodgingResult || createLodging.isPending) return;
+    if (createdLodging?.googlePlaceId === lodgingResult.googlePlaceId) {
+      confirmLodging(createdLodging.placeId);
+      return;
+    }
+    try {
+      const placeId = await createLodging.mutateAsync(lodgingResult);
+      setCreatedLodging({ googlePlaceId: lodgingResult.googlePlaceId, placeId });
+      confirmLodging(placeId);
+    } catch {
+      // 선택한 결과를 유지해 다시 저장할 수 있게 해요.
+    }
+  };
 
   // ── 구역 ──
   const confirmZone = () => {
-    if (!pendingZone) return;
-    const hasPlaces = places.some((place) => isOnMap(place) && isPlaceInZone(place, pendingZone));
+    const zone = selectedZone;
+    if (!zone) return;
+    const hasPlaces = places.some((place) => isOnMap(place) && isPlaceInZone(place, zone));
     if (!hasPlaces) {
-      setZoneError(`${pendingZone.name} 주변에는 저장한 장소가 없어요. 다른 구역을 입력하거나, 직접 추가해 보세요.`);
+      setZoneError(`${zone.name} 주변에는 저장한 장소가 없어요. 다른 구역을 입력하거나, 직접 추가해 보세요.`);
       return;
     }
-    void save(setDayZone(plan, dayIndex, pendingZone), () => goToStep('nodes'));
+    void save(setDayZone(plan, dayIndex, zone), () => goToStep('nodes'));
   };
 
   // ── 노드 ──
   const addPlace = (placeId: string) => {
-    save(addNodeToDay(plan, dayIndex, placeId));
-    setSelectedId(null);
+    void save(addNodeToDay(plan, dayIndex, placeId), () => setIsPreviewing(false));
   };
 
   const confirmSelectedPlace = () => {
@@ -271,7 +362,8 @@ export default function PlanEditPage() {
       planBLabel: node.planB ? '플랜 B변경' : '플랜 B추가',
       onPlanB: () => {
         setPlanBTargetId(node.placeId);
-        setSelectedId(null);
+        setCategory(place.category);
+        browsePlace(null);
       },
       onRemove: () => {
         save(removeNodeFromDay(plan, dayIndex, node.placeId));
@@ -281,101 +373,117 @@ export default function PlanEditPage() {
   };
 
   const addPlanB = () => {
-    if (!planBTargetId || !selectedId) return;
-    save(setPlanB(plan, dayIndex, planBTargetId, selectedId));
-    setToastMessage(`${planBTargetIndex + 1}번 장소의 플랜 B를 정했어요.`);
-    resetSelection();
+    if (!planBTargetId || !selectedId || !canPreviewPlanB) return;
+    void save(setPlanB(plan, dayIndex, planBTargetId, selectedId), () => {
+      setToastMessage(`${planBTargetIndex + 1}번 장소의 플랜 B를 정했어요.`);
+      setPlanBTargetId(null);
+      browsePlace(planBTargetId);
+    });
   };
 
   const completeDay = () => {
     setIsSkipDayOpen(false);
-    void save(completePlanDay(plan, dayIndex), () => {
-      if (isLastDay) navigate(`/plans/${plan.id}`, { replace: true });
-      else goToDay(dayIndex + 1);
-    });
+    if (isLastDay) {
+      resetSelection();
+      setIsReviewing(true);
+      return;
+    }
+    void save(completePlanDay(plan, dayIndex), () => goToDay(dayIndex + 1));
   };
+
+  const isBusy = isContinuing || aiDraft.isPending || createLodging.isPending;
 
   const handleCompleteDay = () => {
     if (day.nodes.length === 0) setIsSkipDayOpen(true);
     else completeDay();
   };
 
-  // ── 아래쪽 버튼 ──
-  const renderActions = () => {
+  const actions = () => {
     if (currentStep === 'lodging') {
-      return (
-        <>
-          <Button disabled={!selectedPlace} onClick={() => confirmLodging(selectedId ?? undefined)}>
-            이 숙소에서 출발
-          </Button>
-          <button type="button" className={styles.textButton} onClick={() => confirmLodging(undefined)}>
-            숙소 없이 시작
-          </button>
-        </>
-      );
+      if (lodgingResult) {
+        return <Button disabled={createLodging.isPending || Boolean(saveError)} onClick={confirmSearchedLodging}>이 숙소로 선택</Button>;
+      }
+      if (selectedPlace && isPreviewing) {
+        return <Button onClick={() => confirmLodging(selectedPlace.id)}>이 숙소로 선택</Button>;
+      }
+      if (isSearchingLodging || selectedPlace) return null;
+      return <Button onClick={() => setIsSearchingLodging(true)}>숙소 직접 추가</Button>;
     }
-
     if (currentStep === 'zone') {
-      return (
-        <Button disabled={!pendingZone} onClick={confirmZone}>
-          다음
-        </Button>
-      );
+      return <Button aria-disabled={!selectedZone} onClick={confirmZone}>다음</Button>;
     }
-
-    if (planBTargetId) {
-      // 플랜B는 대신할 장소와 같은 카테고리여야 하고, 다른 일차에 이미 넣은 카드는 못 써요 (서버 규칙)
-      const isSameCategory = selectedPlace?.category === planBTargetPlace?.category;
-      const isUsedElsewhere = selectedPlace ? findOtherDayNumber(plan, dayIndex, selectedPlace.id) !== undefined : false;
-      const canAdd =
-        selectedPlace && !dayPlaceIds.has(selectedPlace.id) && !isSelectedLodging && isSameCategory && !isUsedElsewhere;
-      return (
-        <>
-          <Button disabled={!canAdd} onClick={addPlanB}>
-            {planBTargetIndex + 1}번 장소의 플랜 B로 추가
-          </Button>
-          <button type="button" className={styles.textButton} onClick={resetSelection}>
-            취소
-          </button>
-        </>
-      );
+    if (isPreviewing && planBTargetId) {
+      return <Button disabled={!canPreviewPlanB || Boolean(saveError)} onClick={addPlanB}>{planBTargetIndex + 1}번 장소의 플랜 B로 추가</Button>;
     }
-
-    // 확정한 카드는 카드 위 버튼으로 플랜 B·제거를 해서 아래 버튼이 없어요
-    if (selectedNode) return null;
-
-    if (selectedPlace && !isSelectedLodging) {
-      return <Button onClick={confirmSelectedPlace}>이 장소로 확정</Button>;
+    if (isPreviewing && canPreviewPlace) {
+      return <Button disabled={Boolean(saveError)} onClick={confirmSelectedPlace}>이 장소로 확정</Button>;
     }
-
-    return <Button onClick={handleCompleteDay}>{dayIndex + 1}일차 완성</Button>;
+    if (selectedPlace && !isSelectedLodging) return null;
+    if (planBTargetId) return <Button variant="outline" onClick={resetSelection}>취소</Button>;
+    if (isReviewing) {
+      return <Button onClick={() => {
+        void save(completePlanDay(plan, plan.days.length - 1), () => navigate(`/plans/${plan.id}`, { replace: true }));
+      }}>여행계획 완성</Button>;
+    }
+    return <Button disabled={day.nodes.length === 0} onClick={handleCompleteDay}>{dayIndex + 1}일차 완성</Button>;
   };
 
-  const isEmptyCategory = currentStep === 'nodes' && isPlacesLoaded && mapNodes.length === 0;
-  const isNodeIdle = currentStep === 'nodes' && !planBTargetId && !isContinuing && !aiDraft.isPending;
-  const getTutorialKind = (): PlanTutorialKind | null => {
-    if (!isNodeIdle || !selectedPlace || isSelectedLodging) return null;
-    if (selectedNode) return seenTutorials.planB ? null : 'planB';
-    return seenTutorials.confirm ? null : 'confirm';
-  };
-  const tutorialKind = getTutorialKind();
-  const closeTutorial = () => {
-    if (!tutorialKind) return;
-    markPlanTutorialSeen(tutorialKind);
-    setSeenTutorials((prev) => ({ ...prev, [tutorialKind]: true }));
-  };
-  // 확정 안내는 버튼만 보여줘요 (피그마에 카드가 없어요)
-  const isStripVisible = Boolean(selectedPlace) && !isSelectedLodging && tutorialKind !== 'confirm';
+  const isStripVisible = selectedPlace && !isSelectedLodging && (!isPreviewing || (!canPreviewPlace && currentStep === 'nodes'));
+  const stripPlaces = currentStep === 'lodging'
+    ? lodgingPlaces
+    : selectedNode
+      ? [selectedPlace].filter((place): place is Place => Boolean(place))
+      : visiblePlaces.filter((place) => place.id !== lodgingPlace?.id && (category === 'all' || place.category === category));
+  const lodgingAddress = lodgingResult?.address ?? selectedPlace?.address;
+  const isLodgingConfirmation = currentStep === 'lodging' && (lodgingResult || (selectedPlace && isPreviewing));
+  const footerAction = actions();
 
   return (
     <main className={styles.page}>
-      <div className={styles.top} inert={isContinuing || aiDraft.isPending}>
-        <Header title={STEP_TITLES[currentStep]} onBack={handleBack} />
-        {hasExistingRoute && (
-          <button type="button" className={styles.aiDraftButton} disabled={updatePlan.isSaving} onClick={() => setIsAiDraftConfirmOpen(true)}>
-            AI 초안으로 다시 만들기
-          </button>
-        )}
+      <div className={styles.top} inert={isBusy}>
+        <Header title={STEP_TITLES[currentStep]} onBack={handleBack} action={
+          <div ref={menuRef} className={styles.menuWrap}>
+            <button type="button" className={styles.moreButton} aria-label="더보기" aria-expanded={isMenuOpen} onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              <img src={kebabIcon} alt="" />
+            </button>
+            {isMenuOpen && (
+              <div className={styles.menu}>
+                {currentStep !== 'lodging' && <button type="button" onClick={() => goToStep('lodging')}>숙소 선택하기</button>}
+                {currentStep === 'lodging' && (
+                  <>
+                    <button type="button" onClick={() => {
+                      resetSelection();
+                      setLodgingResult(undefined);
+                      setIsMenuOpen(false);
+                      setIsSearchingLodging(true);
+                    }}>숙소 직접 추가</button>
+                    {plan.accommodationPlaceId && <button type="button" onClick={() => {
+                      setIsMenuOpen(false);
+                      void save(setAccommodation(plan, undefined), () => goToDay(dayIndex));
+                    }}>숙소 없이 시작</button>}
+                  </>
+                )}
+                {currentStep === 'nodes' && (
+                  <>
+                    <button type="button" onClick={() => goToStep('zone')}>여행지역 다시 선택</button>
+                    {!isReviewing && day.nodes.length === 0 && (
+                      <button type="button" onClick={() => {
+                        setIsMenuOpen(false);
+                        handleCompleteDay();
+                      }}>일차 건너뛰기</button>
+                    )}
+                  </>
+                )}
+                {hasExistingRoute && (
+                  <button type="button" disabled={updatePlan.isSaving} onClick={() => {
+                    setIsMenuOpen(false);
+                    setIsAiDraftConfirmOpen(true);
+                  }}>AI 초안으로 다시 만들기</button>
+                )}
+              </div>
+            )}
+          </div>
+        } />
         {currentStep !== 'lodging' && (
           <div className={styles.toolbar}>
             <DaySelector days={plan.days} selectedIndex={dayIndex} onSelect={goToDay} />
@@ -385,7 +493,7 @@ export default function PlanEditPage() {
                   selected={category}
                   onChange={(next) => {
                     setCategory(next);
-                    setSelectedId(null);
+                    browsePlace(null);
                   }}
                 />
               </div>
@@ -394,18 +502,21 @@ export default function PlanEditPage() {
         )}
       </div>
 
-      <div className={styles.mapArea} inert={isContinuing || aiDraft.isPending}>
+      <div className={styles.mapArea} inert={isBusy}>
         <MapView
           className={styles.map}
           center={mapCenter}
           // 구역 안에서는 카드가 몰려 있어 마커가 겹쳐요. 한 단계 확대해 덜 겹치게 해요
           zoom={currentStep === 'lodging' ? DEFAULT_MAP_ZOOM : DEFAULT_MAP_ZOOM + 1}
           nodes={mapNodes}
-          selectedNodeId={selectedId}
+          selectedNodeId={lodgingResult?.googlePlaceId ?? selectedId}
           route={route}
+          isPlanning
+          highlightedNodeId={isPreviewing && !isReviewing ? selectedId : lodgingResult?.googlePlaceId}
+          enlargeSelectedNode={Boolean(isLodgingConfirmation)}
           onSelectNode={selectPlace}
           onClickMap={() => {
-            if (!planBTargetId) setSelectedId(null);
+            if (!lodgingResult) browsePlace(null);
           }}
         />
         {zoneError && currentStep === 'zone' && (
@@ -419,9 +530,6 @@ export default function PlanEditPage() {
         {planBTargetId && selectedPlace && selectedPlace.category !== planBTargetPlace?.category && (
           <p className={styles.notice}>플랜 B는 같은 종류의 장소만 넣을 수 있어요.</p>
         )}
-        {!planBTargetId && isEmptyCategory && (
-          <p className={styles.notice}>이 구역에 해당하는 장소가 없어요.</p>
-        )}
         {placesStatus === 'loading' && (
           <div className={styles.placesLoading}>
             <LoadingSpinner label="장소를 불러오는 중" />
@@ -429,14 +537,7 @@ export default function PlanEditPage() {
         )}
       </div>
 
-      {tutorialKind && <PlanTutorialOverlay kind={tutorialKind} onClose={closeTutorial} />}
-
-      <div
-        className={`${styles.bottom} ${tutorialKind ? styles.bottomRaised : ''}`}
-        inert={isContinuing || aiDraft.isPending}
-        // 안내가 떠 있을 때 버튼을 누르면 그 동작을 하면서 안내도 닫아요
-        onClick={closeTutorial}
-      >
+      <div className={styles.bottom} inert={isBusy}>
         {saveError && (
           <div className={styles.saveError} role="alert">
             <p>저장하지 못했어요. {saveError}</p>
@@ -451,21 +552,46 @@ export default function PlanEditPage() {
             key={dayIndex}
             dayLabel={dayLabel}
             destination={plan.destination}
-            selectedZone={pendingZone}
+            selectedZone={selectedZone}
+            onEditQuery={() => {
+              setPendingZone(null);
+              setZoneError(null);
+            }}
             onSelectZone={(zone) => {
               setPendingZone(zone);
               setZoneError(null);
-              setCenterOverride(null);
-            }}
+                      }}
           />
         )}
-        {tutorialKind && <PlanTutorialHint kind={tutorialKind} />}
+        {currentStep === 'lodging' && isSearchingLodging && !lodgingResult && (
+          <ZoneSheet
+            dayLabel="숙소를 검색해주세요."
+            destination={plan.destination}
+            selectedZone={undefined}
+            onSelectZone={(zone) => {
+              browsePlace(null);
+              setLodgingResult(zone.result);
+            }}
+            isLodging
+          />
+        )}
+        {isLodgingConfirmation && (
+          <section className={styles.lodgingSheet} aria-label="숙소 선택 확인">
+            <img src={handleIcon} alt="" className={styles.handle} />
+            <h2>이 숙소가 맞나요?</h2>
+            <p>{lodgingAddress ?? lodgingResult?.name ?? selectedPlace?.name}</p>
+            {createLodging.error && <p role="alert">{getErrorMessage(createLodging.error)}</p>}
+          </section>
+        )}
         {isStripVisible && (
           <div className={styles.strip}>
             <PlaceCardStrip
-              places={visiblePlaces.filter((place) => place.id !== plan.accommodationPlaceId)}
+              places={stripPlaces}
               selectedId={selectedId}
-              onSelect={selectPlace}
+              onSelect={browsePlace}
+              onPick={selectedNode ? undefined : selectPlace}
+              isPlanCard
+              isWide={Boolean(selectedNode)}
               onOpen={openPlace}
               onCopy={async (place) =>
                 setToastMessage((await copyPlace(place)) ? COPY_DONE_MESSAGE : COPY_FAILED_MESSAGE)
@@ -474,22 +600,9 @@ export default function PlanEditPage() {
             />
           </div>
         )}
-        <div className={`${styles.actions} ${tutorialKind ? styles.actionsOnTutorial : ''}`}>{renderActions()}</div>
+        {footerAction && <div className={styles.actions}>{footerAction}</div>}
       </div>
 
-      <ConfirmModal
-        isOpen={isNoLodgingOpen && !isContinuing}
-        icon="alert"
-        title="숙소 위치가 어디인가요?"
-        description="선택한 주소가 매일의 출발지, 도착지가 돼요."
-        cancelLabel="건너뛰기"
-        confirmLabel="추가하기"
-        onCancel={() => {
-          setIsNoLodgingDismissed(true);
-          confirmLodging(undefined);
-        }}
-        onConfirm={() => navigate('/cards/new')}
-      />
       <ConfirmModal
         isOpen={otherDayConfirm !== null}
         icon="alert"
@@ -501,8 +614,7 @@ export default function PlanEditPage() {
         onConfirm={() => {
           if (otherDayConfirm) {
             // 옮기고 나서 원래 일차가 비면 계획은 다시 '작성 중'이 돼요
-            save(withDraftIfEmptyDay(moveNodeToDay(plan, dayIndex, otherDayConfirm.placeId)));
-            setSelectedId(null);
+            void save(withDraftIfEmptyDay(moveNodeToDay(plan, dayIndex, otherDayConfirm.placeId)), () => setIsPreviewing(false));
           }
           setOtherDayConfirm(null);
         }}

@@ -440,6 +440,16 @@ export const componentDemos: ComponentDemo[] = [
           </div>
         ),
       },
+      {
+        label: "여행계획 동선 · 미리보기 · 다른 카테고리",
+        render: () => (
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 28, padding: "12px 16px 32px" }}>
+            <MapMarker imageUrl={sampleDonut} name="확정한 장소" isPlanning isOnRoute />
+            <MapMarker imageUrl={sampleDonut} name="확정 전 미리보기" isPlanning isHighlighted />
+            <MapMarker imageUrl={sampleDonut} name="다른 카테고리 장소" isPlanning isDot />
+          </div>
+        ),
+      },
     ],
   },
   {

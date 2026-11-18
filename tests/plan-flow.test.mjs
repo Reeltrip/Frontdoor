@@ -196,3 +196,19 @@ test('다른 일차의 완료 상태는 노드 순서 저장 때도 유지해요
   assert.equal(saved.days[0].isCompleted, true);
   assert.equal(saved.days[1].isCompleted, false);
 });
+
+test('동선 미리보기는 계획을 바꾸지 않고 완성 화면에서만 숙소 복귀선을 보여줘요', async () => {
+  globalThis.fetch = model().fetch;
+  const plan = await api.fetchPlan('10');
+
+  const preview = edits.buildPlanningRoute(plan, 0, { previewPlaceId: '5' });
+  assert.deepEqual(preview.map(({ nodeId }) => nodeId), ['90', '1', '2', '5']);
+  assert.deepEqual(plan.days[0].nodes.map(({ placeId }) => placeId), ['1', '2']);
+
+  const planB = edits.buildPlanningRoute(plan, 0, { previewPlanB: { targetPlaceId: '1', placeId: '6' } });
+  assert.equal(planB[1].planBNodeId, '6');
+  assert.equal(plan.days[0].nodes[0].planB.placeId, '3');
+
+  const finished = edits.buildPlanningRoute(plan, 0, { isClosed: true });
+  assert.deepEqual(finished.map(({ nodeId }) => nodeId), ['90', '1', '2', '90']);
+});

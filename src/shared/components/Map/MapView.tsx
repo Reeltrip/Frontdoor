@@ -32,6 +32,10 @@ export type MapViewProps = {
   /** 노드가 아닌 지도 바탕을 눌렀을 때 (선택 풀기 등) */
   onClickMap?: () => void;
   className?: string;
+  /** 여행계획 편집에서 쓰는 동선 색과 사진 핀 상태 */
+  isPlanning?: boolean;
+  highlightedNodeId?: string | null;
+  enlargeSelectedNode?: boolean;
 };
 
 const ROUTE_STROKE_WEIGHT = 4;
@@ -66,13 +70,14 @@ function MapCamera({ center, zoom }: MapCameraProps) {
 type MapRouteLinesProps = {
   nodes: MapNode[];
   route: MapRouteStop[];
+  isPlanning?: boolean;
 };
 
-function MapRouteLines({ nodes, route }: MapRouteLinesProps) {
+function MapRouteLines({ nodes, route, isPlanning }: MapRouteLinesProps) {
   const { mainPath, planBPaths } = useMemo(() => buildRoutePaths(nodes, route), [nodes, route]);
   const colors = useMemo(
-    () => ({ main: readColorToken('--color-gray-900'), planB: readColorToken('--color-lime-600') }),
-    [],
+    () => ({ main: readColorToken(isPlanning ? '--color-plan-route' : '--color-gray-900'), planB: readColorToken('--color-lime-600') }),
+    [isPlanning],
   );
 
   return (
@@ -109,9 +114,13 @@ function MapContent({
   route,
   onSelectNode,
   onClickMap,
+  isPlanning,
+  highlightedNodeId,
+  enlargeSelectedNode = !isPlanning,
 }: Omit<MapViewProps, 'className'>) {
   const loadingStatus = useApiLoadingStatus();
   const hasAuthFailed = useMapAuthFailure();
+  const routeIds = new Set(route?.flatMap(({ nodeId, planBNodeId }) => planBNodeId ? [nodeId, planBNodeId] : [nodeId]));
 
   if (hasAuthFailed || loadingStatus === APILoadingStatus.FAILED) {
     return <MapStatus status="error" />;
@@ -130,23 +139,29 @@ function MapContent({
         className={styles.map}
       >
         <MapCamera center={center} zoom={zoom} />
-        {route && <MapRouteLines nodes={nodes} route={route} />}
+        {route && <MapRouteLines nodes={nodes} route={route} isPlanning={isPlanning} />}
         {nodes.map((node) => {
           const isSelected = node.id === selectedNodeId;
+          const isOnRoute = routeIds.has(node.id);
           return (
             <AdvancedMarker
               key={node.id}
               position={node.position}
               title={node.name}
-              zIndex={getNodeZIndex(node, isSelected)}
-              className={styles.node}
+              zIndex={isOnRoute && !isSelected ? 3 : getNodeZIndex(node, isSelected) + (isSelected ? 1 : 0)}
+              className={node.isDot ? undefined : styles.node}
               onClick={() => onSelectNode?.(node.id)}
             >
               <MapMarker
                 imageUrl={node.imageUrl}
                 name={node.name}
-                size={isSelected ? 'lg' : 'sm'}
+                size={isSelected && enlargeSelectedNode ? 'lg' : 'sm'}
                 isMuted={node.isMuted}
+                isPlanning={isPlanning}
+                isOnRoute={isOnRoute}
+                isHighlighted={node.id === highlightedNodeId}
+                isDot={node.isDot}
+                categoryIcon={node.categoryIcon}
               />
             </AdvancedMarker>
           );
