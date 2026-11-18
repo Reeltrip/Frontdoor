@@ -1,7 +1,6 @@
 import { Link, Navigate, useNavigate } from "react-router";
 import { hasAuthTokens } from "@/shared/lib/authToken";
 import logo from "../../shared/assets/logo/wayvi-logo-white.svg";
-import startBg from "../../shared/assets/images/start-bg.png";
 import styles from "./StartPage.module.css";
 import Button from "@/shared/components/Button";
 
@@ -17,9 +16,6 @@ export default function StartPage() {
 
   return (
     <main className={styles.page}>
-      <img className={styles.background} src={startBg} alt="" />
-      <div className={styles.overlay} />
-
       <section className={styles.hero}>
         <img className={styles.logo} src={logo} alt="WAYVI" />
         <p className={styles.tagline}>여행의 발견부터 계획까지 하나로</p>
