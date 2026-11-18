@@ -22,10 +22,12 @@ const TICK_DEG = 360 / TICK_COUNT;
 const STEP_DEG = TICK_DEG * TICKS_PER_STEP;
 const RING_RADIUS = 252;
 const TICK_LENGTH = 16.85;
-const MAJOR_TICK_LENGTH = 27;
+// 카테고리 하나 = 굵은 눈금 한 칸. 얼마나 돌려야 다음 카테고리인지 보이게 길고 진하게 그려요
+const MAJOR_TICK_LENGTH = 34;
 
 const TICKS = Array.from({ length: TICK_COUNT }, (_, index) => ({
   angle: index * TICK_DEG,
+  isMajor: index % TICKS_PER_STEP === 0,
   length: index % TICKS_PER_STEP === 0 ? MAJOR_TICK_LENGTH : TICK_LENGTH,
 }));
 
@@ -75,9 +77,10 @@ export default function CategoryDial({
           style={{ transform: `rotate(${-position * STEP_DEG}deg)` }}
           viewBox={`0 0 ${RING_RADIUS * 2} ${RING_RADIUS * 2}`}
         >
-          {TICKS.map(({ angle, length }) => (
+          {TICKS.map(({ angle, length, isMajor }) => (
             <line
               key={angle}
+              className={isMajor ? styles.majorTick : undefined}
               x1={RING_RADIUS}
               y1={TICK_LENGTH - length}
               x2={RING_RADIUS}
