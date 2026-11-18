@@ -1,0 +1,28 @@
+.marker {
+  position: relative;
+  display: grid;
+}
+
+.credits {
+  position: absolute;
+  top: calc(100% + 16px);
+  left: 50%;
+  width: max-content;
+  max-width: 160px;
+  margin: 0;
+  padding: 3px 8px;
+  list-style: none;
+  border-radius: 8px;
+  background: var(--color-surface);
+  box-shadow: 0 1px 4px rgb(26 26 26 / 18%);
+  color: var(--color-gray-900);
+  font: var(--font-caption);
+  text-align: center;
+  overflow-wrap: anywhere;
+  transform: translateX(-50%);
+}
+
+.credits a {
+  color: inherit;
+  text-decoration: underline;
+}

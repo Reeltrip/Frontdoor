@@ -13,6 +13,12 @@ export function getFirstNodePosition(places: Place[]): MapNode['position'] | und
 export function toMapNodes(places: Place[]): MapNode[] {
   return places.flatMap((place) => {
     if (!place.location || OFF_MAP_CATEGORIES.includes(place.category)) return [];
-    return [{ id: place.id, name: place.name, imageUrl: place.imageUrl, position: place.location }];
+    return [{
+      id: place.id,
+      name: place.name,
+      imageUrl: place.imageUrl,
+      position: place.location,
+      googlePlaceId: place.googlePlaceId,
+    }];
   });
 }

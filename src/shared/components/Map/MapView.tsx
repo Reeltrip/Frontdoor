@@ -9,7 +9,8 @@ import {
   useMap,
 } from '@vis.gl/react-google-maps';
 import MapErrorBoundary from './MapErrorBoundary';
-import MapMarker from './MapMarker';
+import MapMarker, { type MapMarkerProps } from './MapMarker';
+import GooglePlacePhotoMarker from './GooglePlacePhotoMarker';
 import MapStatus from './MapStatus';
 import { buildRoutePaths } from './mapRoute';
 import { useMapAuthFailure } from './useMapAuthFailure';
@@ -158,6 +159,23 @@ function MapContent({
         {nodes.map((node) => {
           const isSelected = node.id === selectedNodeId;
           const isOnRoute = routeIds.has(node.id);
+          const markerProps: MapMarkerProps = {
+            imageUrl: node.imageUrl,
+            name: node.name,
+            size: isSelected && enlargeSelectedNode ? 'lg' : 'sm',
+            isMuted: node.isMuted,
+            isPlanning,
+            isSelected,
+            isInactiveRoute: inactiveIds.has(node.id),
+            isHighlighted: node.id === (previewId ?? highlightedNodeId),
+            isDot: node.isDot,
+            categoryIcon: node.categoryIcon,
+          };
+          const photoPlaceId =
+            isSelected && !node.isDot && !node.imageUrl && loadingStatus === APILoadingStatus.LOADED
+              ? node.googlePlaceId
+              : undefined;
+
           return (
             <AdvancedMarker
               key={node.id}
@@ -167,18 +185,9 @@ function MapContent({
               className={node.isDot ? undefined : styles.node}
               onClick={() => onSelectNode?.(node.id)}
             >
-              <MapMarker
-                imageUrl={node.imageUrl}
-                name={node.name}
-                size={isSelected && enlargeSelectedNode ? 'lg' : 'sm'}
-                isMuted={node.isMuted}
-                isPlanning={isPlanning}
-                isSelected={isSelected}
-                isInactiveRoute={inactiveIds.has(node.id)}
-                isHighlighted={node.id === (previewId ?? highlightedNodeId)}
-                isDot={node.isDot}
-                categoryIcon={node.categoryIcon}
-              />
+              {photoPlaceId
+                ? <GooglePlacePhotoMarker key={photoPlaceId} placeId={photoPlaceId} markerProps={markerProps} />
+                : <MapMarker {...markerProps} />}
             </AdvancedMarker>
           );
         })}

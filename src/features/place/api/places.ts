@@ -77,6 +77,7 @@ export function toPlace(item: ApiPlace, fallbackId = ''): Place {
     category: fromApiCategory(item.category),
     name: item.name,
     imageUrl: item.imageUrl ?? '',
+    ...(hasText(item.googlePlaceId) ? { googlePlaceId: item.googlePlaceId } : {}),
     ...(hasLocation ? { location: { lat: item.latitude as number, lng: item.longitude as number } } : {}),
     summary,
     ...(hasText(item.address) ? { address: item.address } : {}),

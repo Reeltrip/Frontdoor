@@ -1,6 +1,6 @@
 import styles from './MapMarker.module.css';
 
-type MapMarkerProps = {
+export type MapMarkerProps = {
   imageUrl: string;
   name: string;
   /** sm: 일반 크기, lg: 상세 확인 크기 */
@@ -8,6 +8,8 @@ type MapMarkerProps = {
   /** 다른 일자에 이미 들어간 노드는 회색으로 */
   isMuted?: boolean;
   onClick?: () => void;
+  onImageLoad?: () => void;
+  onImageError?: () => void;
   isPlanning?: boolean;
   isSelected?: boolean;
   isInactiveRoute?: boolean;
@@ -23,6 +25,8 @@ export default function MapMarker({
   size = 'sm',
   isMuted = false,
   onClick,
+  onImageLoad,
+  onImageError,
   isPlanning,
   isSelected = false,
   isInactiveRoute,
@@ -47,7 +51,7 @@ export default function MapMarker({
               vectorEffect="non-scaling-stroke"
             />
           </svg>
-          {imageUrl && <img src={imageUrl} alt="" className={styles.photo} />}
+          {imageUrl && <img src={imageUrl} alt="" className={styles.photo} onLoad={onImageLoad} onError={onImageError} />}
           {categoryIcon && <span className={styles.category}><img src={categoryIcon} alt="" /></span>}
         </>
       )}
