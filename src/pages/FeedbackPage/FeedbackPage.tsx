@@ -84,7 +84,7 @@ export default function FeedbackPage() {
         {message && <p className={styles.message} role={inquiry.isError ? 'alert' : 'status'}>{message}</p>}
       </div>
       <div className={styles.footer}>
-        <div className={styles.notification}><span>앱으로 답변 알림 받기</span><AccountSwitch label="앱으로 답변 알림 받기" checked={wantsReplyNotification} onChange={setWantsReplyNotification} /></div>
+        <div className={styles.notification}><span>메일로 답변 알림 받기</span><AccountSwitch label="메일로 답변 알림 받기" checked={wantsReplyNotification} onChange={setWantsReplyNotification} /></div>
         <Button type="submit" disabled={inquiry.isPending}>{inquiry.isPending ? '저장 중' : '저장하기'}</Button>
       </div>
     </form>

@@ -71,4 +71,9 @@ export type PlanListParams = {
 };
 
 /** GET /plans 목록의 한 줄 */
-export type PlanSummary = Pick<Plan, 'id' | 'title' | 'startDate' | 'endDate' | 'destination' | 'status'>;
+export type PlanSummary = Pick<Plan, 'id' | 'title' | 'startDate' | 'endDate' | 'destination' | 'status'> & {
+  /** 계획 첫 노드의 카드 사진. 노드가 없으면 없어요 */
+  coverImageUrl?: string;
+  /** 모든 일차에 들어 있는 장소 수 합계 */
+  placeCount?: number;
+};

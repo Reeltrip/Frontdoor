@@ -21,10 +21,32 @@ function PlanRow({ plan, onOpen }: { plan: PlanSummary; onOpen: (plan: PlanSumma
       <button type="button" className={styles.planRow} onClick={() => onOpen(plan)}>
         <span className={styles.planName}>{plan.title}</span>
         <span className={styles.planDate}>
-          {formatDate(plan.startDate)} — {formatDate(plan.endDate)}
+          {/* 장소 수는 목록 응답의 placeCount예요. 값이 없으면 기간을 보여줘요 */}
+          {plan.placeCount !== undefined
+            ? `${formatDate(plan.startDate)} | 장소 ${plan.placeCount}곳`
+            : `${formatDate(plan.startDate)} — ${formatDate(plan.endDate)}`}
         </span>
       </button>
     </li>
+  );
+}
+
+// 다가오는 여행 큰 카드 (피그마 S5-1). 표지 사진이 없거나 못 불러오면 뒤의 그라데이션이 그대로 보여요
+function FeaturedPlanCard({ plan, onOpen }: { plan: PlanSummary; onOpen: (plan: PlanSummary) => void }) {
+  const [failedImageUrl, setFailedImageUrl] = useState<string>();
+  const { coverImageUrl } = plan;
+  const hasCover = coverImageUrl !== undefined && coverImageUrl !== failedImageUrl;
+
+  return (
+    <button type="button" className={styles.featured} onClick={() => onOpen(plan)}>
+      {hasCover && (
+        <img className={styles.featuredImage} src={coverImageUrl} alt="" onError={() => setFailedImageUrl(coverImageUrl)} />
+      )}
+      {/* 사진이 없을 때도 밝은 그라데이션 위 흰 글자가 읽히게 늘 덮어요 */}
+      <span className={styles.featuredShade} />
+      <span className={styles.featuredLabel}>다가오는 여행 | {plan.title}</span>
+      <span className={styles.openIcon} aria-hidden="true">↗</span>
+    </button>
   );
 }
 
@@ -97,12 +119,7 @@ export default function TripListPage() {
           <div role="tabpanel" className={styles.planContent}>
             {upcoming[0] && (
               <section className={styles.upcoming} aria-label="다가오는 여행">
-                <button type="button" className={styles.featured} onClick={() => openPlan(upcoming[0])}>
-                  <span className={styles.featuredShade} />
-                  <span className={styles.featuredDestination}>{upcoming[0].destination || upcoming[0].title}</span>
-                  <span className={styles.featuredTitle}>{upcoming[0].title}</span>
-                  <span className={styles.openIcon} aria-hidden="true">↗</span>
-                </button>
+                <FeaturedPlanCard plan={upcoming[0]} onOpen={openPlan} />
               </section>
             )}
 

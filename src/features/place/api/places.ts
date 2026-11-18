@@ -82,6 +82,7 @@ export function toPlace(item: ApiPlace, fallbackId = ''): Place {
     ...(hasText(item.address) ? { address: item.address } : {}),
     ...(hasText(item.priceText ?? item.cost) ? { tag: (item.priceText ?? item.cost) as string } : {}),
     ...(typeof item.reviewCount === 'number' ? { reviewCount: item.reviewCount } : {}),
+    ...(hasText(item.sourceUrl) ? { sourceUrl: item.sourceUrl } : {}),
   };
 }
 
