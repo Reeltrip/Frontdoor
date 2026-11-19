@@ -309,7 +309,14 @@ export type RouteMode = 'WALK' | 'TAXI' | 'SUBWAY' | 'BUS' | 'TRAIN' | 'TRAM' | 
 
 export type RouteSegment = { mode: RouteMode; minutes: number; lineName: string | null; stopName: string | null };
 
-export type PlaceRoute = { totalMinutes: number; departAt: string; arriveAt: string; segments: RouteSegment[] };
+export type PlaceRoute = {
+  totalMinutes: number;
+  departAt: string;
+  arriveAt: string;
+  segments: RouteSegment[];
+  /** 그 경로의 길 모양(Google encoded polyline). 서버가 받지 못했으면 null이에요 */
+  polyline?: string | null;
+};
 
 export const routeKeys = {
   between: (fromPlaceId: string, toPlaceId: string, date: string) => ['routes', fromPlaceId, toPlaceId, date] as const,

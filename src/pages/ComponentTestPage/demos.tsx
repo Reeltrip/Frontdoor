@@ -7,7 +7,7 @@ import {
   LoadingBlob,
   LoadingSpinner,
 } from "@/shared/components/Loading";
-import { MapMarker, MapView } from "@/shared/components/Map";
+import { MapMarker, MapView, getLegKey } from "@/shared/components/Map";
 import PlaceCard from "@/features/place/ui/PlaceCard";
 import PlaceCardCompact from "@/features/place/ui/PlaceCardCompact";
 import CategoryChip from "@/features/place/ui/CategoryChip";
@@ -534,6 +534,32 @@ export const componentDemos: ComponentDemo[] = [
                 { id: "google", name: "Google 사진", imageUrl: sampleDonut, googlePlaceId: "ChIJj61dQgK6j4AR4GeTYWZsKWw", position: { lat: 37.422, lng: -122.0841 } },
                 { id: "card", name: "카드 사진", imageUrl: sampleDonut, position: { lat: 37.422, lng: -122.0805 } },
               ]}
+            />
+          </div>
+        ),
+      },
+      {
+        label: "동선이 길을 따라가요 (첫 구간: 길 모양 있음 → 꺾인 선, 둘째 구간: 없음 → 직선)",
+        render: () => (
+          <div style={{ height: 320 }}>
+            <MapView
+              center={{ lat: 34.6695, lng: 135.5025 }}
+              zoom={15}
+              isPlanning
+              nodes={[
+                { id: "a", name: "출발", imageUrl: sampleDonut, position: { lat: 34.6727, lng: 135.4996 } },
+                { id: "b", name: "중간", imageUrl: sampleDonut, position: { lat: 34.6688, lng: 135.5031 } },
+                { id: "c", name: "도착", imageUrl: sampleDonut, position: { lat: 34.6655, lng: 135.5062 } },
+              ]}
+              route={[{ nodeId: "a" }, { nodeId: "b" }, { nodeId: "c" }]}
+              // 손으로 만든 예시 길이에요. 실제 화면은 서버가 준 Google 길 모양을 써요
+              legPaths={{
+                [getLegKey("a", "b")]: [
+                  { lat: 34.6727, lng: 135.5012 },
+                  { lat: 34.6705, lng: 135.5012 },
+                  { lat: 34.6705, lng: 135.5031 },
+                ],
+              }}
             />
           </div>
         ),

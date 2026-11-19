@@ -1,6 +1,7 @@
 import { useQueries } from '@tanstack/react-query';
 import { getDistanceKm } from '../lib/planZones';
-import { fetchRoute, routeKeys, type PlaceRoute, type RouteMode } from '../api/plans';
+import { type PlaceRoute, type RouteMode } from '../api/plans';
+import { getDayRouteQuery } from '../model/dayRoutes';
 import { CATEGORIES } from '@/features/place/lib/categories';
 import type { Place } from '@/features/place/model/place.types';
 import transitIcon from '@/shared/assets/icons/transit-small.svg';
@@ -31,9 +32,6 @@ const MODE_LABELS: Record<RouteMode, string> = {
   TRAM: '트램',
   TRANSIT: '대중교통',
 };
-
-/** 경로는 오전 10시 출발 기준으로 찾아요 (계획에 시각이 없어서) */
-const DEPART_TIME = 'T10:00:00+09:00';
 
 const formatDistance = (from: Place, to: Place) => {
   if (!from.location || !to.location) return null;
@@ -93,14 +91,7 @@ function StopRow({ place, isPlanB = false }: { place: Place; isPlanB?: boolean }
 export default function DayTimeline({ stops, isPlanBVisible, date, canFetchRoutes }: DayTimelineProps) {
   const pairs = stops.slice(0, -1).map((stop, index) => ({ from: stop.place, to: stops[index + 1].place }));
   const routes = useQueries({
-    queries: pairs.map(({ from, to }) => ({
-      queryKey: routeKeys.between(from.id, to.id, date),
-      queryFn: ({ signal }: { signal: AbortSignal }) => fetchRoute(from.id, to.id, `${date}${DEPART_TIME}`, signal),
-      enabled: canFetchRoutes && Boolean(from.location && to.location),
-      staleTime: Infinity,
-      // 경로가 없는 구간은 다시 불러도 같아서 한 번만 물어봐요
-      retry: false,
-    })),
+    queries: pairs.map(({ from, to }) => getDayRouteQuery(from, to, date, canFetchRoutes)),
   });
 
   const renderMove = (index: number) => {
