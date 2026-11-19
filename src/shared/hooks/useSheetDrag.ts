@@ -44,6 +44,8 @@ export function useSheetDrag({ collapsedHeight, topGap }: { collapsedHeight: num
     const parentHeight = sheet?.parentElement?.clientHeight ?? 0;
     const collapsed = Math.min(collapsedHeight, parentHeight);
     drag.current = { startY: event.clientY, dy: 0, collapsed, expanded: Math.max(collapsed, parentHeight - topGap) };
+    // 제목 글자를 잡고 끌면 브라우저가 글자 선택·끌어놓기로 보고 끌기를 취소해요. 그걸 막아요
+    event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
@@ -59,9 +61,13 @@ export function useSheetDrag({ collapsedHeight, topGap }: { collapsedHeight: num
     const current = drag.current;
     drag.current = null;
     setDragHeight(null);
-    if (!current || isCancelled) return;
-    if (Math.abs(current.dy) < TAP_DISTANCE) setIsExpanded((value) => !value);
-    else setIsExpanded(decideSheetExpanded(isExpanded, current.dy));
+    if (!current) return;
+    // 브라우저가 중간에 끌기를 취소해도 이미 끈 거리만큼은 반영해요. 누르기로는 보지 않아요
+    if (Math.abs(current.dy) < TAP_DISTANCE) {
+      if (!isCancelled) setIsExpanded((value) => !value);
+      return;
+    }
+    setIsExpanded(decideSheetExpanded(isExpanded, current.dy));
   };
 
   return {

@@ -141,6 +141,12 @@
   padding: 28px 20px 0;
   touch-action: none;
   cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.sheetGrip img {
+  -webkit-user-drag: none;
 }
 
 .handle {
