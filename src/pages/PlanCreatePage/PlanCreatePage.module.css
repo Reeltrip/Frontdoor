@@ -6,8 +6,21 @@
   min-height: 100dvh;
   padding: var(--page-top) 20px calc(var(--home-bar-height) + 10px);
   overflow: hidden;
+  isolation: isolate;
   background: var(--color-gray-900);
   color: var(--color-white);
+}
+
+/* 상태바는 단색(어두운색)이라 초록빛 사진과 바로 맞닿으면 경계선이 보여요. 맨 위에서 어두운색이 사진으로 풀리게 해요 */
+.page::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 140px;
+  background: linear-gradient(var(--color-gray-900), rgba(26, 26, 26, 0));
+  pointer-events: none;
 }
 
 .background {
@@ -23,6 +36,8 @@
 .fields,
 .actions {
   position: relative;
+  /* 맨 위 그라데이션(.page::after)보다 위에 놓여요 */
+  z-index: 1;
 }
 
 .header {
