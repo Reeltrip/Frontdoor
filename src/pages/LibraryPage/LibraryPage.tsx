@@ -23,6 +23,7 @@ import {
   COPY_FAILED_MESSAGE,
   copyPlace,
   openPlace,
+  SOURCE_MISSING_MESSAGE,
 } from "@/features/place/lib/placeActions";
 import styles from "./LibraryPage.module.css";
 
@@ -203,7 +204,9 @@ export default function LibraryPage() {
               selectedId={selectedId}
               onSelect={selectPlace}
               onDelete={setDeleteTarget}
-              onOpen={openPlace}
+              onOpen={(place) => {
+                if (!openPlace(place)) setToastMessage(SOURCE_MISSING_MESSAGE);
+              }}
               onCopy={async (place) =>
                 setToastMessage((await copyPlace(place)) ? COPY_DONE_MESSAGE : COPY_FAILED_MESSAGE)
               }
