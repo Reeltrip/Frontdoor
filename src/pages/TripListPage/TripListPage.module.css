@@ -157,6 +157,24 @@
 .state button { margin-top: 12px; padding: 10px 16px; border: 0; border-radius: 24px; background: var(--color-gray-900); color: white; cursor: pointer; }
 .tabBar { position: absolute; bottom: calc(var(--home-bar-height) + 10px); left: 50%; transform: translateX(-50%); }
 
+/*
+ * iOS 26 홈 화면 앱은 화면 맨 위를 흐리게 처리해서 제목이 흐려 보였어요.
+ * 맨 위에 붙은 고정 머리줄이 있으면 Safari가 흐림 대신 그 바탕색을 상태바까지 이어 칠해요.
+ * 그래서 폰에서는 머리줄을 단색으로 맨 위에 고정하고, 그만큼 아래 내용을 내려요 (#111)
+ */
+@media (hover: none) and (pointer: coarse) {
+  .page { padding-top: 56px; }
+  .header {
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: 10;
+    height: 56px;
+    background: #fafafa;
+  }
+}
+
 @media (max-height: 740px) {
   .featured { height: 220px; }
   .header { padding-top: max(calc(28px * var(--status-bar-space)), calc(env(safe-area-inset-top) + 8px)); }
