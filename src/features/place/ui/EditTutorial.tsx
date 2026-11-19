@@ -33,9 +33,8 @@ export default function EditTutorial({ onClose }: EditTutorialProps) {
             markerEnd="url(#edit-tutorial-head)"
           />
         </svg>
-
-        <span className={styles.ring} />
       </div>
+      <span className={styles.ring} />
     </div>
   );
 }
