@@ -51,20 +51,15 @@ export default function MapMarker({
         <>
           <svg className={styles.pin} viewBox="0 0 65 76" preserveAspectRatio="none" aria-hidden="true">
             <path d={PIN_PATH} vectorEffect="non-scaling-stroke" />
-            {/* 여행계획 시안(S4-5c)은 사진이 물방울 안을 꽉 채워요 */}
-            {isPlanning && (
-              <>
-                <clipPath id={clipId}>
-                  <path d={PIN_PATH} />
-                </clipPath>
-                {imageUrl && (
-                  <image href={imageUrl} width="65" height="76" preserveAspectRatio="xMidYMid slice" clipPath={`url(#${clipId})`} />
-                )}
-                {categoryIcon && <path d={PIN_PATH} className={styles.categoryShade} />}
-              </>
+            {/* 보관함·여행계획 시안 모두 사진이 물방울 안을 꽉 채워요 */}
+            <clipPath id={clipId}>
+              <path d={PIN_PATH} />
+            </clipPath>
+            {imageUrl && (
+              <image href={imageUrl} width="65" height="76" preserveAspectRatio="xMidYMid slice" clipPath={`url(#${clipId})`} />
             )}
+            {categoryIcon && <path d={PIN_PATH} className={styles.categoryShade} />}
           </svg>
-          {!isPlanning && imageUrl && <img src={imageUrl} alt="" className={styles.photo} />}
           {categoryIcon && <span className={styles.category}><img src={categoryIcon} alt="" /></span>}
         </>
       )}
