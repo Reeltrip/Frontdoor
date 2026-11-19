@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import Button from "@/shared/components/Button";
+import { useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
 import stepOneArt from "@/shared/assets/images/onboarding/guide-step1.webp";
 import stepTwoArt from "@/shared/assets/images/onboarding/guide-step2.webp";
 import stepThreeArt from "@/shared/assets/images/onboarding/guide-step3.webp";
@@ -35,6 +36,8 @@ const LAST_STEP = GUIDE_STEPS.length - 1;
 
 export default function OnboardingGuidePage() {
   const navigate = useNavigate();
+  // 화면 위쪽 색(#fafafa)을 상태바와 맨 위 띠에도 맞춰요
+  useScreenBackdrop("#fafafa");
   const [step, setStep] = useState(0);
   const { art, title, description } = GUIDE_STEPS[step];
   const isLastStep = step === LAST_STEP;

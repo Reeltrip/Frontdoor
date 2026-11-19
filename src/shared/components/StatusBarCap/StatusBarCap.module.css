@@ -1,0 +1,25 @@
+.cap {
+  display: none;
+}
+
+/*
+ * iOS 26 홈 화면 앱은 화면 맨 위(상태바 바로 아래)를 흐리게 처리해서 머리줄이 흐려 보여요.
+ * 맨 위에 고정된 단색 요소가 있으면 Safari가 흐림 대신 그 색을 상태바까지 이어 칠해요(여행목록 #113에서 실기기 확인).
+ * 그래서 폰에서는 모든 화면 맨 위에 그 화면 위쪽 색과 같은 얇은 띠를 고정해 둬요 (#114).
+ * 띠는 화면들이 비워 둔 위 여백(8px) 안에 들어가서 배치는 바뀌지 않아요.
+ * Safari가 이 띠를 찾을 수 있어야 해서 pointer-events는 끄지 않아요.
+ */
+@media (hover: none) and (pointer: coarse) {
+  .cap {
+    display: block;
+    position: fixed;
+    top: 0;
+    right: 0;
+    left: 0;
+    /* 화면 머리줄(최대 5)보다는 위, 튜토리얼·시트·모달의 어두운 덮개(10 이상)보다는 아래예요.
+       덮개 위에 띠가 있으면 어두운 화면 맨 위에 흰 줄이 보여요 */
+    z-index: 9;
+    height: 8px;
+    background: var(--screen-backdrop, var(--color-bg));
+  }
+}
