@@ -166,3 +166,31 @@
   right: 46px;
   width: 38px;
 }
+
+.actionPill {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  width: 79px;
+  height: 38px;
+  padding: 6px 8px 6px 9px;
+  border-radius: 54px;
+  background: rgba(51, 51, 51, 0.45);
+  backdrop-filter: blur(4px);
+}
+
+.pillButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}

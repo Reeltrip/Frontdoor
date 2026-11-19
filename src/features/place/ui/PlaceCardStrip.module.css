@@ -18,18 +18,6 @@
   scroll-snap-align: start;
 }
 
-.deleteButton {
-  position: absolute;
-  top: 22px;
-  right: 60.8px;
-  display: flex;
-  width: 30.8px;
-  height: 30.8px;
-  padding: 0;
-  border: 0;
-  background: none;
-  cursor: pointer;
-}
 .planStrip {
   position: relative;
   gap: 16px;

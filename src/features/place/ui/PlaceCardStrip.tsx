@@ -1,5 +1,4 @@
 import { useEffect, useRef } from "react";
-import trashIcon from "@/shared/assets/icons/trash-compact.svg";
 import type { Place } from "../model/place.types";
 import PlaceCardCompact from "./PlaceCardCompact";
 import styles from "./PlaceCardStrip.module.css";
@@ -48,7 +47,11 @@ export default function PlaceCardStrip({
     const scroller = scrollerRef.current;
     const item = scroller?.children[index] as HTMLElement | undefined;
     const first = scroller?.firstElementChild as HTMLElement | null;
-    if (item && first) scroller?.scrollTo({ left: item.offsetLeft - first.offsetLeft, behavior: "instant" });
+    if (item && first)
+      scroller?.scrollTo({
+        left: item.offsetLeft - first.offsetLeft,
+        behavior: "instant",
+      });
   }, [places, selectedId]);
 
   useEffect(() => () => window.clearTimeout(settleTimerRef.current), []);
@@ -60,16 +63,25 @@ export default function PlaceCardStrip({
       if (!scroller) return;
       const items = Array.from(scroller.children) as HTMLElement[];
       const start = items[0]?.offsetLeft ?? 0;
-      const index = items.reduce((nearest, item, i) =>
-        Math.abs(item.offsetLeft - start - scroller.scrollLeft) <
-        Math.abs(items[nearest].offsetLeft - start - scroller.scrollLeft) ? i : nearest, 0);
+      const index = items.reduce(
+        (nearest, item, i) =>
+          Math.abs(item.offsetLeft - start - scroller.scrollLeft) <
+          Math.abs(items[nearest].offsetLeft - start - scroller.scrollLeft)
+            ? i
+            : nearest,
+        0,
+      );
       const place = places[index];
       if (place && place.id !== selectedId) onSelect(place.id);
     }, SETTLE_MS);
   };
 
   return (
-    <div ref={scrollerRef} className={`${styles.strip} ${isPlanCard ? styles.planStrip : ""} ${isWide ? styles.wideStrip : ""}`} onScroll={handleScroll}>
+    <div
+      ref={scrollerRef}
+      className={`${styles.strip} ${isPlanCard ? styles.planStrip : ""} ${isWide ? styles.wideStrip : ""}`}
+      onScroll={handleScroll}
+    >
       {places.map((place) => {
         const nodeActions = getNodeActions?.(place);
         return (
@@ -80,20 +92,11 @@ export default function PlaceCardStrip({
               onPick={onPick && ((picked) => onPick(picked.id))}
               onOpen={onOpen}
               onCopy={onCopy}
+              onDelete={onDelete}
               planBLabel={nodeActions?.planBLabel}
               onPlanB={nodeActions?.onPlanB}
               onRemove={nodeActions?.onRemove}
             />
-            {onDelete && (
-              <button
-                type="button"
-                className={styles.deleteButton}
-                onClick={() => onDelete(place)}
-                aria-label={`${place.name} 삭제`}
-              >
-                <img src={trashIcon} alt="" />
-              </button>
-            )}
           </div>
         );
       })}

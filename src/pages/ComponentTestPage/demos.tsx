@@ -153,7 +153,10 @@ export const componentDemos: ComponentDemo[] = [
       { label: "목록 선택", render: () => <TabBarDemo initialTab="menu" /> },
       { label: "계획 선택", render: () => <TabBarDemo initialTab="plan" /> },
       { label: "마이 선택", render: () => <TabBarDemo initialTab="profile" /> },
-      { label: "어두운 배경 (계획 선택)", render: () => <TabBarDemo initialTab="plan" theme="dark" /> },
+      {
+        label: "어두운 배경 (계획 선택)",
+        render: () => <TabBarDemo initialTab="plan" theme="dark" />,
+      },
     ],
   },
   {
@@ -213,8 +216,14 @@ export const componentDemos: ComponentDemo[] = [
     description: "여행 기간 선택. 시작일 → 종료일 순서로 눌러 보기",
     variants: [
       { label: "시작일 선택", render: () => <CalendarDemo /> },
-      { label: "기간 선택 · 19–21", render: () => <CalendarDemo endDay={21} /> },
-      { label: "여러 주 선택 · 19–29", render: () => <CalendarDemo endDay={29} /> },
+      {
+        label: "기간 선택 · 19–21",
+        render: () => <CalendarDemo endDay={21} />,
+      },
+      {
+        label: "여러 주 선택 · 19–29",
+        render: () => <CalendarDemo endDay={29} />,
+      },
     ],
   },
   {
@@ -234,15 +243,54 @@ export const componentDemos: ComponentDemo[] = [
     variants: [
       {
         label: "마이페이지 로그아웃",
-        render: () => <ConfirmModal isOpen isInline icon="logout" presentation="account" title="정말로 로그아웃 하시겠어요?" cancelLabel="그만두기" confirmLabel="로그아웃" onCancel={noop} onConfirm={noop} />,
+        render: () => (
+          <ConfirmModal
+            isOpen
+            isInline
+            icon="logout"
+            presentation="account"
+            title="정말로 로그아웃 하시겠어요?"
+            cancelLabel="그만두기"
+            confirmLabel="로그아웃"
+            onCancel={noop}
+            onConfirm={noop}
+          />
+        ),
       },
       {
         label: "프로필 변경사항 저장",
-        render: () => <ConfirmModal isOpen isInline icon="alert" presentation="account" title="변경사항이 감지되었어요." description="변경하신 내용을 저장할까요?" cancelLabel="그만두기" confirmLabel="저장하기" onCancel={noop} onConfirm={noop} />,
+        render: () => (
+          <ConfirmModal
+            isOpen
+            isInline
+            icon="alert"
+            presentation="account"
+            title="변경사항이 감지되었어요."
+            description="변경하신 내용을 저장할까요?"
+            cancelLabel="그만두기"
+            confirmLabel="저장하기"
+            onCancel={noop}
+            onConfirm={noop}
+          />
+        ),
       },
       {
         label: "프로필 저장 중",
-        render: () => <ConfirmModal isOpen isInline isPending icon="alert" presentation="account" title="변경사항이 감지되었어요." description="변경하신 내용을 저장할까요?" cancelLabel="그만두기" confirmLabel="저장 중" onCancel={noop} onConfirm={noop} />,
+        render: () => (
+          <ConfirmModal
+            isOpen
+            isInline
+            isPending
+            icon="alert"
+            presentation="account"
+            title="변경사항이 감지되었어요."
+            description="변경하신 내용을 저장할까요?"
+            cancelLabel="그만두기"
+            confirmLabel="저장 중"
+            onCancel={noop}
+            onConfirm={noop}
+          />
+        ),
       },
       {
         label: "링크 불러오기",
@@ -330,6 +378,12 @@ export const componentDemos: ComponentDemo[] = [
     description: "흰 바탕 작은 요약 카드",
     variants: [
       { label: "기본", render: () => <PlaceCardCompact place={DONUT_PLACE} /> },
+      {
+        label: "보관함 (삭제 알약)",
+        render: () => (
+          <PlaceCardCompact place={DONUT_PLACE} onDelete={() => {}} />
+        ),
+      },
     ],
   },
   {
@@ -388,11 +442,21 @@ export const componentDemos: ComponentDemo[] = [
   {
     name: "CategoryWheel",
     path: "features/place/ui/CategoryWheel",
-    description: "결과 화면의 카테고리 메뉴. 장소 사진이 없거나 실패하면 시안의 사진을 표시",
+    description:
+      "결과 화면의 카테고리 메뉴. 장소 사진이 없거나 실패하면 시안의 사진을 표시",
     variants: [
-      { label: "사진 없음 (Figma 기본 사진)", render: () => <CategoryWheelDemo /> },
-      { label: "장소 사진 있음", render: () => <CategoryWheelDemo photoState="loaded" /> },
-      { label: "사진 불러오기 실패", render: () => <CategoryWheelDemo photoState="error" /> },
+      {
+        label: "사진 없음 (Figma 기본 사진)",
+        render: () => <CategoryWheelDemo />,
+      },
+      {
+        label: "장소 사진 있음",
+        render: () => <CategoryWheelDemo photoState="loaded" />,
+      },
+      {
+        label: "사진 불러오기 실패",
+        render: () => <CategoryWheelDemo photoState="error" />,
+      },
     ],
   },
   {
@@ -401,7 +465,10 @@ export const componentDemos: ComponentDemo[] = [
     description: "좌우로 끌어서 돌리는 카테고리 다이얼. 눈금이 같이 돌아감",
     variants: [
       { label: "기본", render: () => <CategoryDialDemo /> },
-      { label: "요약 카드 자세히 보기", render: () => <CategoryDialDemo variant="summary" /> },
+      {
+        label: "요약 카드 자세히 보기",
+        render: () => <CategoryDialDemo variant="summary" />,
+      },
     ],
   },
   {
@@ -431,9 +498,26 @@ export const componentDemos: ComponentDemo[] = [
       {
         label: "Figma 선택 마커 원본",
         render: () => (
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 4, paddingInline: 12 }}>
-            <img src={mapMarkerReferenceSmall} width={98} height={108} alt="Figma 선택 마커 작은 크기" />
-            <img src={mapMarkerReferenceLarge} width={134} height={150} alt="Figma 선택 마커 큰 크기" />
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-end",
+              gap: 4,
+              paddingInline: 12,
+            }}
+          >
+            <img
+              src={mapMarkerReferenceSmall}
+              width={98}
+              height={108}
+              alt="Figma 선택 마커 작은 크기"
+            />
+            <img
+              src={mapMarkerReferenceLarge}
+              width={134}
+              height={150}
+              alt="Figma 선택 마커 큰 크기"
+            />
           </div>
         ),
       },
@@ -449,7 +533,12 @@ export const componentDemos: ComponentDemo[] = [
             }}
           >
             <MapMarker imageUrl={sampleDonut} name="I'm donut?" />
-            <MapMarker imageUrl={sampleDonut} name="선택한 장소" size="lg" isSelected />
+            <MapMarker
+              imageUrl={sampleDonut}
+              name="선택한 장소"
+              size="lg"
+              isSelected
+            />
             <MapMarker imageUrl={sampleDonut} name="I'm donut?" isMuted />
           </div>
         ),
@@ -458,18 +547,54 @@ export const componentDemos: ComponentDemo[] = [
         label: "검색한 장소의 사진 없음",
         render: () => (
           <div style={{ padding: "12px 16px 32px" }}>
-            <MapMarker imageUrl="" name="사진이 없는 검색 장소" isPlanning isSelected />
+            <MapMarker
+              imageUrl=""
+              name="사진이 없는 검색 장소"
+              isPlanning
+              isSelected
+            />
           </div>
         ),
       },
       {
-        label: "여행계획 확정(라임 점) · 플랜 B로 빠진 장소(검은 점) · 선택 미리보기 · 다른 카테고리",
+        label:
+          "여행계획 확정(라임 점) · 플랜 B로 빠진 장소(검은 점) · 선택 미리보기 · 다른 카테고리",
         render: () => (
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 28, padding: "12px 16px 40px", flexWrap: "wrap" }}>
-            <MapMarker imageUrl={sampleDonut} name="확정한 장소" isPlanning isRouteStop />
-            <MapMarker imageUrl={sampleDonut} name="플랜 B로 빠진 장소" isPlanning isInactiveRoute />
-            <MapMarker imageUrl={sampleDonut} name="확정 전 미리보기" isPlanning isSelected isHighlighted isRouteStop />
-            <MapMarker imageUrl={sampleDonut} name="다른 카테고리 장소" isPlanning isDot />
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-end",
+              gap: 28,
+              padding: "12px 16px 40px",
+              flexWrap: "wrap",
+            }}
+          >
+            <MapMarker
+              imageUrl={sampleDonut}
+              name="확정한 장소"
+              isPlanning
+              isRouteStop
+            />
+            <MapMarker
+              imageUrl={sampleDonut}
+              name="플랜 B로 빠진 장소"
+              isPlanning
+              isInactiveRoute
+            />
+            <MapMarker
+              imageUrl={sampleDonut}
+              name="확정 전 미리보기"
+              isPlanning
+              isSelected
+              isHighlighted
+              isRouteStop
+            />
+            <MapMarker
+              imageUrl={sampleDonut}
+              name="다른 카테고리 장소"
+              isPlanning
+              isDot
+            />
           </div>
         ),
       },
@@ -493,11 +618,19 @@ export const componentDemos: ComponentDemo[] = [
     variants: [
       {
         label: "기본 실패",
-        render: () => <Link to="/dev/components?preview=analysis-failed">실패 화면 전체 보기</Link>,
+        render: () => (
+          <Link to="/dev/components?preview=analysis-failed">
+            실패 화면 전체 보기
+          </Link>
+        ),
       },
       {
         label: "서버 실패 이유",
-        render: () => <Link to="/dev/components?preview=analysis-failed&message=private">서버 실패 이유가 있는 화면 보기</Link>,
+        render: () => (
+          <Link to="/dev/components?preview=analysis-failed&message=private">
+            서버 실패 이유가 있는 화면 보기
+          </Link>
+        ),
       },
     ],
   },

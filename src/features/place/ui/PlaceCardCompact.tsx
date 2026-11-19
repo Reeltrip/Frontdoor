@@ -1,9 +1,10 @@
-import openIcon from '@/shared/assets/icons/open-arrow-compact.svg';
-import trashIcon from '@/shared/assets/icons/trash-compact.svg';
-import copyIcon from '@/shared/assets/icons/copy-dark.svg';
-import { displayOrDash } from '@/shared/lib/displayValue';
-import type { Place } from '../model/place.types';
-import styles from './PlaceCardCompact.module.css';
+import openIcon from "@/shared/assets/icons/open-arrow-compact.svg";
+import trashIcon from "@/shared/assets/icons/trash-compact.svg";
+import copyIcon from "@/shared/assets/icons/copy-dark.svg";
+import { displayOrDash } from "@/shared/lib/displayValue";
+import type { Place } from "../model/place.types";
+import styles from "./PlaceCardCompact.module.css";
+import openPillIcon from "@/shared/assets/icons/open-arrow-pill.svg";
 
 type PlaceCardCompactProps = {
   place: Place;
@@ -14,6 +15,7 @@ type PlaceCardCompactProps = {
   planBLabel?: string;
   onPlanB?: (place: Place) => void;
   onRemove?: (place: Place) => void;
+  onDelete?: (place: Place) => void;
   className?: string;
 };
 
@@ -26,18 +28,32 @@ export default function PlaceCardCompact({
   planBLabel,
   onPlanB,
   onRemove,
+  onDelete,
   className,
 }: PlaceCardCompactProps) {
   const name = displayOrDash(place.name);
 
   return (
-    <article className={[styles.card, className].filter(Boolean).join(' ')}>
+    <article className={[styles.card, className].filter(Boolean).join(" ")}>
       <div className={styles.photoBox}>
-        {place.imageUrl && <img src={place.imageUrl} alt="" className={styles.photo} />}
-        {onPick && <button type="button" className={styles.pickButton} onClick={() => onPick(place)} aria-label={`${name} 선택`} />}
+        {place.imageUrl && (
+          <img src={place.imageUrl} alt="" className={styles.photo} />
+        )}
+        {onPick && (
+          <button
+            type="button"
+            className={styles.pickButton}
+            onClick={() => onPick(place)}
+            aria-label={`${name} 선택`}
+          />
+        )}
         {onPlanB && (
-          <button type="button" className={styles.planBButton} onClick={() => onPlanB(place)}>
-            {planBLabel ?? '플랜 B추가'}
+          <button
+            type="button"
+            className={styles.planBButton}
+            onClick={() => onPlanB(place)}
+          >
+            {planBLabel ?? "플랜 B추가"}
           </button>
         )}
         {onRemove && (
@@ -50,14 +66,35 @@ export default function PlaceCardCompact({
             <img src={trashIcon} alt="" />
           </button>
         )}
-        <button
-          type="button"
-          className={styles.openButton}
-          onClick={() => onOpen?.(place)}
-          aria-label={`${name} 원본 링크 새 탭에서 열기`}
-        >
-          <img src={openIcon} alt="" />
-        </button>
+        {onDelete ? (
+          <div className={styles.actionPill}>
+            <button
+              type="button"
+              className={styles.pillButton}
+              onClick={() => onDelete(place)}
+              aria-label={`${name} 삭제`}
+            >
+              <img src={trashIcon} alt="" />
+            </button>
+            <button
+              type="button"
+              className={styles.pillButton}
+              onClick={() => onOpen?.(place)}
+              aria-label={`${name} 원본 링크 새 탭에서 열기`}
+            >
+              <img src={openPillIcon} alt="" />
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            className={styles.openButton}
+            onClick={() => onOpen?.(place)}
+            aria-label={`${name} 원본 링크 새 탭에서 열기`}
+          >
+            <img src={openIcon} alt="" />
+          </button>
+        )}
       </div>
 
       <div className={styles.titleRow}>
@@ -78,7 +115,9 @@ export default function PlaceCardCompact({
         <span className={styles.tag}>{displayOrDash(place.tag)}</span>
         {/* 리뷰 수는 없으면 숨김: '- Reviews'는 뜻이 없어서 */}
         {place.reviewCount !== undefined && (
-          <span className={styles.reviews}>{place.reviewCount.toLocaleString()} Reviews</span>
+          <span className={styles.reviews}>
+            {place.reviewCount.toLocaleString()} Reviews
+          </span>
         )}
       </div>
     </article>
