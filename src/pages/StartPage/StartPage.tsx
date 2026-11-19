@@ -6,7 +6,7 @@ import styles from "./StartPage.module.css";
 import Button from "@/shared/components/Button";
 
 export default function StartPage() {
-  useScreenBackdrop(DARK_BACKDROP);
+  useScreenBackdrop(DARK_BACKDROP, { hasStatusBarCap: false });
   const navigate = useNavigate();
 
   // 이미 로그인했으면 시작 화면을 건너뛰어요
