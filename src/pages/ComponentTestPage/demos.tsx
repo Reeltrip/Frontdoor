@@ -438,7 +438,7 @@ export const componentDemos: ComponentDemo[] = [
         ),
       },
       {
-        label: "기본 흰색 · 선택 시 라임 안쪽 · 다른 일자",
+        label: "보관함 기본 · 선택(큰 핀) · 다른 일자",
         render: () => (
           <div
             style={{
@@ -455,11 +455,12 @@ export const componentDemos: ComponentDemo[] = [
         ),
       },
       {
-        label: "여행계획 기본 · 선택 미리보기 · 다른 카테고리",
+        label: "여행계획 확정(라임 점) · 플랜 B로 빠진 장소(검은 점) · 선택 미리보기 · 다른 카테고리",
         render: () => (
-          <div style={{ display: "flex", alignItems: "flex-end", gap: 28, padding: "12px 16px 32px" }}>
-            <MapMarker imageUrl={sampleDonut} name="확정한 장소" isPlanning />
-            <MapMarker imageUrl={sampleDonut} name="확정 전 미리보기" isPlanning isSelected isHighlighted />
+          <div style={{ display: "flex", alignItems: "flex-end", gap: 28, padding: "12px 16px 40px", flexWrap: "wrap" }}>
+            <MapMarker imageUrl={sampleDonut} name="확정한 장소" isPlanning isRouteStop />
+            <MapMarker imageUrl={sampleDonut} name="플랜 B로 빠진 장소" isPlanning isInactiveRoute />
+            <MapMarker imageUrl={sampleDonut} name="확정 전 미리보기" isPlanning isSelected isHighlighted isRouteStop />
             <MapMarker imageUrl={sampleDonut} name="다른 카테고리 장소" isPlanning isDot />
           </div>
         ),

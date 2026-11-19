@@ -174,6 +174,7 @@ function MapContent({
                 isMuted={node.isMuted}
                 isPlanning={isPlanning}
                 isSelected={isSelected}
+                isRouteStop={isOnRoute}
                 isInactiveRoute={inactiveIds.has(node.id)}
                 isHighlighted={node.id === (previewId ?? highlightedNodeId)}
                 isDot={node.isDot}
