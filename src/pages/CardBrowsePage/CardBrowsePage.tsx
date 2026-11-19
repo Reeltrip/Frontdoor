@@ -12,6 +12,7 @@ import {
   COPY_FAILED_MESSAGE,
   copyPlace,
   openPlace,
+  SOURCE_MISSING_MESSAGE,
 } from "@/features/place/lib/placeActions";
 import ConfirmModal from "@/shared/components/ConfirmModal";
 import Toast from "@/shared/components/Toast";
@@ -179,7 +180,9 @@ export default function CardBrowsePage() {
             activeIndex={placeIndex}
             onChange={setPlaceIndex}
             isLocked={isEditing}
-            onOpen={openPlace}
+            onOpen={(place) => {
+              if (!openPlace(place)) setToastMessage(SOURCE_MISSING_MESSAGE);
+            }}
             onCopy={handleCopy}
             // 메모는 카드 편집에서 적어요
             onAddMemo={handleEdit}

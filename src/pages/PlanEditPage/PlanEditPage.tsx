@@ -17,7 +17,7 @@ import { usePlaces } from '@/features/place/model/usePlaces';
 import type { Place, PlaceCategory } from '@/features/place/model/place.types';
 import CategoryFilterBar from '@/features/place/ui/CategoryFilterBar';
 import PlaceCardStrip from '@/features/place/ui/PlaceCardStrip';
-import { COPY_DONE_MESSAGE, COPY_FAILED_MESSAGE, copyPlace, openPlace } from '@/features/place/lib/placeActions';
+import { COPY_DONE_MESSAGE, COPY_FAILED_MESSAGE, copyPlace, openPlace, SOURCE_MISSING_MESSAGE } from '@/features/place/lib/placeActions';
 import { getDayZone, isPlaceInZone, type PlanZone } from '@/features/plan/lib/planZones';
 import { mergePlanPlaces } from '@/features/plan/model/planPlaces';
 import { completePlanDay, formatDayDate, withDraftIfEmptyDay } from '@/features/plan/model/planDays';
@@ -212,7 +212,9 @@ export default function PlanEditPage() {
   const handleBack = () => {
     if (continuingRef.current || createLodging.isPending) return;
     if (isPreviewing) return setIsPreviewing(false);
-    if (selectedId || planBTargetId) return resetSelection();
+    // 플랜 B를 고르는 중에 다른 장소를 봤다면 선택만 풀고 플랜 B 고르기는 이어가요
+    if (selectedId) return browsePlace(null);
+    if (planBTargetId) return resetSelection();
     if (currentStep === 'lodging') {
       if (lodgingResult) return setLodgingResult(undefined);
       if (isSearchingLodging) return setIsSearchingLodging(false);
@@ -372,9 +374,12 @@ export default function PlanEditPage() {
     addPlace(selectedId);
   };
 
-  /** 확정한 카드 사진 위에 올리는 [플랜 B추가]·휴지통 (피그마 'S4-5c-2 카드 확정 후') */
+  /**
+   * 확정한 카드 사진 위에 올리는 [플랜 B추가]·휴지통 (피그마 'S4-5c-2 카드 확정 후').
+   * 플랜 B를 고르는 중에도 원래 동선의 장소를 빼거나 다른 장소의 플랜 B로 바꿀 수 있어요
+   */
   const getNodeActions = (place: Place) => {
-    if (currentStep !== 'nodes' || planBTargetId) return undefined;
+    if (currentStep !== 'nodes') return undefined;
     const node = day.nodes.find((item) => item.placeId === place.id);
     if (!node) return undefined;
     return {
@@ -385,8 +390,9 @@ export default function PlanEditPage() {
         browsePlace(null);
       },
       onRemove: () => {
-        save(removeNodeFromDay(plan, dayIndex, node.placeId));
-        setSelectedId(null);
+        void save(removeNodeFromDay(plan, dayIndex, node.placeId));
+        if (node.placeId === planBTargetId) resetSelection();
+        else browsePlace(null);
       },
     };
   };
@@ -618,7 +624,9 @@ export default function PlanEditPage() {
               onPick={selectedNode ? undefined : selectPlace}
               isPlanCard
               isWide={Boolean(selectedNode)}
-              onOpen={openPlace}
+              onOpen={(place) => {
+                if (!openPlace(place)) setToastMessage(SOURCE_MISSING_MESSAGE);
+              }}
               onCopy={async (place) =>
                 setToastMessage((await copyPlace(place)) ? COPY_DONE_MESSAGE : COPY_FAILED_MESSAGE)
               }

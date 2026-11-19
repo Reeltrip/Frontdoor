@@ -54,7 +54,7 @@ export default function PlaceCardCompact({
           type="button"
           className={styles.openButton}
           onClick={() => onOpen?.(place)}
-          aria-label={`${name} 자세히 보기`}
+          aria-label={`${name} 원본 링크 새 탭에서 열기`}
         >
           <img src={openIcon} alt="" />
         </button>
