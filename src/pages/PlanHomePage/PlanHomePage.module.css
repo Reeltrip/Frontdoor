@@ -42,7 +42,9 @@
   flex-direction: column;
   align-items: flex-start;
   flex-shrink: 0;
-  padding: var(--page-top) 20px 0;
+  /* 이 화면은 상단 띠가 없어서(사진 화면) 폰에서도 Figma처럼 제목 위를 48px 비워요.
+     상태바 바로 아래는 아이폰 홈 화면 앱이 흐리게 처리해서 제목 첫 줄이 흐려 보였어요 */
+  padding: max(48px, calc(env(safe-area-inset-top) + 8px)) 20px 0;
 }
 
 .title {
