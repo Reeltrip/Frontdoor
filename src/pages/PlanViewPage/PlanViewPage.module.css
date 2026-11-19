@@ -121,16 +121,47 @@
   border-radius: 12px 12px 0 0;
   background: var(--color-surface);
   box-shadow: 0 -4px 6px 0 rgba(0, 0, 0, 0.03);
+  transition: height 0.25s ease;
+}
+
+/* 펼치면 지도를 위쪽 72px만 남겨요 (useSheetDrag topGap과 같아요) */
+.sheetExpanded {
+  height: calc(100% - 72px);
+}
+
+/* 끄는 동안은 손가락을 바로 따라오게 해요 */
+.sheetDragging {
+  transition: none;
+}
+
+/* 시트 위쪽 여백까지 잡을 수 있게 여백만큼 넓혀요. 끄는 동안 화면이 같이 스크롤되지 않게 해요 */
+.sheetGrip {
+  flex-shrink: 0;
+  margin: -28px -20px 0;
+  padding: 28px 20px 0;
+  touch-action: none;
+  cursor: grab;
 }
 
 .handle {
   position: absolute;
-  top: 12px;
+  top: 0;
   left: 50%;
+  display: grid;
+  width: 80px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  background: none;
+  place-items: center;
+  transform: translateX(-50%);
+  cursor: grab;
+}
+
+.handle img {
   display: block;
   width: 40px;
   height: 4px;
-  transform: translateX(-50%);
 }
 
 .sheetHeader {

@@ -12,6 +12,7 @@ import { usePlaces } from '@/features/place/model/usePlaces';
 import CategoryFilterBar from '@/features/place/ui/CategoryFilterBar';
 import type { Place, PlaceCategory } from '@/features/place/model/place.types';
 import { hasAuthTokens } from '@/shared/lib/authToken';
+import { useSheetDrag } from '@/shared/hooks/useSheetDrag';
 import { getDayZone } from '@/features/plan/lib/planZones';
 import { mergePlanPlaces } from '@/features/plan/model/planPlaces';
 import ShareSheet, { type ShareChannel } from '@/features/plan/ui/ShareSheet';
@@ -56,6 +57,8 @@ export default function PlanViewPage() {
   const [sharedUrl, setSharedUrl] = useState<string | null>(null);
   const [shareMessage, setShareMessage] = useState<string | null>(null);
   const [selectedDay, setSelectedDay] = useState(entry?.dayIndex ?? 0);
+  // 피그마 시트 높이 281px. 펼치면 지도를 위쪽 72px만 남겨요
+  const sheet = useSheetDrag({ collapsedHeight: 281, topGap: 72 });
   const [category, setCategory] = useState<PlaceCategory | 'all'>(entry?.category ?? 'all');
   const [isPlanBVisible, setIsPlanBVisible] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -265,23 +268,43 @@ export default function PlanViewPage() {
           onClickMap={() => setSelectedId(null)}
         />
 
-        <section className={styles.sheet} aria-label={`${dayIndex + 1}일차 동선`}>
-          <img src={handleIcon} alt="" className={styles.handle} />
-          <div className={styles.sheetHeader}>
-            <div>
-              <h2 className={styles.sheetTitle}>
-                {plan.destination ?? plan.title} {dayIndex + 1}일차
-              </h2>
-              <p className={styles.sheetDate}>
-                {DAY_FORMAT.format(new Date(`${day.date}T00:00:00Z`))}
-              </p>
+        <section
+          data-sheet
+          className={[styles.sheet, sheet.isExpanded && styles.sheetExpanded, sheet.isDragging && styles.sheetDragging]
+            .filter(Boolean)
+            .join(' ')}
+          style={sheet.sheetStyle}
+          aria-label={`${dayIndex + 1}일차 동선`}
+        >
+          {/* 손잡이와 제목 줄을 끌면 시트가 펼쳐지고 접혀요. 누르기만 해도 바뀌어요 */}
+          <div className={styles.sheetGrip} {...sheet.dragHandlers}>
+            <button
+              type="button"
+              data-sheet-handle
+              className={styles.handle}
+              aria-expanded={sheet.isExpanded}
+              aria-label={sheet.isExpanded ? '일정 접기' : '일정 펼치기'}
+              // 손가락·마우스로 누른 건 끌기 처리에서 바꿔요. 키보드(detail 0)만 여기서 바꿔요
+              onClick={(event) => { if (event.detail === 0) sheet.toggle(); }}
+            >
+              <img src={handleIcon} alt="" />
+            </button>
+            <div className={styles.sheetHeader}>
+              <div>
+                <h2 className={styles.sheetTitle}>
+                  {plan.destination ?? plan.title} {dayIndex + 1}일차
+                </h2>
+                <p className={styles.sheetDate}>
+                  {DAY_FORMAT.format(new Date(`${day.date}T00:00:00Z`))}
+                </p>
+              </div>
+              {canEdit && (
+                <button type="button" className={styles.editButton} onClick={() => navigate(editPath)}>
+                  <img src={editIcon} alt="" className={styles.editIcon} />
+                  <span className={styles.srOnly}>계획 수정</span>
+                </button>
+              )}
             </div>
-            {canEdit && (
-              <button type="button" className={styles.editButton} onClick={() => navigate(editPath)}>
-                <img src={editIcon} alt="" className={styles.editIcon} />
-                <span className={styles.srOnly}>계획 수정</span>
-              </button>
-            )}
           </div>
 
           <div key={dayIndex} className={styles.sheetBody}>
