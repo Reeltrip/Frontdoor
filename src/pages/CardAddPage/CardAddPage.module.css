@@ -7,7 +7,7 @@
 }
 
 .top {
-  padding-top: max(38px, calc(env(safe-area-inset-top) + 4px));
+  padding-top: max(calc(38px * var(--status-bar-space)), calc(env(safe-area-inset-top) + 4px));
 }
 
 .backButton {

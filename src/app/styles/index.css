@@ -1,7 +1,12 @@
 /* 디자인 토큰. 값은 피그마 '디자인시스템' 섹션(Typography, Sub/Gray COLORS)을 그대로 옮김 */
 :root {
+  /*
+   * 데스크톱 390×844 시연 화면에는 진짜 상태바가 없어서, 피그마처럼 상태바 자리(최소 여백)를 비워 둬요.
+   * 폰에서는 상태바가 이미 화면 위에 따로 있어요(홈 화면 앱은 env(safe-area-inset-top)도 0). 그래서 1 → 0으로 꺼요 (#108)
+   */
+  --status-bar-space: 1;
   /* 제목 줄의 위 여백이에요. 모든 화면이 여행목록과 같은 높이에서 시작해요. 아이폰은 상태바 바로 아래 8px이에요 */
-  --page-top: max(48px, calc(env(safe-area-inset-top) + 8px));
+  --page-top: max(calc(48px * var(--status-bar-space)), calc(env(safe-area-inset-top) + 8px));
   /* 피그마 아래 여백에도 홈 막대 자리(34px)가 이미 들어 있어요. 아이폰에서 두 번 더하지 않게 큰 쪽만 써요 */
   --home-bar-height: max(env(safe-area-inset-bottom), 34px);
 
@@ -78,6 +83,13 @@
   font-family: var(--font-family);
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
+}
+
+/* 손가락으로 쓰는 폰(아이폰·안드로이드)이면 상태바 자리를 따로 비우지 않아요 */
+@media (hover: none) and (pointer: coarse) {
+  :root {
+    --status-bar-space: 0;
+  }
 }
 
 *,

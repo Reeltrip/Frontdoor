@@ -37,7 +37,7 @@
   z-index: 3;
   flex-shrink: 0;
   /* 제목이 여행목록과 같은 높이(48px)에 오게 해요. 머리줄 안쪽 여백이 9px이라 39px이에요 */
-  padding: max(39px, env(safe-area-inset-top)) 0 0;
+  padding: max(calc(39px * var(--status-bar-space)), env(safe-area-inset-top)) 0 0;
   background: var(--color-bg);
 }
 

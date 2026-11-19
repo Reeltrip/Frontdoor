@@ -7,7 +7,7 @@
 
 .top {
   height: 40px;
-  margin-top: max(42px, calc(env(safe-area-inset-top) + 4px));
+  margin-top: max(calc(42px * var(--status-bar-space)), calc(env(safe-area-inset-top) + 4px));
 }
 
 .backButton {
