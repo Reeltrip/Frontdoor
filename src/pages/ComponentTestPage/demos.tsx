@@ -455,6 +455,14 @@ export const componentDemos: ComponentDemo[] = [
         ),
       },
       {
+        label: "검색한 장소의 사진 없음",
+        render: () => (
+          <div style={{ padding: "12px 16px 32px" }}>
+            <MapMarker imageUrl="" name="사진이 없는 검색 장소" isPlanning isSelected />
+          </div>
+        ),
+      },
+      {
         label: "여행계획 확정(라임 점) · 플랜 B로 빠진 장소(검은 점) · 선택 미리보기 · 다른 카테고리",
         render: () => (
           <div style={{ display: "flex", alignItems: "flex-end", gap: 28, padding: "12px 16px 40px", flexWrap: "wrap" }}>

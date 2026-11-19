@@ -1,7 +1,7 @@
 import { useId } from 'react';
 import styles from './MapMarker.module.css';
 
-type MapMarkerProps = {
+export type MapMarkerProps = {
   imageUrl: string;
   name: string;
   /** sm: 일반 크기, lg: 상세 확인 크기 */
@@ -9,6 +9,8 @@ type MapMarkerProps = {
   /** 다른 일자에 이미 들어간 노드는 회색으로 */
   isMuted?: boolean;
   onClick?: () => void;
+  onImageLoad?: () => void;
+  onImageError?: () => void;
   isPlanning?: boolean;
   isSelected?: boolean;
   /** 동선에 들어간 노드. 핀 끝에 동선 색 점을 찍어요 */
@@ -29,6 +31,8 @@ export default function MapMarker({
   size = 'sm',
   isMuted = false,
   onClick,
+  onImageLoad,
+  onImageError,
   isPlanning,
   isSelected = false,
   isRouteStop,
@@ -56,7 +60,15 @@ export default function MapMarker({
               <path d={PIN_PATH} />
             </clipPath>
             {imageUrl && (
-              <image href={imageUrl} width="65" height="76" preserveAspectRatio="xMidYMid slice" clipPath={`url(#${clipId})`} />
+              <image
+                href={imageUrl}
+                width="65"
+                height="76"
+                preserveAspectRatio="xMidYMid slice"
+                clipPath={`url(#${clipId})`}
+                onLoad={onImageLoad}
+                onError={onImageError}
+              />
             )}
             {categoryIcon && <path d={PIN_PATH} className={styles.categoryShade} />}
           </svg>

@@ -21,6 +21,7 @@ export type Place = {
   category: PlaceCategory;
   name: string;
   imageUrl: string;
+  googlePlaceId?: string;
   /** 지도에 놓을 좌표. 교통·팁 카드나 위치를 찾지 못한 카드는 없음 */
   location?: PlaceLocation;
   /** 카드 이름 아래 한 줄. 여러 개면 구분선으로 이어 붙임. 예: ['하카타역 동쪽 도보 약 6~7분', '11:00~24:00'] */

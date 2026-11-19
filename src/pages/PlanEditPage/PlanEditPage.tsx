@@ -271,11 +271,19 @@ export default function PlanEditPage() {
         isClosed: hasFinishedPlan,
       })
     : undefined;
-  const searchedLodgingPhoto = lodgingResult && lodgingPlaces.find((place) =>
-    place.name === lodgingResult.name && place.location?.lat === lodgingResult.latitude && place.location.lng === lodgingResult.longitude,
-  )?.imageUrl;
+  const getSearchedLodgingPhoto = (result: PlaceSearchResult) =>
+    lodgingPlaces.find((place) => place.imageUrl && place.googlePlaceId === result.googlePlaceId)?.imageUrl ??
+    lodgingPlaces.find((place) => place.imageUrl && !place.googlePlaceId && place.name === result.name &&
+      place.location?.lat === result.latitude && place.location.lng === result.longitude)?.imageUrl ??
+    '';
   const mapNodes = lodgingResult && lodgingResultPosition
-    ? [{ id: lodgingResult.googlePlaceId, name: lodgingResult.name, imageUrl: searchedLodgingPhoto ?? '', position: lodgingResultPosition }]
+    ? [{
+        id: lodgingResult.googlePlaceId,
+        name: lodgingResult.name,
+        imageUrl: getSearchedLodgingPhoto(lodgingResult),
+        position: lodgingResultPosition,
+        googlePlaceId: lodgingResult.googlePlaceId,
+      }]
     : toMapNodes(visiblePlaces).map((node) => {
         const place = visiblePlaces.find((item) => item.id === node.id);
         const isPinned = dayPlaceIds.has(node.id) || node.id === lodgingPlace?.id;

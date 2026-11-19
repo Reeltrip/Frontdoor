@@ -9,6 +9,8 @@ export type MapNode = {
   id: string;
   name: string;
   imageUrl: string;
+  /** 선택한 장소에 카드 사진이 없을 때 Google 장소 사진을 찾아요. */
+  googlePlaceId?: string;
   position: MapPosition;
   /** 다른 일자에 이미 들어간 노드는 회색으로 */
   isMuted?: boolean;
