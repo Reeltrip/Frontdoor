@@ -7,7 +7,7 @@ import {
   LoadingBlob,
   LoadingSpinner,
 } from "@/shared/components/Loading";
-import { MapMarker, MapView, getLegKey } from "@/shared/components/Map";
+import { MapMarker, MapView, getLegKey, getRouteLegColorToken } from "@/shared/components/Map";
 import PlaceCard from "@/features/place/ui/PlaceCard";
 import PlaceCardCompact from "@/features/place/ui/PlaceCardCompact";
 import CategoryChip from "@/features/place/ui/CategoryChip";
@@ -559,6 +559,29 @@ export const componentDemos: ComponentDemo[] = [
                   { lat: 34.6705, lng: 135.5012 },
                   { lat: 34.6705, lng: 135.5031 },
                 ],
+              }}
+            />
+          </div>
+        ),
+      },
+      {
+        label: "동선을 구간마다 다른 색으로 (계획 보기, 일정 목록 이동 줄과 같은 순서)",
+        render: () => (
+          <div style={{ height: 320 }}>
+            <MapView
+              center={{ lat: 34.6695, lng: 135.5025 }}
+              zoom={15}
+              isPlanning
+              nodes={[
+                { id: "a", name: "숙소", imageUrl: sampleDonut, position: { lat: 34.6727, lng: 135.4996 } },
+                { id: "b", name: "첫 장소", imageUrl: sampleDonut, position: { lat: 34.6688, lng: 135.5031 } },
+                { id: "c", name: "둘째 장소", imageUrl: sampleDonut, position: { lat: 34.6655, lng: 135.5062 } },
+              ]}
+              route={[{ nodeId: "a" }, { nodeId: "b" }, { nodeId: "c" }, { nodeId: "a" }]}
+              legColors={{
+                [getLegKey("a", "b")]: getRouteLegColorToken(0),
+                [getLegKey("b", "c")]: getRouteLegColorToken(1),
+                [getLegKey("c", "a")]: getRouteLegColorToken(2),
               }}
             />
           </div>

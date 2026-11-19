@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { Fragment, useEffect, useMemo } from 'react';
 import {
   AdvancedMarker,
   APILoadingStatus,
@@ -31,6 +31,8 @@ export type MapViewProps = {
   route?: MapRouteStop[];
   /** 구간별 실제 길 모양. 넣은 구간은 길을 따라, 없는 구간은 직선으로 그려요 */
   legPaths?: MapLegPaths;
+  /** 구간별 선 색(CSS 변수 이름). 주면 동선을 구간마다 이 색으로 나눠 그려요 */
+  legColors?: Record<string, string>;
   onSelectNode?: (nodeId: string) => void;
   /** 노드가 아닌 지도 바탕을 눌렀을 때 (선택 풀기 등) */
   onClickMap?: () => void;
@@ -74,11 +76,12 @@ type MapRouteLinesProps = {
   nodes: MapNode[];
   route: MapRouteStop[];
   legPaths?: MapLegPaths;
+  legColors?: Record<string, string>;
   isPlanning?: boolean;
 };
 
-function MapRouteLines({ nodes, route, legPaths, isPlanning }: MapRouteLinesProps) {
-  const { mainPaths, inactivePaths, previewPath } = useMemo(
+function MapRouteLines({ nodes, route, legPaths, legColors, isPlanning }: MapRouteLinesProps) {
+  const { mainPaths, mainLegs, inactivePaths, previewPath } = useMemo(
     () => buildRoutePaths(nodes, route, legPaths),
     [nodes, route, legPaths],
   );
@@ -89,6 +92,11 @@ function MapRouteLines({ nodes, route, legPaths, isPlanning }: MapRouteLinesProp
       shadow: readColorToken('--color-gray-900'),
     }),
     [isPlanning],
+  );
+  // 구간 색을 받으면 구간마다 따로 그려요. 색이 없는 구간은 기본 동선 색이에요
+  const coloredLegs = useMemo(
+    () => legColors && mainLegs.map((leg) => ({ ...leg, color: legColors[leg.key] ? readColorToken(legColors[leg.key]) : colors.main })),
+    [legColors, mainLegs, colors.main],
   );
 
   const dash = {
@@ -116,11 +124,19 @@ function MapRouteLines({ nodes, route, legPaths, isPlanning }: MapRouteLinesProp
           clickable={false}
         />
       ))}
-      {mainPaths.map((path, index) => (
-        <Polyline key={index} path={path} strokeColor={colors.main} strokeWeight={ROUTE_STROKE_WEIGHT} zIndex={2} clickable={false} />
-      ))}
+      {coloredLegs
+        ? coloredLegs.map((leg) => (
+          <Fragment key={leg.key}>
+            {/* 구간이 같은 길을 지나도 서로 구분되게 흰 테두리를 깔아요 */}
+            <Polyline path={leg.path} strokeColor={colors.dash} strokeWeight={ROUTE_STROKE_WEIGHT + 3} zIndex={2} clickable={false} />
+            <Polyline path={leg.path} strokeColor={leg.color} strokeWeight={ROUTE_STROKE_WEIGHT} zIndex={3} clickable={false} />
+          </Fragment>
+        ))
+        : mainPaths.map((path, index) => (
+          <Polyline key={index} path={path} strokeColor={colors.main} strokeWeight={ROUTE_STROKE_WEIGHT} zIndex={2} clickable={false} />
+        ))}
       {previewPath && (
-        <Polyline path={previewPath} strokeColor={colors.main} strokeWeight={ROUTE_STROKE_WEIGHT} zIndex={3} clickable={false} />
+        <Polyline path={previewPath} strokeColor={colors.main} strokeWeight={ROUTE_STROKE_WEIGHT} zIndex={4} clickable={false} />
       )}
     </>
   );
@@ -133,6 +149,7 @@ function MapContent({
   selectedNodeId,
   route,
   legPaths,
+  legColors,
   onSelectNode,
   onClickMap,
   isPlanning,
@@ -162,7 +179,7 @@ function MapContent({
         className={styles.map}
       >
         <MapCamera center={center} zoom={zoom} />
-        {route && <MapRouteLines nodes={nodes} route={route} legPaths={legPaths} isPlanning={isPlanning} />}
+        {route && <MapRouteLines nodes={nodes} route={route} legPaths={legPaths} legColors={legColors} isPlanning={isPlanning} />}
         {nodes.map((node) => {
           const isSelected = node.id === selectedNodeId;
           const isOnRoute = routeIds.has(node.id);

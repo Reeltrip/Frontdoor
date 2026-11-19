@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
 import { useQueries } from '@tanstack/react-query';
-import { MapView, decodePolyline, getLegKey, type MapLegPaths, type MapViewProps } from '@/shared/components/Map';
+import { MapView, decodePolyline, getLegKey, getRouteLegColorToken, type MapLegPaths, type MapViewProps } from '@/shared/components/Map';
 import type { Place } from '@/features/place/model/place.types';
 import { getDayRouteQuery } from '../model/dayRoutes';
 
-type DayRouteMapProps = Omit<MapViewProps, 'legPaths'> & {
+type DayRouteMapProps = Omit<MapViewProps, 'legPaths' | 'legColors'> & {
   /** 그 일차에 들르는 장소를 순서대로 (숙소 포함) */
   stopPlaces: Place[];
   /** 그 일차 날짜 (YYYY-MM-DD) */
@@ -25,16 +25,21 @@ export default function DayRouteMap({ stopPlaces, date, canFetchRoutes, ...mapPr
   const signature = pairs
     .map(({ from, to }, index) => `${getLegKey(from.id, to.id)}=${routes[index]?.data?.polyline ?? ''}`)
     .join('\n');
-  const legPaths = useMemo(() => {
+  // 구간 색도 순서대로 다르게 해요. 일정 목록(DayTimeline)도 같은 순서로 같은 색을 써요
+  const { legPaths, legColors } = useMemo(() => {
     const paths: MapLegPaths = {};
-    for (const line of signature.split('\n')) {
+    const colors: Record<string, string> = {};
+    signature.split('\n').forEach((line, index) => {
       const separator = line.indexOf('=');
+      if (separator <= 0) return;
+      const key = line.slice(0, separator);
+      colors[key] = getRouteLegColorToken(index);
       const path = decodePolyline(line.slice(separator + 1));
       // 받지 못했거나 풀지 못한 구간은 넣지 않아요. 지도가 그 구간을 직선으로 그려요
-      if (separator > 0 && path.length > 1) paths[line.slice(0, separator)] = path;
-    }
-    return paths;
+      if (path.length > 1) paths[key] = path;
+    });
+    return { legPaths: paths, legColors: colors };
   }, [signature]);
 
-  return <MapView {...mapProps} legPaths={legPaths} />;
+  return <MapView {...mapProps} legPaths={legPaths} legColors={legColors} />;
 }

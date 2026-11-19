@@ -84,6 +84,8 @@
 .moveIcon {
   position: relative;
   display: block;
+  flex-shrink: 0;
+  color: var(--leg-color, var(--color-lime-600));
   width: 16px;
   height: 16px;
 }
@@ -97,7 +99,7 @@
   margin-left: 4px;
   font: var(--font-caption);
   letter-spacing: var(--tracking);
-  color: var(--color-lime-600);
+  color: var(--leg-color, var(--color-lime-600));
 }
 
 .moveLink {
