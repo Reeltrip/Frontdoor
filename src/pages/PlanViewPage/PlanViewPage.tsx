@@ -4,7 +4,7 @@ import { getErrorMessage } from '@/shared/api/client';
 import Button from '@/shared/components/Button';
 import Header from '@/shared/components/Header';
 import { LoadingSpinner } from '@/shared/components/Loading';
-import { DEFAULT_MAP_CENTER, MapView, type MapPosition } from '@/shared/components/Map';
+import { DEFAULT_MAP_CENTER, type MapPosition } from '@/shared/components/Map';
 import editIcon from '@/shared/assets/icons/edit-circle.svg';
 import handleIcon from '@/shared/assets/icons/sheet-handle.svg';
 import { toMapNodes } from '@/features/place/lib/mapNodes';
@@ -20,6 +20,7 @@ import { buildDayRoute } from '@/features/plan/model/planEdit';
 import { useCreateShareLink, usePlan } from '@/features/plan/model/usePlan';
 import type { ShareType } from '@/features/plan/model/plan.types';
 import DaySelector from '@/features/plan/ui/DaySelector';
+import DayRouteMap from '@/features/plan/ui/DayRouteMap';
 import DayTimeline, { type TimelineStop } from '@/features/plan/ui/DayTimeline';
 import styles from './PlanViewPage.module.css';
 
@@ -250,7 +251,10 @@ export default function PlanViewPage() {
       </div>
 
       <div className={styles.mapArea}>
-        <MapView
+        <DayRouteMap
+          stopPlaces={stops.map((stop) => stop.place)}
+          date={day.date}
+          canFetchRoutes={isLoggedIn}
           className={styles.map}
           center={mapCenter}
           nodes={mapNodes}

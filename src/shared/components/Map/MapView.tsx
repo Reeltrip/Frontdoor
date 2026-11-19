@@ -12,7 +12,7 @@ import MapErrorBoundary from './MapErrorBoundary';
 import MapMarker, { type MapMarkerProps } from './MapMarker';
 import GooglePlacePhotoMarker from './GooglePlacePhotoMarker';
 import MapStatus from './MapStatus';
-import { buildRoutePaths } from './mapRoute';
+import { buildRoutePaths, type MapLegPaths } from './mapRoute';
 import { useMapAuthFailure } from './useMapAuthFailure';
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM, GOOGLE_MAPS_API_KEY, GOOGLE_MAPS_MAP_ID } from './mapConfig';
 import type { MapNode, MapPosition, MapRouteStop } from './map.types';
@@ -29,6 +29,8 @@ export type MapViewProps = {
   selectedNodeId?: string | null;
   /** 동선. 확정한 순서대로 넣어요. 비우면 선을 그리지 않아요 */
   route?: MapRouteStop[];
+  /** 구간별 실제 길 모양. 넣은 구간은 길을 따라, 없는 구간은 직선으로 그려요 */
+  legPaths?: MapLegPaths;
   onSelectNode?: (nodeId: string) => void;
   /** 노드가 아닌 지도 바탕을 눌렀을 때 (선택 풀기 등) */
   onClickMap?: () => void;
@@ -71,11 +73,15 @@ function MapCamera({ center, zoom }: MapCameraProps) {
 type MapRouteLinesProps = {
   nodes: MapNode[];
   route: MapRouteStop[];
+  legPaths?: MapLegPaths;
   isPlanning?: boolean;
 };
 
-function MapRouteLines({ nodes, route, isPlanning }: MapRouteLinesProps) {
-  const { mainPaths, inactivePaths, previewPath } = useMemo(() => buildRoutePaths(nodes, route), [nodes, route]);
+function MapRouteLines({ nodes, route, legPaths, isPlanning }: MapRouteLinesProps) {
+  const { mainPaths, inactivePaths, previewPath } = useMemo(
+    () => buildRoutePaths(nodes, route, legPaths),
+    [nodes, route, legPaths],
+  );
   const colors = useMemo(
     () => ({
       main: readColorToken(isPlanning ? '--color-plan-route' : '--color-gray-900'),
@@ -126,6 +132,7 @@ function MapContent({
   nodes,
   selectedNodeId,
   route,
+  legPaths,
   onSelectNode,
   onClickMap,
   isPlanning,
@@ -155,7 +162,7 @@ function MapContent({
         className={styles.map}
       >
         <MapCamera center={center} zoom={zoom} />
-        {route && <MapRouteLines nodes={nodes} route={route} isPlanning={isPlanning} />}
+        {route && <MapRouteLines nodes={nodes} route={route} legPaths={legPaths} isPlanning={isPlanning} />}
         {nodes.map((node) => {
           const isSelected = node.id === selectedNodeId;
           const isOnRoute = routeIds.has(node.id);
