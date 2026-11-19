@@ -41,18 +41,18 @@
   background: var(--color-bg);
 }
 
-.top > header {
+.top>header {
   padding-top: 0;
 }
 
-.top > header > button {
+.top>header>button {
   display: grid;
   width: 42px;
   height: 44px;
   place-items: center;
 }
 
-.top > header > button img {
+.top>header>button img {
   width: 10px;
   height: 17px;
 }
@@ -118,9 +118,23 @@
   text-align: center;
 }
 
-.aiDraftLoading > div { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-.aiDraftLoading p, .aiDraftLoading span { margin: 0; font: var(--font-body2); letter-spacing: var(--tracking); }
-.aiDraftLoading span { color: var(--color-gray-200); }
+.aiDraftLoading>div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.aiDraftLoading p,
+.aiDraftLoading span {
+  margin: 0;
+  font: var(--font-body2);
+  letter-spacing: var(--tracking);
+}
+
+.aiDraftLoading span {
+  color: var(--color-gray-200);
+}
 
 .toolbar {
   display: flex;
@@ -134,7 +148,7 @@
   min-width: 0;
 }
 
-.filter > div > div {
+.filter>div>div {
   padding-left: 19px;
 }
 
@@ -211,7 +225,7 @@
   pointer-events: none;
 }
 
-.bottom > * {
+.bottom>* {
   pointer-events: auto;
 }
 
@@ -231,7 +245,7 @@
   background: linear-gradient(to top, var(--color-white) 64%, rgba(250, 250, 250, 0));
 }
 
-.bottom > section + .actions {
+.bottom>section+.actions {
   padding-top: 0;
   background: var(--color-surface);
 }
@@ -282,4 +296,16 @@
 
 .saveError p {
   margin: 0 0 8px;
+}
+
+.aboveTutorial {
+  z-index: 6;
+}
+
+.aboveTutorial .actions {
+  background: none;
+}
+
+.aboveTutorial .actions button {
+  box-shadow: 0 0 25px rgba(255, 255, 255, 0.67);
 }

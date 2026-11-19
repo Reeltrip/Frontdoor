@@ -1,5 +1,5 @@
-import type { PlanTutorialKind } from '../lib/planTutorialSeen';
-import styles from './PlanTutorial.module.css';
+import type { PlanTutorialKind } from "../lib/planTutorialSeen";
+import styles from "./PlanTutorial.module.css";
 
 type PlanTutorialOverlayProps = {
   kind: PlanTutorialKind;
@@ -7,20 +7,46 @@ type PlanTutorialOverlayProps = {
 };
 
 /** 지도와 위쪽 줄을 덮는 어두운 막. 어디를 눌러도 닫혀요 */
-export function PlanTutorialOverlay({ kind, onClose }: PlanTutorialOverlayProps) {
+export function PlanTutorialOverlay({
+  kind,
+  onClose,
+}: PlanTutorialOverlayProps) {
   return (
     <div className={styles.overlay} onClick={onClose} role="presentation">
-      {kind === 'confirm' && (
+      {kind === "confirm" && (
         // 피그마 'S4-5c-2 여행계획 튜토리얼': 1번에서 2번으로 이어지는 동선 그림
         <svg className={styles.route} viewBox="0 0 240 260" aria-hidden>
-          <ellipse className={styles.glow} cx="160" cy="212" rx="70" ry="38" />
+          <defs>
+            <linearGradient id="plan-tutorial-glow" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stopColor="#CCFF26" stopOpacity="0.08" />
+              <stop offset="1" stopColor="#CCFF26" stopOpacity="0.66" />
+            </linearGradient>
+          </defs>
+          <ellipse
+            className={styles.glow}
+            cx="160"
+            cy="212"
+            rx="74"
+            ry="43"
+            transform="rotate(-2.08 160 243)"
+          />
           <path className={styles.line} d="M38 92L160 212" />
           <circle className={styles.dot} cx="38" cy="92" r="9" />
           <circle className={styles.dot} cx="160" cy="212" r="9" />
-          <path className={styles.pin} d="M36 74C18 60 4 50 4 34a32 32 0 0164 0c0 16-14 26-32 40z" />
-          <path className={styles.pin} d="M160 190c-18-14-32-24-32-40a32 32 0 0164 0c0 16-14 26-32 40z" />
-          <text className={styles.number} x="36" y="44">1</text>
-          <text className={styles.number} x="160" y="160">2</text>
+          <path
+            className={styles.pin}
+            d="M30 70.5C18 60 4 50 4 34a32 32 0 0164 0c0 16-14 26-26 36.5Q36 78 30 70.5z"
+          />
+          <path
+            className={styles.pin}
+            d="M154 186.5C142 176 128 166 128 150a32 32 0 0164 0c0 16-14 26-26 36.5Q160 194 154 186.5z"
+          />
+          <text className={styles.number} x="36" y="44">
+            1
+          </text>
+          <text className={styles.number} x="160" y="160">
+            2
+          </text>
         </svg>
       )}
     </div>
@@ -29,7 +55,7 @@ export function PlanTutorialOverlay({ kind, onClose }: PlanTutorialOverlayProps)
 
 /** 아래쪽 버튼·카드 바로 위에 놓는 안내 글과 점선 화살표 */
 export function PlanTutorialHint({ kind }: { kind: PlanTutorialKind }) {
-  if (kind === 'confirm') {
+  if (kind === "confirm") {
     return (
       <div className={styles.confirmHint}>
         <p className={styles.text}>
@@ -48,7 +74,8 @@ export function PlanTutorialHint({ kind }: { kind: PlanTutorialKind }) {
   return (
     <div className={styles.planBHint}>
       <p className={styles.text}>
-        확정카드에서 <strong className={styles.accent}>플랜 B추가</strong>를 눌러
+        확정카드에서 <strong className={styles.accent}>플랜 B추가</strong>를
+        눌러
         <br />
         계획을 더 구체화 해보세요!
       </p>
