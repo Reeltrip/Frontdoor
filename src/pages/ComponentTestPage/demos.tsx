@@ -7,7 +7,7 @@ import {
   LoadingBlob,
   LoadingSpinner,
 } from "@/shared/components/Loading";
-import { MapMarker } from "@/shared/components/Map";
+import { MapMarker, MapView } from "@/shared/components/Map";
 import PlaceCard from "@/features/place/ui/PlaceCard";
 import PlaceCardCompact from "@/features/place/ui/PlaceCardCompact";
 import CategoryChip from "@/features/place/ui/CategoryChip";
@@ -517,6 +517,23 @@ export const componentDemos: ComponentDemo[] = [
               width={134}
               height={150}
               alt="Figma 선택 마커 큰 크기"
+            />
+          </div>
+        ),
+      },
+      {
+        label: "지도 위 Google 사진 우선 (왼쪽: Google 장소 ID 있음 → Google 사진, 오른쪽: 없음 → 카드 사진)",
+        render: () => (
+          <div style={{ height: 320 }}>
+            <MapView
+              center={{ lat: 37.422, lng: -122.0841 }}
+              zoom={16}
+              selectedNodeId="google"
+              nodes={[
+                // Google 문서에 나오는 예시 장소(Googleplex)예요. 지도 키가 있는 미리보기 배포에서만 사진이 보여요
+                { id: "google", name: "Google 사진", imageUrl: sampleDonut, googlePlaceId: "ChIJj61dQgK6j4AR4GeTYWZsKWw", position: { lat: 37.422, lng: -122.0841 } },
+                { id: "card", name: "카드 사진", imageUrl: sampleDonut, position: { lat: 37.422, lng: -122.0805 } },
+              ]}
             />
           </div>
         ),

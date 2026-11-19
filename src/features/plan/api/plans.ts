@@ -46,6 +46,8 @@ type ApiNode = {
   latitude: number | null;
   longitude: number | null;
   imageUrl: string | null;
+  /** 마커에 Google 장소 사진을 그릴 때 써요. 없는 카드는 null */
+  googlePlaceId?: string | null;
   alternatives: { placeId: number; name: string }[];
 };
 
@@ -59,7 +61,7 @@ type ApiDay = {
 
 type ApiPlan = ApiPlanSummary & {
   role: PlanRole | null;
-  stays: { placeId: number; name: string; latitude: number | null; longitude: number | null }[];
+  stays: { placeId: number; name: string; latitude: number | null; longitude: number | null; googlePlaceId?: string | null }[];
   days: ApiDay[];
 };
 
@@ -75,6 +77,7 @@ function toEmbeddedPlaces(plan: ApiPlan): Place[] {
     imageUrl: '',
     summary: [],
     ...toLocation(stay.latitude, stay.longitude),
+    ...(stay.googlePlaceId ? { googlePlaceId: stay.googlePlaceId } : {}),
   }));
   const nodes: Place[] = plan.days.flatMap((day) =>
     day.nodes.flatMap((node) => [
@@ -85,6 +88,7 @@ function toEmbeddedPlaces(plan: ApiPlan): Place[] {
         imageUrl: node.imageUrl ?? '',
         summary: [],
         ...toLocation(node.latitude, node.longitude),
+        ...(node.googlePlaceId ? { googlePlaceId: node.googlePlaceId } : {}),
       },
       // 플랜B는 대신할 노드와 같은 카테고리만 넣을 수 있어요 (서버 규칙)
       ...node.alternatives.map((alternative) => ({
