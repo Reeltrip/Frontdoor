@@ -29,6 +29,7 @@ import { toDraft, type PlaceDraft } from "@/features/place/model/placeEdit";
 import {
   PlanTutorialHint,
   PlanTutorialOverlay,
+  PlanTutorialCardFocus,
 } from "@/features/plan/ui/PlanTutorial";
 import type { PlanTutorialKind } from "@/features/plan/lib/planTutorialSeen";
 export function ColorScale({ name, steps }: { name: string; steps: string[] }) {
@@ -427,7 +428,11 @@ export function PlanTutorialDemo({
         ) : (
           <>
             {isOpen && <PlanTutorialHint kind="planB" />}
-            <div style={{ width: 300, margin: "12px 0 44px 20px" }}>{card}</div>
+            <div style={{ paddingBottom: 30 }}>
+              <PlanTutorialCardFocus active={isOpen}>
+                {card}
+              </PlanTutorialCardFocus>
+            </div>
           </>
         )}
       </div>

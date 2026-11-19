@@ -66,6 +66,7 @@ import {
 import DaySelector from "@/features/plan/ui/DaySelector";
 import ZoneSheet from "@/features/plan/ui/ZoneSheet";
 import {
+  PlanTutorialCardFocus,
   PlanTutorialHint,
   PlanTutorialOverlay,
 } from "@/features/plan/ui/PlanTutorial";
@@ -123,6 +124,13 @@ export default function PlanEditPage() {
   const closeConfirmTutorial = () => {
     markPlanTutorialSeen("confirm");
     setIsConfirmTutorialClosed(true);
+  };
+  const [isPlanBTutorialClosed, setIsPlanBTutorialClosed] = useState(() =>
+    hasSeenPlanTutorial("planB"),
+  );
+  const closePlanBTutorial = () => {
+    markPlanTutorialSeen("planB");
+    setIsPlanBTutorialClosed(true);
   };
   const [hasFinishedPlan, setHasFinishedPlan] = useState(false);
   const [isPreviewing, setIsPreviewing] = useState(false);
@@ -528,11 +536,13 @@ export default function PlanEditPage() {
     return {
       planBLabel: node.planB ? "플랜 B변경" : "플랜 B추가",
       onPlanB: () => {
+        closePlanBTutorial();
         setPlanBTargetId(node.placeId);
         setCategory(place.category);
         browsePlace(null);
       },
       onRemove: () => {
+        closePlanBTutorial();
         void save(removeNodeFromDay(plan, dayIndex, node.placeId));
         if (node.placeId === planBTargetId) resetSelection();
         else browsePlace(null);
@@ -684,6 +694,17 @@ export default function PlanEditPage() {
     canPreviewPlace &&
     !planBTargetId &&
     currentStep === "nodes";
+  const isPlanBTutorialOpen =
+    !isPlanBTutorialClosed &&
+    !isConfirmTutorialOpen &&
+    currentStep === "nodes" &&
+    !planBTargetId &&
+    Boolean(isStripVisible && selectedNode);
+  {
+    isPlanBTutorialOpen && (
+      <PlanTutorialOverlay kind="planB" onClose={closePlanBTutorial} />
+    );
+  }
 
   return (
     <main className={styles.page}>
@@ -827,6 +848,8 @@ export default function PlanEditPage() {
             {zoneError}
           </p>
         )}
+        className=
+        {`${styles.bottom} ${isConfirmTutorialOpen || isPlanBTutorialOpen ? styles.aboveTutorial : ""}`}
         {planBTargetId && !selectedPlace && (
           <p className={styles.notice}>
             {planBStopNumber}번 장소 대신 갈 곳을 지도에서 골라 주세요.
@@ -906,25 +929,29 @@ export default function PlanEditPage() {
         )}
         {isStripVisible && (
           <div className={styles.strip}>
-            <PlaceCardStrip
-              places={stripPlaces}
-              selectedId={selectedId}
-              onSelect={browsePlace}
-              onPick={selectedNode ? undefined : selectPlace}
-              isPlanCard
-              isWide={Boolean(selectedNode)}
-              onOpen={(place) => {
-                if (!openPlace(place)) setToastMessage(SOURCE_MISSING_MESSAGE);
-              }}
-              onCopy={async (place) =>
-                setToastMessage(
-                  (await copyPlace(place))
-                    ? COPY_DONE_MESSAGE
-                    : COPY_FAILED_MESSAGE,
-                )
-              }
-              getNodeActions={getNodeActions}
-            />
+            {isPlanBTutorialOpen && <PlanTutorialHint kind="planB" />}
+            <PlanTutorialCardFocus active={isPlanBTutorialOpen}>
+              <PlaceCardStrip
+                places={stripPlaces}
+                selectedId={selectedId}
+                onSelect={browsePlace}
+                onPick={selectedNode ? undefined : selectPlace}
+                isPlanCard
+                isWide={Boolean(selectedNode)}
+                onOpen={(place) => {
+                  if (!openPlace(place))
+                    setToastMessage(SOURCE_MISSING_MESSAGE);
+                }}
+                onCopy={async (place) =>
+                  setToastMessage(
+                    (await copyPlace(place))
+                      ? COPY_DONE_MESSAGE
+                      : COPY_FAILED_MESSAGE,
+                  )
+                }
+                getNodeActions={getNodeActions}
+              />
+            </PlanTutorialCardFocus>
           </div>
         )}
         {footerAction && (

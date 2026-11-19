@@ -101,7 +101,7 @@
 /* 카드 바로 위. 화살표가 카드 위 버튼까지 내려가야 해서 카드보다 앞에 그려요 */
 .planBHint {
   position: relative;
-  z-index: 1;
+  z-index: 3;
   height: 98px;
   /* 아래 간격(12px)을 없애 이 상자 아래 끝이 카드 위 끝이 되게 해요 */
   margin-bottom: -12px;
@@ -124,17 +124,66 @@
 }
 
 .removeLabel {
-  left: 208px;
+  left: calc(100% - 132px);
 }
 
 .openLabel {
-  left: 278px;
+  left: calc(100% - 62px);
 }
 
-.planBArrows {
+.planBArrowLeft,
+.planBArrowRight {
   position: absolute;
   top: 0;
-  left: 0;
-  width: 390px;
+  width: 100px;
   height: 150px;
+  overflow: visible;
+}
+
+.planBArrowLeft {
+  left: 0;
+}
+
+
+.planBArrowRight {
+  right: 30px;
+}
+
+
+.cardFocus button {
+  z-index: 2;
+}
+
+.cardFocus button:not([aria-label]),
+.cardFocus button[aria-label$='계획에서 제거'] {
+  border-color: transparent;
+  background: #ffffff;
+  color: #1a1a1a;
+  backdrop-filter: none;
+}
+
+.cardFocus button[aria-label$='계획에서 제거'] img {
+  filter: brightness(0);
+}
+
+/* 사진은 어둡게 덮지 않고 그대로 보여요 */
+.cardFocus article>div:first-child {
+  position: relative;
+  z-index: 2;
+}
+
+/* 피그마: 화살표도 휴지통과 같은 38px 흰 원, 둘 사이 6px */
+.cardFocus button[aria-label$='새 탭에서 열기'] {
+  top: 12px;
+  right: 10px;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.cardFocus button[aria-label$='계획에서 제거'] {
+  right: 54px;
 }

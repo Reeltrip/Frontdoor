@@ -1,5 +1,6 @@
 import type { PlanTutorialKind } from "../lib/planTutorialSeen";
 import styles from "./PlanTutorial.module.css";
+import type { ReactNode } from "react";
 
 type PlanTutorialOverlayProps = {
   kind: PlanTutorialKind;
@@ -28,7 +29,7 @@ export function PlanTutorialOverlay({
             cy="212"
             rx="74"
             ry="43"
-            transform="rotate(-2.08 160 243)"
+            transform="rotate(-2.08 160 212)"
           />
           <path className={styles.line} d="M38 92L160 212" />
           <circle className={styles.dot} cx="38" cy="92" r="9" />
@@ -82,14 +83,34 @@ export function PlanTutorialHint({ kind }: { kind: PlanTutorialKind }) {
       <span className={`${styles.label} ${styles.removeLabel}`}>카드 삭제</span>
       <span className={`${styles.label} ${styles.openLabel}`}>원본 보기</span>
       {/* 화살표는 카드 위 버튼에서 글 쪽으로 올라와요. 카드는 y 98에서 시작하고 왼쪽 20px, 폭 300px이에요 */}
-      <svg className={styles.planBArrows} viewBox="0 0 390 150" aria-hidden>
+      {/* 알약 쪽 화살표는 카드 왼쪽에서 재요 */}
+      <svg className={styles.planBArrowLeft} viewBox="0 0 100 150" aria-hidden>
         <path className={styles.dotted} d="M58 124C40 112 34 84 48 62" />
         <path className={styles.head} d="M41 67L49 61L53 70" />
-        <path className={styles.dotted} d="M245 122C252 104 250 82 241 66" />
-        <path className={styles.head} d="M235 72L241 65L248 70" />
-        <path className={styles.dotted} d="M283 122C296 108 302 86 300 66" />
-        <path className={styles.head} d="M294 72L300 65L306 72" />
+      </svg>
+      {/* 휴지통·원본 열기 화살표는 사진 오른쪽 끝(0)에서 왼쪽으로 재요 */}
+      <svg
+        className={styles.planBArrowRight}
+        viewBox="-100 0 100 150"
+        aria-hidden
+      >
+        <path className={styles.dotted} d="M-65 122C-58 104 -60 82 -69 66" />
+        <path className={styles.head} d="M-75 72L-69 65L-62 70" />
+        <path className={styles.dotted} d="M-27 122C-14 108 -8 86 -10 66" />
+        <path className={styles.head} d="M-16 72L-10 65L-4 72" />
       </svg>
     </div>
+  );
+}
+
+export function PlanTutorialCardFocus({
+  active,
+  children,
+}: {
+  active: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <div className={active ? styles.cardFocus : undefined}>{children}</div>
   );
 }

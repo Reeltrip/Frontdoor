@@ -42,6 +42,7 @@ import sampleDonut from "@/shared/assets/images/sample-donut.jpg";
 import mapMarkerReferenceSmall from "./assets/map-marker-reference-small.png";
 import mapMarkerReferenceLarge from "./assets/map-marker-reference-large.png";
 import RecentCollectionCard from "@/features/source/ui/RecentCollectionCard";
+import PlaceCardStrip from "@/features/place/ui/PlaceCardStrip";
 
 export type ComponentDemo = {
   /** 컴포넌트 이름 */
@@ -168,11 +169,17 @@ export const componentDemos: ComponentDemo[] = [
           <PlanTutorialDemo
             kind="planB"
             card={
-              <PlaceCardCompact
-                place={FOOD_PLACE}
-                planBLabel="플랜 B추가"
-                onPlanB={() => {}}
-                onRemove={() => {}}
+              <PlaceCardStrip
+                places={[FOOD_PLACE]}
+                selectedId={FOOD_PLACE.id}
+                onSelect={() => {}}
+                isPlanCard
+                isWide
+                getNodeActions={() => ({
+                  planBLabel: "플랜 B추가",
+                  onPlanB: () => {},
+                  onRemove: () => {},
+                })}
               />
             }
           />
