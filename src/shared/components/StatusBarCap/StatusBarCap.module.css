@@ -11,7 +11,8 @@
  */
 @media (hover: none) and (pointer: coarse) {
   .cap {
-    display: block;
+    /* 사진 화면은 useScreenBackdrop(색, { hasStatusBarCap: false })로 띠를 빼요 */
+    display: var(--status-bar-cap, block);
     position: fixed;
     top: 0;
     right: 0;

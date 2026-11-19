@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import styles from './StatusBarCap.module.css';
 
-const readBackdrop = () => document.documentElement.style.getPropertyValue('--screen-backdrop');
+// 띠 색과 띠를 뺄지(사진 화면)를 같이 읽어요. 둘 중 하나라도 바뀌면 띠를 새로 만들어요
+const readBackdrop = () => {
+  const { style } = document.documentElement;
+  return `${style.getPropertyValue('--screen-backdrop')}|${style.getPropertyValue('--status-bar-cap')}`;
+};
 
 /** 폰에서 화면 맨 위에 까는 단색 띠. 아이폰 홈 화면 앱의 상단 흐림을 막아요 (자세한 이유는 CSS에) */
 export default function StatusBarCap() {

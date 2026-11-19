@@ -33,7 +33,7 @@ function markHomeTutorialSeen(): void {
 }
 
 export default function HomePage() {
-  useScreenBackdrop(LIME_BACKDROP);
+  useScreenBackdrop(LIME_BACKDROP, { hasStatusBarCap: false });
   const navigate = useNavigate();
   // 불러오는 중이거나 실패하면 목록 없이 링크 불러오기만 보여줘요
   const recentCollections = useRecentCollections();
