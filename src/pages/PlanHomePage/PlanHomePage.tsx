@@ -6,6 +6,7 @@ import { LoadingSpinner } from '@/shared/components/Loading';
 import TabBar from '@/shared/components/TabBar';
 import { isDraftPlanStatus, type PlanSummary } from '@/features/plan/model/plan.types';
 import { usePlans } from '@/features/plan/model/usePlan';
+import { DARK_BACKDROP, useScreenBackdrop } from '@/shared/hooks/useScreenBackdrop';
 import styles from './PlanHomePage.module.css';
 
 const STATUS_LABELS: Record<PlanSummary['status'], string> = {
@@ -20,6 +21,7 @@ const formatDate = (date: string) => date.replaceAll('-', '.');
 
 // 하단 '계획' 탭 화면. 새 계획을 만들거나 최근 계획으로 들어가요
 export default function PlanHomePage() {
+  useScreenBackdrop(DARK_BACKDROP);
   const navigate = useNavigate();
   const { plans, viewStatus, error, refetch } = usePlans();
 

@@ -86,9 +86,11 @@ html {
   text-size-adjust: 100%;
 }
 
+/* 아이폰은 상태바(노치) 뒤를 body 바탕색으로 칠해요. 화면 배경과 같아야 위에서 색이 끊기지 않아요.
+   화면마다 위쪽 색이 다르면 useScreenBackdrop으로 --screen-backdrop을 바꿔요 */
 body {
   margin: 0;
-  background: var(--color-page);
+  background: var(--frame-backdrop, var(--screen-backdrop, var(--color-bg)));
 }
 
 button {
@@ -107,6 +109,8 @@ button {
 @media (min-width: 600px) and (hover: hover) and (pointer: fine) {
   :root {
     --app-max-width: 390px;
+    /* PC에서는 시연 폭 바깥이 항상 회색이에요 */
+    --frame-backdrop: var(--color-page);
   }
 }
 

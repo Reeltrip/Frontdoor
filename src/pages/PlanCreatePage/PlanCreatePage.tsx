@@ -12,10 +12,12 @@ import { LoadingSpinner } from '@/shared/components/Loading';
 import type { Plan } from '@/features/plan/model/plan.types';
 import { useCreateAiDraft, useCreatePlan } from '@/features/plan/model/usePlan';
 import { PLAN_PERIOD_ERROR_MESSAGE, usePlanCreateForm } from '@/features/plan/model/usePlanCreateForm';
+import { DARK_BACKDROP, useScreenBackdrop } from '@/shared/hooks/useScreenBackdrop';
 import styles from './PlanCreatePage.module.css';
 
 // 여행계획 생성 (기능명세서 4-1, 예외 5-3 같은 기간에 새 여행계획)
 export default function PlanCreatePage() {
+  useScreenBackdrop(DARK_BACKDROP);
   const navigate = useNavigate();
   const location = useLocation();
   const form = usePlanCreateForm();
