@@ -10,7 +10,8 @@
     display: flex;
     flex-shrink: 0;
     align-items: center;
-    gap: 12px;
+    /* 뒤로가기가 있는 다른 화면처럼 제목이 왼쪽 58px에서 시작해요 (16 + 버튼 32 + 10) */
+    gap: 10px;
     padding: var(--page-top) 16px 0 16px;
 }
 
