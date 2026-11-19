@@ -212,7 +212,9 @@ export default function PlanEditPage() {
   const handleBack = () => {
     if (continuingRef.current || createLodging.isPending) return;
     if (isPreviewing) return setIsPreviewing(false);
-    if (selectedId || planBTargetId) return resetSelection();
+    // 플랜 B를 고르는 중에 다른 장소를 봤다면 선택만 풀고 플랜 B 고르기는 이어가요
+    if (selectedId) return browsePlace(null);
+    if (planBTargetId) return resetSelection();
     if (currentStep === 'lodging') {
       if (lodgingResult) return setLodgingResult(undefined);
       if (isSearchingLodging) return setIsSearchingLodging(false);
@@ -364,9 +366,12 @@ export default function PlanEditPage() {
     addPlace(selectedId);
   };
 
-  /** 확정한 카드 사진 위에 올리는 [플랜 B추가]·휴지통 (피그마 'S4-5c-2 카드 확정 후') */
+  /**
+   * 확정한 카드 사진 위에 올리는 [플랜 B추가]·휴지통 (피그마 'S4-5c-2 카드 확정 후').
+   * 플랜 B를 고르는 중에도 원래 동선의 장소를 빼거나 다른 장소의 플랜 B로 바꿀 수 있어요
+   */
   const getNodeActions = (place: Place) => {
-    if (currentStep !== 'nodes' || planBTargetId) return undefined;
+    if (currentStep !== 'nodes') return undefined;
     const node = day.nodes.find((item) => item.placeId === place.id);
     if (!node) return undefined;
     return {
@@ -377,8 +382,9 @@ export default function PlanEditPage() {
         browsePlace(null);
       },
       onRemove: () => {
-        save(removeNodeFromDay(plan, dayIndex, node.placeId));
-        setSelectedId(null);
+        void save(removeNodeFromDay(plan, dayIndex, node.placeId));
+        if (node.placeId === planBTargetId) resetSelection();
+        else browsePlace(null);
       },
     };
   };
