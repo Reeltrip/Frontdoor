@@ -26,7 +26,12 @@ import PlaceCarousel from "@/features/place/ui/PlaceCarousel";
 import Toast from "@/shared/components/Toast";
 import PlaceEditCard from "@/features/place/ui/PlaceEditCard";
 import { toDraft, type PlaceDraft } from "@/features/place/model/placeEdit";
-
+import {
+  PlanTutorialHint,
+  PlanTutorialOverlay,
+  PlanTutorialCardFocus,
+} from "@/features/plan/ui/PlanTutorial";
+import type { PlanTutorialKind } from "@/features/plan/lib/planTutorialSeen";
 export function ColorScale({ name, steps }: { name: string; steps: string[] }) {
   return (
     <div style={{ width: "100%" }}>
@@ -55,11 +60,29 @@ export function ColorScale({ name, steps }: { name: string; steps: string[] }) {
   );
 }
 
-export function TabBarDemo({ initialTab, theme = "light" }: { initialTab: TabKey; theme?: "light" | "dark" }) {
+export function TabBarDemo({
+  initialTab,
+  theme = "light",
+}: {
+  initialTab: TabKey;
+  theme?: "light" | "dark";
+}) {
   const [activeTab, setActiveTab] = useState<TabKey>(initialTab);
-  const bar = <TabBar activeTab={activeTab} onChange={setActiveTab} theme={theme} />;
+  const bar = (
+    <TabBar activeTab={activeTab} onChange={setActiveTab} theme={theme} />
+  );
   if (theme === "light") return bar;
-  return <div style={{ padding: 16, borderRadius: 16, background: "var(--color-gray-900)" }}>{bar}</div>;
+  return (
+    <div
+      style={{
+        padding: 16,
+        borderRadius: 16,
+        background: "var(--color-gray-900)",
+      }}
+    >
+      {bar}
+    </div>
+  );
 }
 
 export function TextFieldDemo({ initialValue }: { initialValue: string }) {
@@ -308,7 +331,11 @@ const formatDate = (date: Date) => `${date.getMonth() + 1}.${date.getDate()}`;
 
 // 첫 클릭은 시작일, 두 번째는 종료일, 세 번째는 다시 시작일
 export function CalendarDemo({ endDay }: { endDay?: number }) {
-  const [range, setRange] = useState<Date[]>(endDay ? [new Date(2026, 10, 19), new Date(2026, 10, endDay)] : [new Date(2026, 10, 19)]);
+  const [range, setRange] = useState<Date[]>(
+    endDay
+      ? [new Date(2026, 10, 19), new Date(2026, 10, endDay)]
+      : [new Date(2026, 10, 19)],
+  );
   const handleSelect = (date: Date) => {
     if (range.length !== 1 || date < range[0]) {
       setRange([date]);
@@ -341,5 +368,89 @@ export function SegmentedButtonsDemo() {
       value={mode}
       onChange={setMode}
     />
+  );
+}
+/**
+ * 여행계획 튜토리얼 모양 확인용 (피그마 S4-5c-2, S4-5c).
+ * 배경은 지도가 아니라 회색 가짜 배경이에요. 막을 눌러 닫고, 닫은 뒤 "다시 보기"로 열 수 있어요.
+ */
+export function PlanTutorialDemo({
+  kind,
+  card,
+}: {
+  kind: PlanTutorialKind;
+  card?: ReactNode;
+}) {
+  const [isOpen, setIsOpen] = useState(true);
+
+  return (
+    <div
+      style={{
+        position: "relative",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "flex-end",
+        width: 390,
+        height: 640,
+        overflow: "hidden",
+        background: "#d6d9d1",
+      }}
+    >
+      {isOpen && (
+        <PlanTutorialOverlay kind={kind} onClose={() => setIsOpen(false)} />
+      )}
+
+      {/* 막(z-index 5) 위로 아래쪽 버튼·카드가 보이게 올려요 */}
+      <div style={{ position: "relative", zIndex: isOpen ? 6 : 0 }}>
+        {kind === "confirm" ? (
+          // 실제 화면의 .actions처럼 세로로 쌓고 간격 8px
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 8,
+              paddingBottom: 44,
+            }}
+          >
+            {isOpen && <PlanTutorialHint kind="confirm" />}
+            <div style={{ padding: "0 20px" }}>
+              <Button
+                style={
+                  isOpen
+                    ? { boxShadow: "0 0 25px rgba(255, 255, 255, 0.67)" }
+                    : undefined
+                }
+              >
+                이 장소로 확정
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {isOpen && <PlanTutorialHint kind="planB" />}
+            <div style={{ paddingBottom: 30 }}>
+              <PlanTutorialCardFocus active={isOpen}>
+                {card}
+              </PlanTutorialCardFocus>
+            </div>
+          </>
+        )}
+      </div>
+
+      {!isOpen && (
+        <button
+          type="button"
+          onClick={() => setIsOpen(true)}
+          style={{
+            position: "absolute",
+            top: 12,
+            left: 12,
+            padding: "6px 12px",
+          }}
+        >
+          튜토리얼 다시 보기
+        </button>
+      )}
+    </div>
   );
 }

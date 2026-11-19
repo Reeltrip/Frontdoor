@@ -7,7 +7,12 @@ import {
   LoadingBlob,
   LoadingSpinner,
 } from "@/shared/components/Loading";
-import { MapMarker, MapView, getLegKey, getRouteLegColorToken } from "@/shared/components/Map";
+import {
+  MapMarker,
+  MapView,
+  getLegKey,
+  getRouteLegColorToken,
+} from "@/shared/components/Map";
 import PlaceCard from "@/features/place/ui/PlaceCard";
 import PlaceCardCompact from "@/features/place/ui/PlaceCardCompact";
 import CategoryChip from "@/features/place/ui/CategoryChip";
@@ -19,6 +24,7 @@ import {
   CategoryWheelDemo,
   PlaceCarouselDemo,
   PlaceEditCardDemo,
+  PlanTutorialDemo,
   ToastDemo,
   ChipDemo,
   ColorScale,
@@ -36,6 +42,7 @@ import sampleDonut from "@/shared/assets/images/sample-donut.jpg";
 import mapMarkerReferenceSmall from "./assets/map-marker-reference-small.png";
 import mapMarkerReferenceLarge from "./assets/map-marker-reference-large.png";
 import RecentCollectionCard from "@/features/source/ui/RecentCollectionCard";
+import PlaceCardStrip from "@/features/place/ui/PlaceCardStrip";
 
 export type ComponentDemo = {
   /** 컴포넌트 이름 */
@@ -145,6 +152,42 @@ export const componentDemos: ComponentDemo[] = [
       },
     ],
   },
+
+  {
+    name: "PlanTutorial",
+    path: "features/plan/ui/PlanTutorial",
+    description:
+      "여행계획 튜토리얼 (피그마 S4-5c-2, S4-5c). 막을 누르면 닫혀요. 배경은 가짜예요",
+    variants: [
+      {
+        label: "이 장소로 확정 (confirm)",
+        render: () => <PlanTutorialDemo kind="confirm" />,
+      },
+      {
+        label: "플랜 B 추가 (planB)",
+        render: () => (
+          <PlanTutorialDemo
+            kind="planB"
+            card={
+              <PlaceCardStrip
+                places={[FOOD_PLACE]}
+                selectedId={FOOD_PLACE.id}
+                onSelect={() => {}}
+                isPlanCard
+                isWide
+                getNodeActions={() => ({
+                  planBLabel: "플랜 B추가",
+                  onPlanB: () => {},
+                  onRemove: () => {},
+                })}
+              />
+            }
+          />
+        ),
+      },
+    ],
+  },
+
   {
     name: "TabBar",
     path: "shared/components/TabBar",
@@ -522,7 +565,8 @@ export const componentDemos: ComponentDemo[] = [
         ),
       },
       {
-        label: "지도 위 Google 사진 우선 (왼쪽: Google 장소 ID 있음 → Google 사진, 오른쪽: 없음 → 카드 사진)",
+        label:
+          "지도 위 Google 사진 우선 (왼쪽: Google 장소 ID 있음 → Google 사진, 오른쪽: 없음 → 카드 사진)",
         render: () => (
           <div style={{ height: 320 }}>
             <MapView
@@ -531,15 +575,27 @@ export const componentDemos: ComponentDemo[] = [
               selectedNodeId="google"
               nodes={[
                 // Google 문서에 나오는 예시 장소(Googleplex)예요. 지도 키가 있는 미리보기 배포에서만 사진이 보여요
-                { id: "google", name: "Google 사진", imageUrl: sampleDonut, googlePlaceId: "ChIJj61dQgK6j4AR4GeTYWZsKWw", position: { lat: 37.422, lng: -122.0841 } },
-                { id: "card", name: "카드 사진", imageUrl: sampleDonut, position: { lat: 37.422, lng: -122.0805 } },
+                {
+                  id: "google",
+                  name: "Google 사진",
+                  imageUrl: sampleDonut,
+                  googlePlaceId: "ChIJj61dQgK6j4AR4GeTYWZsKWw",
+                  position: { lat: 37.422, lng: -122.0841 },
+                },
+                {
+                  id: "card",
+                  name: "카드 사진",
+                  imageUrl: sampleDonut,
+                  position: { lat: 37.422, lng: -122.0805 },
+                },
               ]}
             />
           </div>
         ),
       },
       {
-        label: "동선이 길을 따라가요 (첫 구간: 길 모양 있음 → 꺾인 선, 둘째 구간: 없음 → 직선)",
+        label:
+          "동선이 길을 따라가요 (첫 구간: 길 모양 있음 → 꺾인 선, 둘째 구간: 없음 → 직선)",
         render: () => (
           <div style={{ height: 320 }}>
             <MapView
@@ -547,9 +603,24 @@ export const componentDemos: ComponentDemo[] = [
               zoom={15}
               isPlanning
               nodes={[
-                { id: "a", name: "출발", imageUrl: sampleDonut, position: { lat: 34.6727, lng: 135.4996 } },
-                { id: "b", name: "중간", imageUrl: sampleDonut, position: { lat: 34.6688, lng: 135.5031 } },
-                { id: "c", name: "도착", imageUrl: sampleDonut, position: { lat: 34.6655, lng: 135.5062 } },
+                {
+                  id: "a",
+                  name: "출발",
+                  imageUrl: sampleDonut,
+                  position: { lat: 34.6727, lng: 135.4996 },
+                },
+                {
+                  id: "b",
+                  name: "중간",
+                  imageUrl: sampleDonut,
+                  position: { lat: 34.6688, lng: 135.5031 },
+                },
+                {
+                  id: "c",
+                  name: "도착",
+                  imageUrl: sampleDonut,
+                  position: { lat: 34.6655, lng: 135.5062 },
+                },
               ]}
               route={[{ nodeId: "a" }, { nodeId: "b" }, { nodeId: "c" }]}
               // 손으로 만든 예시 길이에요. 실제 화면은 서버가 준 Google 길 모양을 써요
@@ -565,7 +636,8 @@ export const componentDemos: ComponentDemo[] = [
         ),
       },
       {
-        label: "동선을 구간마다 다른 색으로 (계획 보기, 일정 목록 이동 줄과 같은 순서)",
+        label:
+          "동선을 구간마다 다른 색으로 (계획 보기, 일정 목록 이동 줄과 같은 순서)",
         render: () => (
           <div style={{ height: 320 }}>
             <MapView
@@ -573,11 +645,31 @@ export const componentDemos: ComponentDemo[] = [
               zoom={15}
               isPlanning
               nodes={[
-                { id: "a", name: "숙소", imageUrl: sampleDonut, position: { lat: 34.6727, lng: 135.4996 } },
-                { id: "b", name: "첫 장소", imageUrl: sampleDonut, position: { lat: 34.6688, lng: 135.5031 } },
-                { id: "c", name: "둘째 장소", imageUrl: sampleDonut, position: { lat: 34.6655, lng: 135.5062 } },
+                {
+                  id: "a",
+                  name: "숙소",
+                  imageUrl: sampleDonut,
+                  position: { lat: 34.6727, lng: 135.4996 },
+                },
+                {
+                  id: "b",
+                  name: "첫 장소",
+                  imageUrl: sampleDonut,
+                  position: { lat: 34.6688, lng: 135.5031 },
+                },
+                {
+                  id: "c",
+                  name: "둘째 장소",
+                  imageUrl: sampleDonut,
+                  position: { lat: 34.6655, lng: 135.5062 },
+                },
               ]}
-              route={[{ nodeId: "a" }, { nodeId: "b" }, { nodeId: "c" }, { nodeId: "a" }]}
+              route={[
+                { nodeId: "a" },
+                { nodeId: "b" },
+                { nodeId: "c" },
+                { nodeId: "a" },
+              ]}
               legColors={{
                 [getLegKey("a", "b")]: getRouteLegColorToken(0),
                 [getLegKey("b", "c")]: getRouteLegColorToken(1),
