@@ -14,6 +14,7 @@ import { usePlan, useUpdatePlan } from '@/features/plan/model/usePlan';
 import { PLAN_PERIOD_ERROR_MESSAGE, usePlanCreateForm } from '@/features/plan/model/usePlanCreateForm';
 import KeepDaysModal from '@/features/plan/ui/KeepDaysModal';
 // 피그마 'S4-1 여행계획 수정'은 새 여행계획 화면과 모양이 같아서 그 스타일을 그대로 써요
+import { DARK_BACKDROP, useScreenBackdrop } from '@/shared/hooks/useScreenBackdrop';
 import formStyles from '../PlanCreatePage/PlanCreatePage.module.css';
 import styles from './PlanInfoEditPage.module.css';
 
@@ -21,6 +22,7 @@ type Period = { startDate: string; endDate: string };
 
 // 계획 편집: 여행 이름·기간·여행지 수정 (피그마 S4-1 여행계획 수정, 기능명세서 5-4 기간 변경)
 export default function PlanInfoEditPage() {
+  useScreenBackdrop(DARK_BACKDROP);
   const { planId = '' } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
