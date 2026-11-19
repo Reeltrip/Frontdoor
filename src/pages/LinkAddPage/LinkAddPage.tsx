@@ -9,8 +9,12 @@ import {
   isLinkAddState,
   type AnalyzingState,
 } from "@/features/source/model/source.types";
-import { LIME_BACKDROP, useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
+import {
+  LIME_BACKDROP,
+  useScreenBackdrop,
+} from "@/shared/hooks/useScreenBackdrop";
 import styles from "./LinkAddPage.module.css";
+import backIcon from "@/shared/assets/icons/back-arrow.svg";
 
 export default function LinkAddPage() {
   useScreenBackdrop(LIME_BACKDROP);
@@ -44,7 +48,14 @@ export default function LinkAddPage() {
   return (
     <form className={styles.page} onSubmit={handleSubmit}>
       <img className={styles.background} src={linkBg} alt="" />
-
+      <button
+        type="button"
+        className={styles.backButton}
+        onClick={() => navigate(-1)}
+        aria-label="뒤로 가기"
+      >
+        <img src={backIcon} alt="" />
+      </button>{" "}
       <header className={styles.header}>
         <h1 className={styles.title}>
           모아둔 여행 영상 링크를
@@ -63,7 +74,6 @@ export default function LinkAddPage() {
           <img src={plusIcon} alt="" className={styles.addIcon} />
         </button>
       </header>
-
       <div className={styles.fields} ref={fieldsRef}>
         {rows.map((row) => (
           <LinkInput
@@ -74,13 +84,11 @@ export default function LinkAddPage() {
           />
         ))}
       </div>
-
       <div className={styles.actions}>
         <Button type="submit" disabled={!canSubmit}>
           요약카드 만들기
         </Button>
       </div>
-
       {/* 입력 중에는 입력 중인 칸만 남기고 화면을 어둡게 함 */}
       <div className={styles.dim} aria-hidden />
     </form>
