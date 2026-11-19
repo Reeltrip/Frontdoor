@@ -92,3 +92,17 @@
     margin-top: auto;
     margin-bottom: calc(var(--home-bar-height) + 10px);
 }
+
+/* 상태바는 단색(연두)이라 사진과 바로 맞닿으면 경계선이 보여요. 맨 위에서 연두가 사진으로 풀리게 해요.
+   -1이라 사진 위, 글자 아래에 깔려요 */
+.page::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+    z-index: -1;
+    height: 140px;
+    background: linear-gradient(var(--color-lime-50), rgba(239, 255, 190, 0));
+    pointer-events: none;
+}
