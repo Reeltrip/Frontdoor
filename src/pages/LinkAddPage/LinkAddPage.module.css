@@ -114,3 +114,19 @@
     background: linear-gradient(var(--color-lime-50), rgba(239, 255, 190, 0));
     pointer-events: none;
 }
+
+.backButton {
+    position: absolute;
+    top: max(calc(39px * var(--status-bar-space)), env(safe-area-inset-top));
+    left: 12px;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 56px;
+    padding: 0;
+    border: none;
+    background: none;
+    cursor: pointer;
+}
