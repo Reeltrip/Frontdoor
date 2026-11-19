@@ -63,15 +63,11 @@ export default function GooglePlacePhotoMarker({ placeId, markerProps, showsCred
         }}
       />
       {showsCredits && isPhotoVisible && photo && photo.authors.length > 0 && (
+        // 출처를 링크로 두면 겹친 아래 핀을 누를 때 링크가 눌려 Google 지도로 넘어가요.
+        // 핀은 작아서 Google 정책상 이름만 보여줘도 돼요(프로필 링크는 "공간이 있을 때"). 터치는 아래로 통과시켜요
         <ul className={styles.credits} aria-label="장소 사진 출처">
-          {photo.authors.map(({ displayName, uri }, index) => (
-            <li key={`${index}-${displayName}`}>
-              {uri ? (
-                <a href={uri} target="_blank" rel="noreferrer" onClick={(event) => event.stopPropagation()}>
-                  {displayName}
-                </a>
-              ) : displayName}
-            </li>
+          {photo.authors.map(({ displayName }, index) => (
+            <li key={`${index}-${displayName}`}>{displayName}</li>
           ))}
         </ul>
       )}

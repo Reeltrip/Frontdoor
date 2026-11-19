@@ -1,7 +1,11 @@
 import type { MapNode, MapPosition, MapRouteStop } from './map.types';
 
+export type MapRouteLeg = { key: string; path: MapPosition[] };
+
 export type MapRoutePaths = {
   mainPaths: MapPosition[][];
+  /** 확정한 동선을 구간마다 나눈 것. 계획 보기에서 구간마다 색을 다르게 그릴 때 써요 */
+  mainLegs: MapRouteLeg[];
   inactivePaths: MapPosition[][];
   previewPath?: MapPosition[];
 };
@@ -52,9 +56,14 @@ export function buildRoutePaths(nodes: MapNode[], route: MapRouteStop[], legPath
     }
   });
 
-  const mainPaths = (previewIndex < 0 ? [main] : [main.slice(0, previewIndex), main.slice(previewIndex + 1)]).map(join);
+  const mainGroups = previewIndex < 0 ? [main] : [main.slice(0, previewIndex), main.slice(previewIndex + 1)];
+  const mainPaths = mainGroups.map(join);
+  const mainLegs = mainGroups.flatMap((group) =>
+    group.slice(1).map((point, index) => ({ key: getLegKey(group[index].id, point.id), path: join([group[index], point]) })),
+  );
   return {
     mainPaths: mainPaths.filter((path) => path.length > 1),
+    mainLegs,
     inactivePaths: inactivePaths.filter((path) => path.length > 1),
     previewPath: previewPath && previewPath.length > 1 ? previewPath : undefined,
   };

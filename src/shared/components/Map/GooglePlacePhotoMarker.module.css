@@ -20,9 +20,6 @@
   text-align: center;
   overflow-wrap: anywhere;
   transform: translateX(-50%);
-}
-
-.credits a {
-  color: inherit;
-  text-decoration: underline;
+  /* 출처 글자가 아래 핀을 가려도 그 핀이 눌리게 해요 */
+  pointer-events: none;
 }

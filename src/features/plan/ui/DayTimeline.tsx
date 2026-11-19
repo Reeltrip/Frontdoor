@@ -1,10 +1,12 @@
+import type { CSSProperties } from 'react';
 import { useQueries } from '@tanstack/react-query';
 import { getDistanceKm } from '../lib/planZones';
 import { type PlaceRoute, type RouteMode } from '../api/plans';
 import { getDayRouteQuery } from '../model/dayRoutes';
 import { CATEGORIES } from '@/features/place/lib/categories';
 import type { Place } from '@/features/place/model/place.types';
-import transitIcon from '@/shared/assets/icons/transit-small.svg';
+import { getRouteLegColorToken } from '@/shared/components/Map';
+import TransitLegIcon from './TransitLegIcon';
 import styles from './DayTimeline.module.css';
 
 export type TimelineStop = {
@@ -103,8 +105,9 @@ export default function DayTimeline({ stops, isPlanBVisible, date, canFetchRoute
     if (route.data) text = getMoveText(route.data);
     else if (route.isFetching) text = '경로를 찾는 중이에요';
     return (
-      <div className={styles.moveRow}>
-        <img src={transitIcon} alt="" className={styles.moveIcon} />
+      // 지도 동선과 같은 순서로 같은 색을 써서 어느 선이 이 구간인지 맞춰 볼 수 있어요
+      <div className={styles.moveRow} style={{ '--leg-color': `var(${getRouteLegColorToken(index)})` } as CSSProperties}>
+        <TransitLegIcon className={styles.moveIcon} />
         {route.data && <span className={styles.moveLabel}>{getMoveLabel(route.data)}</span>}
         <span className={styles.moveText}>{text}</span>
         {directionsUrl && (

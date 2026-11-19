@@ -7,6 +7,13 @@
 
   /* 포인트 색 (라임) */
   --color-plan-route: #c3ea3b;
+  /* 계획 보기 동선의 구간 순서별 색 (routeLegColors.ts) */
+  --color-route-leg-1: #84ad00;
+  --color-route-leg-2: #ff7a2f;
+  --color-route-leg-3: #3d6ff5;
+  --color-route-leg-4: #e2468f;
+  --color-route-leg-5: #0f9f8a;
+  --color-route-leg-6: #8b55f0;
   --color-lime-10: #f8ffe5;
   --color-lime-50: #efffbe;
   --color-lime-100: #e5ff99;
