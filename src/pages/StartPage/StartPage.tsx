@@ -1,10 +1,12 @@
 import { Link, Navigate, useNavigate } from "react-router";
 import { hasAuthTokens } from "@/shared/lib/authToken";
 import logo from "../../shared/assets/logo/wayvi-logo-white.svg";
+import { DARK_BACKDROP, useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
 import styles from "./StartPage.module.css";
 import Button from "@/shared/components/Button";
 
 export default function StartPage() {
+  useScreenBackdrop(DARK_BACKDROP);
   const navigate = useNavigate();
 
   // 이미 로그인했으면 시작 화면을 건너뛰어요

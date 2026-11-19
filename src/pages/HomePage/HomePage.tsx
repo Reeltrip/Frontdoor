@@ -3,6 +3,7 @@ import TabBar from "@/shared/components/TabBar";
 import linkBg from "@/shared/assets/images/link-bg.png";
 import RecentCollectionCard from "@/features/source/ui/RecentCollectionCard";
 import { useRecentCollections } from "@/features/source/model/useRecentCollections";
+import { LIME_BACKDROP, useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
 import styles from "./HomePage.module.css";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -32,6 +33,7 @@ function markHomeTutorialSeen(): void {
 }
 
 export default function HomePage() {
+  useScreenBackdrop(LIME_BACKDROP);
   const navigate = useNavigate();
   // 불러오는 중이거나 실패하면 목록 없이 링크 불러오기만 보여줘요
   const recentCollections = useRecentCollections();

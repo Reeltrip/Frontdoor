@@ -9,9 +9,11 @@ import {
   isLinkAddState,
   type AnalyzingState,
 } from "@/features/source/model/source.types";
+import { LIME_BACKDROP, useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
 import styles from "./LinkAddPage.module.css";
 
 export default function LinkAddPage() {
+  useScreenBackdrop(LIME_BACKDROP);
   const location = useLocation();
   const initialLink = isLinkAddState(location.state)
     ? location.state.initialLink
