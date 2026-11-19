@@ -159,5 +159,5 @@
 
 @media (max-height: 740px) {
   .featured { height: 220px; }
-  .header { padding-top: max(28px, calc(env(safe-area-inset-top) + 8px)); }
+  .header { padding-top: max(calc(28px * var(--status-bar-space)), calc(env(safe-area-inset-top) + 8px)); }
 }
