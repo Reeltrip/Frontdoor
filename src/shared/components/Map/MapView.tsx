@@ -172,10 +172,9 @@ function MapContent({
             isDot: node.isDot,
             categoryIcon: node.categoryIcon,
           };
+          // Google 장소 ID가 있으면 카드 사진보다 Google 사진을 먼저 보여줘요 (점 마커는 사진이 없어요)
           const photoPlaceId =
-            isSelected && !node.isDot && !node.imageUrl && loadingStatus === APILoadingStatus.LOADED
-              ? node.googlePlaceId
-              : undefined;
+            !node.isDot && loadingStatus === APILoadingStatus.LOADED ? node.googlePlaceId : undefined;
 
           return (
             <AdvancedMarker
@@ -187,7 +186,7 @@ function MapContent({
               onClick={() => onSelectNode?.(node.id)}
             >
               {photoPlaceId
-                ? <GooglePlacePhotoMarker key={photoPlaceId} placeId={photoPlaceId} markerProps={markerProps} />
+                ? <GooglePlacePhotoMarker key={photoPlaceId} placeId={photoPlaceId} markerProps={markerProps} showsCredits={isSelected} />
                 : <MapMarker {...markerProps} />}
             </AdvancedMarker>
           );
