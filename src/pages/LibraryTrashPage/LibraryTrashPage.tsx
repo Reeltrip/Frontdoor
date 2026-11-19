@@ -10,6 +10,7 @@ import Button from "@/shared/components/Button";
 import ConfirmModal from "@/shared/components/ConfirmModal";
 import { LoadingSpinner } from "@/shared/components/Loading";
 import Toast from "@/shared/components/Toast";
+import { useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
 import {
   useDeletedPlaces,
   usePurgePlaces,
@@ -22,6 +23,8 @@ const TOAST_DURATION_MS = 2000;
 
 export default function LibraryTrashPage() {
   const navigate = useNavigate();
+  // 화면 위쪽 색(#fafafa)을 상태바와 맨 위 띠에도 맞춰요
+  useScreenBackdrop("#fafafa");
   const { places, viewStatus, error, refetch } = useDeletedPlaces();
   const restorePlaces = useRestorePlaces();
   const purgePlaces = usePurgePlaces();
