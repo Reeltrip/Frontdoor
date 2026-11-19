@@ -10,11 +10,13 @@ import {
 import { isAnalyzingState } from "@/features/source/model/source.types";
 import { useProfile } from "@/features/account/model/useAccount";
 import styles from "./LinkAnalyzingPage.module.css";
+import { useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
 
 const RESULT_DELAY_MS = 600;
 const DEFAULT_NICKNAME = "여행자";
 
 export default function LinkAnalyzingPage() {
+  useScreenBackdrop("#fafafa");
   const location = useLocation();
 
   // 주소로 바로 들어오면 넘겨받은 링크가 없으니 입력 화면으로 돌려보냄

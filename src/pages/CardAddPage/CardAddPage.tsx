@@ -34,6 +34,7 @@ import {
   type CardFeatures,
 } from "@/features/place/model/cardAdd.types";
 import styles from "./CardAddPage.module.css";
+import { useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
 
 const STEP_TITLES: Record<CardAddStep, string | null> = {
   category: null,
@@ -68,10 +69,15 @@ const PROGRESS_PERCENTS: Record<CardAddStep, number> = {
 // 저장이 금방 끝나도 '카드를 만들고 있어요' 화면이 깜빡이고 사라지지 않게 최소 시간을 둬요
 const MIN_CREATING_MS = 1500;
 const CREATING_STEP_MS = 500;
-const CREATING_STEPS = ["입력한 내용 확인 중", "사진 올리는 중", "요약 카드 마무리 중"];
+const CREATING_STEPS = [
+  "입력한 내용 확인 중",
+  "사진 올리는 중",
+  "요약 카드 마무리 중",
+];
 const DEFAULT_NICKNAME = "여행자";
 
-const wait = (ms: number) => new Promise<void>((resolve) => window.setTimeout(resolve, ms));
+const wait = (ms: number) =>
+  new Promise<void>((resolve) => window.setTimeout(resolve, ms));
 
 export default function CardAddPage() {
   const navigate = useNavigate();
@@ -128,7 +134,8 @@ export default function CardAddPage() {
   });
   const saveCard = useMutation({
     // 실패하면 기다리지 않고 바로 입력 화면으로 돌아가요
-    mutationFn: async () => (await Promise.all([createCard.mutateAsync(), wait(MIN_CREATING_MS)]))[0],
+    mutationFn: async () =>
+      (await Promise.all([createCard.mutateAsync(), wait(MIN_CREATING_MS)]))[0],
     onSuccess: async (result) => {
       saveLastResult({ placeIds: result.placeIds, title: null });
       await queryClient.invalidateQueries({ queryKey: placeKeys.all });
@@ -136,6 +143,7 @@ export default function CardAddPage() {
     },
     onError: (error) => setErrorMessage(getErrorMessage(error)),
   });
+  useScreenBackdrop(saveCard.isPending ? "#fafafa" : "#ffffff");
   const [isImportModalOpen, setIsImportModalOpen] = useState(true);
   const [isTutorialOpen, setIsTutorialOpen] = useState(false);
   const [isArrowTutorialOpen, setIsArrowTutorialOpen] = useState(false);
@@ -148,7 +156,10 @@ export default function CardAddPage() {
   useEffect(() => {
     if (!saveCard.isPending) return;
     const timer = window.setInterval(
-      () => setCreatingStep((prev) => Math.min(prev + 1, CREATING_STEPS.length - 1)),
+      () =>
+        setCreatingStep((prev) =>
+          Math.min(prev + 1, CREATING_STEPS.length - 1),
+        ),
       CREATING_STEP_MS,
     );
     return () => {
