@@ -9,6 +9,7 @@ import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { sourceKeys } from "@/features/source/api/sources";
 import HomeTutorial from "@/features/source/ui/HomeTutorial";
+import { clearTutorialReplay, isTutorialReplay } from "@/features/account/lib/tutorialReplay";
 import ConfirmModal from "@/shared/components/ConfirmModal";
 import { readClipboardLink } from "@/features/source/lib/readClipboardLink";
 import type { LinkAddState } from "@/features/source/model/source.types";
@@ -44,8 +45,10 @@ export default function HomePage() {
   const isRecentLoaded =
     queryClient.getQueryState(sourceKeys.recent())?.status === "success";
   const [hasSeenTutorial, setHasSeenTutorial] = useState(hasSeenHomeTutorial);
+  // 마이페이지에서 "튜토리얼 다시 보기"를 누르면 수집 기록이 있어도 한 번 띄워요
+  const [isReplay] = useState(isTutorialReplay);
   const isTutorialOpen =
-    !hasSeenTutorial && isRecentLoaded && !hasRecentCollections;
+    !hasSeenTutorial && isRecentLoaded && (!hasRecentCollections || isReplay);
 
   const [clipboardLink, setClipboardLink] = useState<string | null>(null);
 
@@ -69,6 +72,7 @@ export default function HomePage() {
 
   const handleTutorialClose = () => {
     markHomeTutorialSeen();
+    clearTutorialReplay();
     setHasSeenTutorial(true);
   };
 

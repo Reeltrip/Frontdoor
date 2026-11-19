@@ -14,6 +14,7 @@ import kebabIcon from '@/shared/assets/icons/kebab.svg';
 import ConfirmModal from '@/shared/components/ConfirmModal';
 import { clearAuthTokens, getAuthTokens } from '@/shared/lib/authToken';
 import { logout } from '@/features/auth/api/auth';
+import { replayTutorials } from '@/features/account/lib/tutorialReplay';
 import styles from './MyPage.module.css';
 
 export default function MyPage() {
@@ -74,6 +75,8 @@ export default function MyPage() {
       <button type="button" className={styles.row} onClick={() => navigate('/my/notifications')}><span className={styles.icon}><img src={notificationIcon} alt="" /></span>푸시 알림 설정</button>
       <button type="button" className={styles.row} onClick={() => navigate('/my/terms')}><span className={styles.icon}><img src={helpIcon} alt="" /></span>이용약관</button>
       <button type="button" className={styles.row} onClick={() => navigate('/my/privacy')}><span className={styles.icon}><img src={privacyIcon} alt="" /></span>개인정보처리방침</button>
+      {/* 본 기록을 지우고 가입 직후의 앱 안내부터 다시 보여줘요. 끝나면 홈에서 사용 안내가 이어져요 */}
+      <button type="button" className={styles.row} onClick={() => { replayTutorials(); navigate('/welcome'); }}><span className={styles.icon}><img src={helpIcon} alt="" /></span>튜토리얼 다시 보기</button>
       <button type="button" className={styles.row} onClick={() => navigate('/my/app')}><span className={styles.icon}><img src={infoIcon} alt="" /></span><span>앱 관리<span className={styles.version}>1.0.0</span></span></button>
       <button type="button" className={`${styles.row} ${styles.logout}`} onClick={() => setIsLogoutOpen(true)}><span className={styles.icon}><img src={logoutIcon} alt="" /></span>로그아웃</button>
     </nav>
