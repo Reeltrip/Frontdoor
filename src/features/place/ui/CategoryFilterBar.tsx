@@ -23,11 +23,13 @@ export default function CategoryFilterBar({
 }: CategoryFilterBarProps) {
   const barRef = useRef<HTMLDivElement>(null);
   const [hasMore, setHasMore] = useState(false);
+  const [hasPrev, setHasPrev] = useState(false);
 
   const updateHasMore = () => {
     const bar = barRef.current;
     if (!bar) return;
     setHasMore(bar.scrollLeft + bar.clientWidth < bar.scrollWidth - 1);
+    setHasPrev(bar.scrollLeft > 1);
   };
 
   const dragRef = useRef<{
@@ -80,14 +82,23 @@ export default function CategoryFilterBar({
   useEffect(() => {
     if (!scrollToSelected) return;
     const bar = barRef.current;
-    const button = bar?.querySelector<HTMLButtonElement>('button[aria-pressed="true"]');
-    if (bar && button && button.offsetLeft + button.offsetWidth > bar.scrollLeft + bar.clientWidth) {
-      bar.scrollLeft = button.offsetLeft + button.offsetWidth - bar.clientWidth + 16;
+    const button = bar?.querySelector<HTMLButtonElement>(
+      'button[aria-pressed="true"]',
+    );
+    if (
+      bar &&
+      button &&
+      button.offsetLeft + button.offsetWidth > bar.scrollLeft + bar.clientWidth
+    ) {
+      bar.scrollLeft =
+        button.offsetLeft + button.offsetWidth - bar.clientWidth + 16;
     }
   }, [scrollToSelected, selected]);
 
   return (
-    <div className={`${styles.wrapper} ${hasMore ? styles.hasMore : ""}`}>
+    <div
+      className={`${styles.wrapper} ${hasMore ? styles.hasMore : ""} ${hasPrev ? styles.hasPrev : ""}`}
+    >
       <div
         ref={barRef}
         className={styles.bar}
