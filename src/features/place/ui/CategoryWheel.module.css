@@ -85,6 +85,8 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    filter: blur(5.35px);
+    transform: scale(1.25);
 }
 
 .photoShade {
@@ -93,7 +95,6 @@
     width: 100%;
     height: 100%;
     border-radius: 50%;
-    backdrop-filter: blur(5.35px);
 }
 
 .icon {
