@@ -266,6 +266,10 @@
   line-height: normal;
 }
 
+.sectionHeading .selectionHeading {
+  color: var(--color-gray-900);
+}
+
 .sectionHeading h2 span {
   color: var(--color-gray-900);
   font-weight: 600;
@@ -310,26 +314,6 @@
   list-style: none;
 }
 
-.planItem {
-  position: relative;
-}
-
-.deleteTrip {
-  position: absolute;
-  top: 50%;
-  right: 4px;
-  display: grid;
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  place-items: center;
-  transform: translateY(-50%);
-  border: 0;
-  border-radius: 50%;
-  background: var(--color-gray-0);
-  cursor: pointer;
-}
-
 .planRow {
   display: flex;
   flex-direction: column;
@@ -352,12 +336,11 @@
   padding-inline-start: 19px;
 }
 
-.editingRow {
-  padding-inline-end: 48px;
-}
-
-.planRow:disabled {
-  cursor: default;
+.selectedRow {
+  border-color: transparent;
+  border-radius: 12px;
+  background: var(--color-gray-50);
+  box-shadow: 0 0 3px rgba(51, 51, 51, .27);
 }
 
 .planTitleLine {
