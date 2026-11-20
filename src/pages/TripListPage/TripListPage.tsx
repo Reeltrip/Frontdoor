@@ -102,6 +102,8 @@ function FeaturedPlanCard({
             onError={() => setFailedImageUrl(coverImageUrl)}
           />
         )}
+        {/* 가장자리 흐림과 점무늬 (피그마 S5-1) */}
+        <span className={styles.featuredGlow} />
         {/* 사진이 없을 때도 밝은 그라데이션 위 흰 글자가 읽히게 늘 덮어요 */}
         <span className={styles.featuredShade} />
         <span className={styles.featuredLabel}>

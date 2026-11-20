@@ -125,12 +125,13 @@
   display: block;
   box-sizing: border-box;
   width: 100%;
-  height: 292px;
+  /* 피그마 S5-1 Frame 2117905217: 350×338, 모서리 33, 연두 방사형 바탕 위에 사진 88% */
+  height: 338px;
   overflow: hidden;
   padding: 28px 68px 24px 24px;
   border: 0;
-  border-radius: 28px;
-  background: linear-gradient(145deg, #d5e2ca, #75885f 48%, #293b30);
+  border-radius: 33px;
+  background: radial-gradient(circle at 50% 50%, rgba(201, 218, 138, .6), #c9da8a);
   box-shadow: 0 4px 18px rgba(26, 26, 26, .12);
   color: white;
   text-align: left;
@@ -161,6 +162,21 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* 피그마: 사진 불투명도 88%. 아래 연두 바탕이 살짝 비쳐요 */
+  opacity: .88;
+}
+
+/* 피그마의 안쪽 그림자 3겹(가장자리가 흐리게 번짐)과 흰 점무늬. 사진 위에 얹어야 보여서 따로 덮어요 */
+.featuredGlow {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(circle, rgba(255, 255, 255, .3) 1px, transparent 1.6px) 0 0 / 9px 9px;
+  box-shadow:
+    inset 0 0 65.4px #faffe6,
+    inset 0 0 6.1px #e6ffc8,
+    inset 0 0 42.5px #ffffff;
+  pointer-events: none;
 }
 
 /* 사진 위 흰 글자가 읽히게 위쪽만 얇게 어둡게 해요 */

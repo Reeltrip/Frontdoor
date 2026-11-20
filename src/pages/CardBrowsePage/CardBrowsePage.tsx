@@ -31,6 +31,11 @@ import {
 } from "@/features/place/model/useResultPlaces";
 import { useUpdatePlace } from "@/features/place/model/usePlaces";
 import { getErrorMessage } from "@/shared/api/client";
+import {
+  advanceTutorialTour,
+  clearTutorialReplay,
+  getTutorialTourStep,
+} from "@/features/account/lib/tutorialReplay";
 import styles from "./CardBrowsePage.module.css";
 
 const TUTORIAL_SEEN_KEY = "reeltrip:dial-tutorial-seen";
@@ -144,6 +149,12 @@ export default function CardBrowsePage() {
     markSeen(EDIT_TUTORIAL_SEEN_KEY);
     setIsEditTutorialOpen(false);
   };
+
+  // 편집 안내를 닫으면 다시 보기 중일 때 다음 안내(카드 직접 추가)로 이어서 가요 (#179)
+  const finishEditTutorial = () => {
+    closeEditTutorial();
+    if (getTutorialTourStep() === "cards") navigate(advanceTutorialTour());
+  };
   const handleCategoryChange = (index: number) => {
     setCategoryIndex(index);
     setPlaceIndex(0);
@@ -186,6 +197,8 @@ export default function CardBrowsePage() {
 
   const handleEdit = () => {
     closeEditTutorial();
+    // 안내 중에 편집을 직접 눌렀으면 이어 보기를 끝내고 편집을 이어가요
+    if (getTutorialTourStep() === "cards") clearTutorialReplay();
     if (activePlace) setDraft(toDraft(activePlace));
     return;
   };
@@ -319,7 +332,7 @@ export default function CardBrowsePage() {
         </button>
       )}
       {isTutorialOpen && <DialTutorial onClose={closeTutorial} />}
-      {isEditTutorialOpen && <EditTutorial onClose={closeEditTutorial} />}
+      {isEditTutorialOpen && <EditTutorial onClose={finishEditTutorial} />}
       <ConfirmModal
         isOpen={leaveBlocker.state === "blocked"}
         icon="alert"
