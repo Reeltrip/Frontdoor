@@ -5,6 +5,8 @@ const DEFAULT_BACKDROP = '#ffffff';
 
 /** 어두운 화면 (계획 홈·새 여행계획·시작 화면) */
 export const DARK_BACKDROP = '#1a1a1a';
+/** 위쪽이 회백색으로 시작하는 화면 (카테고리 보관함 헤더). --color-white와 같은 값이에요 */
+export const WHITE_BACKDROP = '#fafafa';
 /** 위쪽이 연두색으로 시작하는 화면 (자료·링크 추가). --color-lime-50과 같은 값이에요 */
 export const LIME_BACKDROP = '#efffbe';
 
