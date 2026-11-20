@@ -38,7 +38,7 @@ import {
   type CardFeatures,
 } from "@/features/place/model/cardAdd.types";
 import styles from "./CardAddPage.module.css";
-import { useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
+import { useScreenBackdrop, WHITE_BACKDROP } from "@/shared/hooks/useScreenBackdrop";
 
 const STEP_TITLES: Record<CardAddStep, string | null> = {
   category: null,
@@ -147,7 +147,8 @@ export default function CardAddPage() {
     },
     onError: (error) => setErrorMessage(getErrorMessage(error)),
   });
-  useScreenBackdrop(saveCard.isPending ? "#fafafa" : "#ffffff");
+  // 입력 화면도 만드는 중 화면도 배경이 #fafafa라 상태바도 같은 색이에요 (#185)
+  useScreenBackdrop(WHITE_BACKDROP);
   // 다시 보기의 마지막 단계면 불러오기 질문 없이 바로 다이얼 안내부터 보여줘요 (#179)
   const [isTourStep] = useState(() => getTutorialTourStep() === "cardAdd");
   const [isImportModalOpen, setIsImportModalOpen] = useState(!isTourStep);
