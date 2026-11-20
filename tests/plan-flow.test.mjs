@@ -227,8 +227,9 @@ test('플랜 B 미리보기와 확정 상태에서 원래 경로와 대체 구�
   ];
 
   const preview = mapRoute.buildRoutePaths(nodes, route);
-  assert.deepEqual(preview.mainPaths, [[position(3), position(4)]]);
-  assert.deepEqual(preview.inactivePaths, [[position(0), position(1), position(3)]]);
+  // 고르는 중에도 원래 동선은 그대로예요
+  assert.deepEqual(preview.mainPaths, [[position(0), position(1), position(3), position(4)]]);
+  assert.deepEqual(preview.inactivePaths, []);
   assert.deepEqual(preview.previewPath, [position(0), position(2), position(3)]);
 
   route[1].isPlanBPreview = false;
