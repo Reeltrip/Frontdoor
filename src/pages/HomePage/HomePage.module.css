@@ -30,7 +30,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin-top: 100px;
+    margin-top: 80px;
     text-align: center;
 }
 
@@ -50,14 +50,16 @@
 }
 
 .loadButton {
-    height: 37px;
-    width: 106px;
+    height: 44px;
+    width: 127px;
     margin-top: 19px;
-    padding: 6px 16px 6px 16px;
+    padding: 0;
+    white-space: nowrap;
     border: none;
     border-radius: 41px;
     background: var(--color-gray-900);
     font: var(--font-body2);
+    font-size: 17px;
     letter-spacing: var(--tracking);
     color: var(--color-white);
     cursor: pointer;
