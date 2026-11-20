@@ -700,16 +700,14 @@ export default function PlanEditPage() {
     currentStep === "nodes" &&
     !planBTargetId &&
     Boolean(isStripVisible && selectedNode);
-  {
-    isPlanBTutorialOpen && (
-      <PlanTutorialOverlay kind="planB" onClose={closePlanBTutorial} />
-    );
-  }
 
   return (
     <main className={styles.page}>
       {isConfirmTutorialOpen && (
         <PlanTutorialOverlay kind="confirm" onClose={closeConfirmTutorial} />
+      )}
+      {isPlanBTutorialOpen && (
+        <PlanTutorialOverlay kind="planB" onClose={closePlanBTutorial} />
       )}
       <div className={styles.top} inert={isBusy}>
         <Header
@@ -848,8 +846,6 @@ export default function PlanEditPage() {
             {zoneError}
           </p>
         )}
-        className=
-        {`${styles.bottom} ${isConfirmTutorialOpen || isPlanBTutorialOpen ? styles.aboveTutorial : ""}`}
         {planBTargetId && !selectedPlace && (
           <p className={styles.notice}>
             {planBStopNumber}번 장소 대신 갈 곳을 지도에서 골라 주세요.
@@ -868,7 +864,7 @@ export default function PlanEditPage() {
       </div>
 
       <div
-        className={`${styles.bottom} ${isConfirmTutorialOpen ? styles.aboveTutorial : ""}`}
+        className={`${styles.bottom} ${isConfirmTutorialOpen || isPlanBTutorialOpen ? styles.aboveTutorial : ""}`}
         inert={isBusy}
       >
         {saveError && (
