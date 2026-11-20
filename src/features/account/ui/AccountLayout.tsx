@@ -12,6 +12,7 @@ type AccountLayoutProps = {
   hasTabBar?: boolean;
   onBack?: () => void;
   action?: ReactNode;
+  className?: string;
 };
 
 export default function AccountLayout({
@@ -21,11 +22,12 @@ export default function AccountLayout({
   hasTabBar = false,
   onBack,
   action,
+  className,
 }: AccountLayoutProps) {
   const navigate = useNavigate();
   useScreenBackdrop("#fafafa");
   return (
-    <main className={`${styles.page} ${hasTabBar ? styles.withTabs : ""}`}>
+    <main className={[styles.page, hasTabBar && styles.withTabs, className].filter(Boolean).join(" ")}>
       <header className={styles.header}>
         {hasBack && (
           <button
