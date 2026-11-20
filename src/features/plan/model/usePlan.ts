@@ -64,16 +64,27 @@ export function useCreateAiDraft(planId: string) {
 }
 
 /** 계획 삭제. 성공하면 목록 캐시에서 바로 빼고, 서버 목록으로 다시 맞춰요 */
-export function useDeletePlan() {
+export function useDeletePlans() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: deletePlan,
-    onSuccess: (_data, planId) => {
+    mutationFn: async (planIds: string[]) => {
+      const results = await Promise.allSettled(planIds.map(deletePlan));
+      const deletedIds = new Set<string>();
+      const failures: { id: string; error: unknown }[] = [];
+      results.forEach((result, index) => {
+        const id = planIds[index];
+        if (result.status === 'fulfilled') deletedIds.add(id);
+        else failures.push({ id, error: result.reason });
+      });
+      return { deletedIds, failures };
+    },
+    onSuccess: ({ deletedIds }) => {
+      if (!deletedIds.size) return;
       queryClient.setQueriesData<PlanSummary[]>({ queryKey: [...planKeys.all, 'list'] }, (plans) =>
-        plans?.filter((plan) => plan.id !== planId),
+        plans?.filter((plan) => !deletedIds.has(plan.id)),
       );
-      queryClient.removeQueries({ queryKey: planKeys.detail(planId) });
+      deletedIds.forEach((id) => queryClient.removeQueries({ queryKey: planKeys.detail(id) }));
       return queryClient.invalidateQueries({ queryKey: [...planKeys.all, 'list'] });
     },
   });

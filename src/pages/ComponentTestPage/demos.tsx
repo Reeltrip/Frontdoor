@@ -249,31 +249,14 @@ export const componentDemos: ComponentDemo[] = [
   {
     name: "PlanDeleteDialog",
     path: "features/plan/ui/PlanDeleteDialog",
-    description:
-      "여행계획 삭제 확인. 되돌릴 수 없어서 두 번 물어요. 2차 확인은 바깥을 눌러도 닫히지 않아요",
+    description: "여행목록에서 선택한 여행계획을 삭제하기 전에 보여주는 확인 창",
     variants: [
       {
-        label: "1차 확인",
+        label: "삭제 확인",
         render: () => (
           <PlanDeleteDialog
             isInline
-            step="confirm"
-            planTitle="교토 당일치기"
             onCancel={noop}
-            onNext={noop}
-            onConfirm={noop}
-          />
-        ),
-      },
-      {
-        label: "2차 확인",
-        render: () => (
-          <PlanDeleteDialog
-            isInline
-            step="final"
-            planTitle="교토 당일치기"
-            onCancel={noop}
-            onNext={noop}
             onConfirm={noop}
           />
         ),
@@ -283,11 +266,8 @@ export const componentDemos: ComponentDemo[] = [
         render: () => (
           <PlanDeleteDialog
             isInline
-            step="final"
-            planTitle="교토 당일치기"
             isPending
             onCancel={noop}
-            onNext={noop}
             onConfirm={noop}
           />
         ),
@@ -297,11 +277,8 @@ export const componentDemos: ComponentDemo[] = [
         render: () => (
           <PlanDeleteDialog
             isInline
-            step="final"
-            planTitle="교토 당일치기"
             errorMessage="삭제하지 못했어요. 네트워크 연결을 확인해 주세요."
             onCancel={noop}
-            onNext={noop}
             onConfirm={noop}
           />
         ),

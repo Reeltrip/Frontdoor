@@ -5,16 +5,13 @@ import {
   isDraftPlanStatus,
   type PlanSummary,
 } from "@/features/plan/model/plan.types";
-import { useDeletePlan, usePlans } from "@/features/plan/model/usePlan";
-import PlanDeleteDialog, {
-  type PlanDeleteStep,
-} from "@/features/plan/ui/PlanDeleteDialog";
+import { useDeletePlans, usePlans } from "@/features/plan/model/usePlan";
+import PlanDeleteDialog from "@/features/plan/ui/PlanDeleteDialog";
 import Toast from "@/shared/components/Toast";
 import TabBar from "@/shared/components/TabBar";
 import Button from "@/shared/components/Button";
-import editIcon from "@/shared/assets/icons/trip-list-edit.svg";
-import trashIcon from "@/shared/assets/icons/trash-outline-red.svg";
-import openArrowIcon from "@/shared/assets/icons/open-arrow-pill.svg";
+import featuredOpenIcon from "@/shared/assets/icons/trip-list-open.svg";
+import featuredTrashIcon from "@/shared/assets/icons/trip-list-trash.svg";
 import styles from "./TripListPage.module.css";
 import { useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
 
@@ -23,7 +20,6 @@ type PlanTab = "mine" | "shared";
 type PlanCardProps = {
   plan: PlanSummary;
   onOpen: (plan: PlanSummary) => void;
-  onDelete?: (plan: PlanSummary) => void;
 };
 
 const DELETED_MESSAGE = "여행계획을 삭제했어요.";
@@ -36,45 +32,26 @@ function isUpcoming(plan: PlanSummary) {
   return !Number.isNaN(endDate.getTime()) && endDate.getTime() >= Date.now();
 }
 
-function DeleteTripButton({
-  plan,
-  onDelete,
-}: {
-  plan: PlanSummary;
-  onDelete: (plan: PlanSummary) => void;
-}) {
-  return (
-    <button
-      type="button"
-      className={styles.deleteTrip}
-      aria-label={plan.title + " 삭제"}
-      onClick={() => onDelete(plan)}
-    >
-      <img src={trashIcon} alt="" width={24} height={24} />
-    </button>
-  );
-}
-
 function PlanRow({
   plan,
   onOpen,
-  onDelete,
   isPast = false,
-}: PlanCardProps & { isPast?: boolean }) {
+  isSelected,
+}: PlanCardProps & { isPast?: boolean; isSelected?: boolean }) {
   const createdAt = isPast ? plan.createdAt : undefined;
   const rowClassName = [
     styles.planRow,
     isPast && styles.pastRow,
-    onDelete && styles.editingRow,
+    isSelected && styles.selectedRow,
   ].filter(Boolean).join(" ");
 
   return (
-    <li className={styles.planItem}>
+    <li>
       <button
         type="button"
         className={rowClassName}
         onClick={() => onOpen(plan)}
-        disabled={Boolean(onDelete)}
+        aria-pressed={isSelected}
       >
         <span className={styles.planTitleLine}>
           <span className={styles.planName}>{plan.title}</span>
@@ -91,13 +68,16 @@ function PlanRow({
             : `${formatDate(plan.startDate)} — ${formatDate(plan.endDate)}`}
         </span>
       </button>
-      {onDelete && <DeleteTripButton plan={plan} onDelete={onDelete} />}
     </li>
   );
 }
 
 // 다가오는 여행 큰 카드 (피그마 S5-1). 표지 사진이 없거나 못 불러오면 뒤의 그라데이션이 그대로 보여요
-function FeaturedPlanCard({ plan, onOpen, onDelete }: PlanCardProps) {
+function FeaturedPlanCard({
+  plan,
+  onOpen,
+  onDelete,
+}: PlanCardProps & { onDelete: (plan: PlanSummary) => void }) {
   const [failedImageUrl, setFailedImageUrl] = useState<string>();
   const { coverImageUrl } = plan;
   const hasCover =
@@ -109,7 +89,6 @@ function FeaturedPlanCard({ plan, onOpen, onDelete }: PlanCardProps) {
         type="button"
         className={styles.featured}
         onClick={() => onOpen(plan)}
-        disabled={Boolean(onDelete)}
       >
         {hasCover && (
           <img
@@ -128,13 +107,18 @@ function FeaturedPlanCard({ plan, onOpen, onDelete }: PlanCardProps) {
         <span className={styles.featuredLabel}>
           다가오는 여행 | {plan.title}
         </span>
-        {!onDelete && (
-          <span className={styles.openIcon} aria-hidden="true">
-            <img src={openArrowIcon} alt="" />
-          </span>
-        )}
+        <span className={styles.featuredActions} aria-hidden="true">
+          <img src={featuredOpenIcon} alt="" />
+        </span>
       </button>
-      {onDelete && <DeleteTripButton plan={plan} onDelete={onDelete} />}
+      <button
+        type="button"
+        className={styles.featuredDelete}
+        aria-label={plan.title + " 삭제"}
+        onClick={() => onDelete(plan)}
+      >
+        <img src={featuredTrashIcon} alt="" />
+      </button>
     </div>
   );
 }
@@ -146,12 +130,14 @@ export default function TripListPage() {
   const [showAllPast, setShowAllPast] = useState(false);
   const { plans, viewStatus, error, refetch } = usePlans({ owner: "me" });
   const shared = usePlans({ owner: "shared" });
-  const deletePlan = useDeletePlan();
+  const deletePlans = useDeletePlans();
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [deleteTarget, setDeleteTarget] = useState<{
-    plan: PlanSummary;
-    step: PlanDeleteStep;
+    ids: string[];
+    fromSelection: boolean;
   } | null>(null);
+  const [deleteError, setDeleteError] = useState<string>();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const isToastVisible = toastMessage !== null;
 
@@ -164,24 +150,35 @@ export default function TripListPage() {
     return () => window.clearTimeout(timer);
   }, [isToastVisible]);
 
-  const startDelete = (plan: PlanSummary) => {
-    deletePlan.reset();
-    setDeleteTarget({ plan, step: "confirm" });
+  const startDelete = (ids: string[], fromSelection = false) => {
+    setDeleteError(undefined);
+    setDeleteTarget({ ids, fromSelection });
   };
-  const onDelete = isEditing ? startDelete : undefined;
 
-  const closeDeleteDialog = () => {
-    if (deletePlan.isPending) return;
-    setDeleteTarget(null);
+  const finishEditing = () => {
+    setIsEditing(false);
+    setSelectedIds([]);
+  };
+
+  const toggleSelection = (plan: PlanSummary) => {
+    setSelectedIds((ids) =>
+      ids.includes(plan.id) ? ids.filter((id) => id !== plan.id) : [...ids, plan.id],
+    );
   };
 
   const confirmDelete = () => {
-    if (!deleteTarget) return;
-    deletePlan.mutate(deleteTarget.plan.id, {
-      onSuccess: () => {
+    if (!deleteTarget || deletePlans.isPending) return;
+    deletePlans.mutate(deleteTarget.ids, {
+      onSuccess: ({ deletedIds, failures }) => {
+        setSelectedIds((ids) => ids.filter((id) => !deletedIds.has(id)));
+        if (failures.length) {
+          setDeleteTarget({ ...deleteTarget, ids: failures.map(({ id }) => id) });
+          setDeleteError(`삭제하지 못했어요. ${getErrorMessage(failures[0].error)}`);
+          return;
+        }
         setDeleteTarget(null);
         setToastMessage(DELETED_MESSAGE);
-        if (plans.length === 1) setIsEditing(false);
+        if (deleteTarget.fromSelection) finishEditing();
       },
     });
   };
@@ -194,6 +191,18 @@ export default function TripListPage() {
       past: sorted.filter((plan) => !isUpcoming(plan)).reverse(),
     };
   }, [plans]);
+  const selectedPast = past.filter(({ id }) => selectedIds.includes(id));
+  const isSelectingPast = isEditing && past.length > 0;
+  const editLabel = isSelectingPast ? "완료" : "편집";
+  const handlePastAction = () => {
+    if (selectedPast.length) {
+      startDelete(selectedPast.map(({ id }) => id), true);
+    } else if (isSelectingPast) {
+      finishEditing();
+    } else {
+      setIsEditing(true);
+    }
+  };
 
   const openPlan = (plan: PlanSummary) =>
     navigate(
@@ -235,7 +244,7 @@ export default function TripListPage() {
           className={activeTab === "shared" ? styles.activeTab : ""}
           onClick={() => {
             setActiveTab("shared");
-            setIsEditing(false);
+            finishEditing();
           }}
         >
           공유받은 계획
@@ -294,7 +303,7 @@ export default function TripListPage() {
                 <FeaturedPlanCard
                   plan={upcoming[0]}
                   onOpen={openPlan}
-                  onDelete={onDelete}
+                  onDelete={(plan) => startDelete([plan.id])}
                 />
               </section>
             ) : (
@@ -325,11 +334,19 @@ export default function TripListPage() {
               aria-labelledby="past-trips-title"
             >
               <div className={styles.sectionHeading}>
-                <h2 id="past-trips-title">
-                  지난 여행 <span>{past.length}</span>
+                <h2
+                  id="past-trips-title"
+                  className={isSelectingPast ? styles.selectionHeading : undefined}
+                  aria-live="polite"
+                >
+                  {isSelectingPast ? (
+                    <><span>{selectedPast.length}</span>개 선택됨</>
+                  ) : (
+                    <>지난 여행 <span>{past.length}</span></>
+                  )}
                 </h2>
                 <div className={styles.sectionActions}>
-                  {past.length > 3 && !isEditing && (
+                  {past.length > 3 && !isSelectingPast && (
                     <button
                       type="button"
                       className={styles.showAllButton}
@@ -338,26 +355,26 @@ export default function TripListPage() {
                       {showAllPast ? "접기" : "모두보기"}
                     </button>
                   )}
-                  {plans.length > 0 && (
+                  {past.length > 0 && (
                     <button
                       type="button"
                       className={styles.editButton}
-                      aria-label={isEditing ? "여행목록 편집 완료" : "여행목록 편집"}
-                      onClick={() => setIsEditing((editing) => !editing)}
+                      aria-label={selectedPast.length ? "선택한 여행 삭제" : `여행목록 편집${isSelectingPast ? " 완료" : ""}`}
+                      onClick={handlePastAction}
                     >
-                      {isEditing ? "완료" : <img src={editIcon} alt="" />}
+                      {selectedPast.length ? "삭제" : editLabel}
                     </button>
                   )}
                 </div>
               </div>
               {past.length ? (
                 <ul className={styles.list}>
-                  {(isEditing || showAllPast ? past : past.slice(0, 3)).map((plan) => (
+                  {(isSelectingPast || showAllPast ? past : past.slice(0, 3)).map((plan) => (
                     <PlanRow
                       key={plan.id}
                       plan={plan}
-                      onOpen={openPlan}
-                      onDelete={onDelete}
+                      onOpen={isSelectingPast ? toggleSelection : openPlan}
+                      isSelected={isSelectingPast ? selectedIds.includes(plan.id) : undefined}
                       isPast
                     />
                   ))}
@@ -374,7 +391,6 @@ export default function TripListPage() {
                         key={plan.id}
                         plan={plan}
                         onOpen={openPlan}
-                        onDelete={onDelete}
                       />
                     ))}
                   </ul>
@@ -389,16 +405,9 @@ export default function TripListPage() {
       {toastMessage && <Toast message={toastMessage} />}
       {deleteTarget && (
         <PlanDeleteDialog
-          step={deleteTarget.step}
-          planTitle={deleteTarget.plan.title}
-          isPending={deletePlan.isPending}
-          errorMessage={
-            deletePlan.isError
-              ? `삭제하지 못했어요. ${getErrorMessage(deletePlan.error)}`
-              : undefined
-          }
-          onCancel={closeDeleteDialog}
-          onNext={() => setDeleteTarget({ ...deleteTarget, step: "final" })}
+          errorMessage={deleteError}
+          isPending={deletePlans.isPending}
+          onCancel={() => setDeleteTarget(null)}
           onConfirm={confirmDelete}
         />
       )}
