@@ -80,6 +80,7 @@ export default function CardBrowsePage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const isOpeningLibrary = useRef(false);
   const isToastVisible = toastMessage !== null;
 
   const category = items[categoryIndex];
@@ -93,7 +94,9 @@ export default function CardBrowsePage() {
   // 상단 < 버튼뿐 아니라 폰 뒤로 가기 제스처·브라우저 뒤로 가기도 여기서 막아요
   const leaveBlocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      isChanged && currentLocation.pathname !== nextLocation.pathname,
+      isChanged &&
+      !isOpeningLibrary.current &&
+      currentLocation.pathname !== nextLocation.pathname,
   );
 
   useBeforeUnload((event) => {
@@ -147,7 +150,11 @@ export default function CardBrowsePage() {
     closeTutorial();
   };
 
-  const savePlace = (place: Place, nextDraft: PlaceDraft) => {
+  const savePlace = (
+    place: Place,
+    nextDraft: PlaceDraft,
+    onSuccess = () => setToastMessage(SAVED_MESSAGE),
+  ) => {
     const next = applyDraft(place, nextDraft);
     updatePlace.mutate(
       {
@@ -166,7 +173,7 @@ export default function CardBrowsePage() {
         },
       },
       {
-        onSuccess: () => setToastMessage(SAVED_MESSAGE),
+        onSuccess,
         onError: (error) =>
           setToastMessage("저장하지 못했어요. " + getErrorMessage(error)),
       },
@@ -189,15 +196,22 @@ export default function CardBrowsePage() {
     setDraft(null);
   };
 
+  const openLibrary = () => {
+    setDraft(null);
+    // 저장 직후에는 편집 상태가 화면에 반영되기 전이라 이동 차단을 한 번 건너뛰어요
+    isOpeningLibrary.current = true;
+    void navigate("/library", { state: { toast: SAVED_MESSAGE } });
+    isOpeningLibrary.current = false;
+  };
+
   // 카드는 링크 분석이 끝날 때 이미 보관함에 저장돼요. 고친 내용이 있을 때만 서버에 보내요
   const handleSaveCards = () => {
     setIsMenuOpen(false);
-    if (isChanged) {
-      handleSave();
+    if (isChanged && activePlace && draft) {
+      savePlace(activePlace, draft, openLibrary);
       return;
     }
-    setDraft(null);
-    setToastMessage(SAVED_MESSAGE);
+    openLibrary();
   };
 
   const finishLeave = () => {
@@ -235,6 +249,7 @@ export default function CardBrowsePage() {
                     role="menuitem"
                     className={styles.menuItem}
                     onClick={handleSaveCards}
+                    disabled={updatePlace.isPending}
                   >
                     카드 저장하기
                   </button>
@@ -245,7 +260,7 @@ export default function CardBrowsePage() {
         }
       />
 
-      <div className={styles.stage}>
+      <div className={styles.stage} inert={isEditing && updatePlace.isPending}>
         {places.length > 0 ? (
           <PlaceCarousel
             places={places}
@@ -287,6 +302,7 @@ export default function CardBrowsePage() {
           className={`${styles.roundButton} ${styles.saveButton}`}
           onClick={handleSave}
           aria-label="저장"
+          disabled={updatePlace.isPending}
         >
           <img src={checkIcon} alt="" />
         </button>
