@@ -59,7 +59,7 @@ import {
   setDayZone,
   setPlanB,
 } from "@/features/plan/model/planEdit";
-import type { Plan } from "@/features/plan/model/plan.types";
+import type { Plan, PlanDay } from "@/features/plan/model/plan.types";
 import {
   useCreateAiDraft,
   usePlan,
@@ -77,7 +77,6 @@ import {
   markPlanTutorialSeen,
 } from "@/features/plan/lib/planTutorialSeen";
 import styles from "./PlanEditPage.module.css";
-import type { Plan, PlanDay } from "@/features/plan/model/plan.types";
 
 /** lodging: 숙소 선택 / zone: 일자별 구역 선택 / nodes: 지도에서 노드 확정 (기능명세서 4-3) */
 type EditStep = "lodging" | "zone" | "nodes";
@@ -122,6 +121,7 @@ export default function PlanEditPage() {
   } | null>(null);
   const [isSkipDayOpen, setIsSkipDayOpen] = useState(false);
   const [isAiDraftConfirmOpen, setIsAiDraftConfirmOpen] = useState(false);
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isReviewing, setIsReviewing] = useState(false);
   const [isConfirmTutorialClosed, setIsConfirmTutorialClosed] = useState(() =>
@@ -177,7 +177,10 @@ export default function PlanEditPage() {
     const timer = window.setTimeout(() => setToastMessage(null), TOAST_MS);
     return () => window.clearTimeout(timer);
   }, [toastMessage]);
-
+  useEffect(() => {
+    if (plan && step === null)
+      setStep(hasRoute(plan.days[0]) ? "nodes" : "zone");
+  }, [plan, step]);
   useEffect(() => {
     if (!isMenuOpen) return;
     const closeOutside = (event: PointerEvent) => {
@@ -258,8 +261,7 @@ export default function PlanEditPage() {
     setIsPreviewing(false);
   };
 
-  const goToDay = (nextDayIndex: number) =>
-    goToStep(hasRoute(plan.days[nextDayIndex]) ? "nodes" : "zone", nextDayIndex);
+  const goToStep = (nextStep: EditStep, nextDayIndex = dayIndex) => {
     resetSelection();
     setIsMenuOpen(false);
     setIsSearchingLodging(false);
@@ -277,7 +279,10 @@ export default function PlanEditPage() {
   };
 
   const goToDay = (nextDayIndex: number) =>
-    goToStep(plan.days[nextDayIndex]?.zone ? "nodes" : "zone", nextDayIndex);
+    goToStep(
+      hasRoute(plan.days[nextDayIndex]) ? "nodes" : "zone",
+      nextDayIndex,
+    );
 
   const handleBack = () => {
     if (continuingRef.current || createLodging.isPending) return;
