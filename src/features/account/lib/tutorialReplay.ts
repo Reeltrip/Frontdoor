@@ -10,14 +10,15 @@ export const TUTORIAL_SEEN_KEYS = {
 
 /**
  * 다시 보기는 안내가 있는 화면을 차례로 옮겨 가며 보여줘요 (#179).
- * 시작 안내(/welcome) → 링크 홈 → 요약카드 다이얼·편집 → 카드 직접 추가 → 마이페이지.
- * 여행계획 안내는 장소를 고른 상태가 있어야 떠서 이어 보기에 넣지 않아요(본 기록만 지워 다음 편집 때 떠요)
+ * 시작 안내(/welcome) → 링크 홈 → 요약카드 다이얼·편집 → 여행계획 확정·플랜 B → 마이페이지.
+ * 여행계획 안내는 실제 계획에서 장소를 골라야 떠서, 다시 보기 전용 화면(/tutorial/plan)에서 보여줘요.
+ * 카드 직접 추가의 다이얼·화살표 안내는 다시 보기에서 뺐어요 (#238)
  */
-export type TutorialTourStep = 'home' | 'cards' | 'cardAdd';
+export type TutorialTourStep = 'home' | 'cards' | 'plan';
 
 const TOUR_KEY = 'wayvi.tutorialReplay';
-const TOUR_STEPS: TutorialTourStep[] = ['home', 'cards', 'cardAdd'];
-const STEP_PATHS: Record<TutorialTourStep, string> = { home: '/home', cards: '/cards', cardAdd: '/cards/new' };
+const TOUR_STEPS: TutorialTourStep[] = ['home', 'cards', 'plan'];
+const STEP_PATHS: Record<TutorialTourStep, string> = { home: '/home', cards: '/cards', plan: '/tutorial/plan' };
 const TOUR_END_PATH = '/my';
 
 /** 마이페이지 "튜토리얼 다시 보기": 본 기록을 지우고 이어 보기를 시작해요 */
@@ -50,7 +51,7 @@ export function isTutorialReplay(): boolean {
 
 /** 지금 단계의 안내를 다 봤어요. 다음 단계로 넘기고 이동할 주소를 돌려줘요. 마지막이면 마이페이지예요 */
 export function advanceTutorialTour(): string {
-  const next = TOUR_STEPS[TOUR_STEPS.indexOf(getTutorialTourStep() ?? 'cardAdd') + 1];
+  const next = TOUR_STEPS[TOUR_STEPS.indexOf(getTutorialTourStep() ?? 'plan') + 1];
   try {
     if (next) localStorage.setItem(TOUR_KEY, next);
     else localStorage.removeItem(TOUR_KEY);

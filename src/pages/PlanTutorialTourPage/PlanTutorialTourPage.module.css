@@ -1,0 +1,10 @@
+/* 안내 막(5)과 위로 올라온 버튼·카드(6)보다 위에 투명하게 깔아요 */
+.nextCatcher {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}

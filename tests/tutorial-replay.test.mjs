@@ -55,14 +55,15 @@ test('지우는 키가 각 화면에서 쓰는 키와 같아요', () => {
 });
 
 // 다시 보기는 안내가 있는 화면을 차례로 옮겨 가며 보여줘요 (#179)
-test('다시 보기는 홈 → 요약카드 → 카드 직접 추가 순서로 이어져요', () => {
+// 카드 직접 추가 안내는 빼고 여행계획 확정·플랜 B 안내를 넣었어요 (#238)
+test('다시 보기는 홈 → 요약카드 → 여행계획 순서로 이어져요', () => {
   assert.equal(replay.getTutorialTourStep(), null);
   replay.replayTutorials();
   assert.equal(replay.getTutorialTourStep(), 'home');
   assert.equal(replay.advanceTutorialTour(), '/cards');
   assert.equal(replay.getTutorialTourStep(), 'cards');
-  assert.equal(replay.advanceTutorialTour(), '/cards/new');
-  assert.equal(replay.getTutorialTourStep(), 'cardAdd');
+  assert.equal(replay.advanceTutorialTour(), '/tutorial/plan');
+  assert.equal(replay.getTutorialTourStep(), 'plan');
   // 마지막 안내 다음에는 마이페이지로 돌아가고 이어 보기는 끝나요
   assert.equal(replay.advanceTutorialTour(), '/my');
   assert.equal(replay.getTutorialTourStep(), null);
@@ -74,6 +75,11 @@ test('이어 보기를 끝내면 어느 화면에서도 이어지지 않아요',
   replay.clearTutorialReplay();
   assert.equal(replay.getTutorialTourStep(), null);
   assert.equal(replay.isTutorialReplay(), false);
+});
+
+test('예전 카드 직접 추가 단계(cardAdd)가 남아 있으면 이어 보기로 읽지 않아요', () => {
+  localStorage.setItem('wayvi.tutorialReplay', 'cardAdd');
+  assert.equal(replay.getTutorialTourStep(), null);
 });
 
 test('예전 다시 보기 표시(1)는 홈 단계로 읽어요', () => {
