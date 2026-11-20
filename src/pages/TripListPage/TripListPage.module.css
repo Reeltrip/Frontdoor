@@ -42,7 +42,6 @@
   background: var(--color-gray-900);
 }
 
-/* 탭 아래 전체 회색 줄은 없애고 선택한 탭의 연두 밑줄만 남겨요 (피그마 댓글 #95) */
 .tabs {
   display: flex;
   flex-shrink: 0;
@@ -51,10 +50,12 @@
 
 /* 탭 글자 16px, 선택한 탭만 500 (피그마 댓글 #99) */
 .tabs button {
+  display: grid;
   flex: 1;
   height: 48px;
+  padding: 0;
+  place-items: center;
   border: 0;
-  border-bottom: 2px solid transparent;
   background: transparent;
   font: var(--font-body1);
   letter-spacing: var(--tracking);
@@ -63,7 +64,6 @@
 }
 
 .tabs .activeTab {
-  border-bottom-color: #d5f337;
   font-weight: 500;
   color: #262838;
 }
@@ -114,12 +114,10 @@
   position: relative;
 }
 
-/* ↗ 왼쪽에 같은 크기 원으로 놓아요 */
-.featuredMenu {
-  position: absolute;
-  top: 20px;
-  right: 64px;
-  z-index: 2;
+.featuredWrap .deleteTrip {
+  top: 16px;
+  right: 16px;
+  transform: none;
 }
 
 .featured {
@@ -246,7 +244,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  min-height: 44px;
+  margin-bottom: 12px;
 }
 
 .sectionHeading h2,
@@ -256,12 +255,36 @@
   letter-spacing: 0;
 }
 
-/* 글자는 400, 숫자만 600으로 굵게 해요 (피그마 댓글 #94). 사이는 피그마처럼 공백 한 칸만 둬요 */
+.sectionHeading h2 {
+  color: #42403a;
+  line-height: normal;
+}
+
 .sectionHeading h2 span {
+  color: var(--color-gray-900);
   font-weight: 600;
 }
 
-.sectionHeading button {
+.sectionActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editButton {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--color-gray-900);
+  font: var(--font-body2);
+  cursor: pointer;
+}
+
+.showAllButton {
   border: 0;
   border-radius: 18px;
   padding: 7px 12px;
@@ -284,12 +307,20 @@
   position: relative;
 }
 
-/* 줄 오른쪽 가운데. 줄 버튼 위에 따로 얹어요 */
-.rowMenu {
+.deleteTrip {
   position: absolute;
   top: 50%;
   right: 4px;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  place-items: center;
   transform: translateY(-50%);
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-gray-0);
+  cursor: pointer;
 }
 
 .planRow {
@@ -299,7 +330,7 @@
   box-sizing: border-box;
   width: 100%;
   min-height: 68px;
-  padding: 13px 48px 13px 16px;
+  padding: 13px 16px;
   border: 1px solid #eee;
   border-radius: 15px;
   background: white;
@@ -308,7 +339,35 @@
   cursor: pointer;
 }
 
-/* 목록 카드 제목은 굵게 하지 않아요 (피그마 댓글 #93) */
+.pastRow {
+  gap: 2px;
+  padding-block: 11px;
+  padding-inline-start: 19px;
+}
+
+.editingRow {
+  padding-inline-end: 48px;
+}
+
+.planRow:disabled,
+.featured:disabled {
+  cursor: default;
+}
+
+.planTitleLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.planCreatedAt {
+  flex-shrink: 0;
+  font: 400 12px/18px var(--font-family);
+  letter-spacing: var(--tracking);
+  color: #a9adbe;
+}
+
 .planName {
   overflow: hidden;
   font: 400 15px/1.6 var(--font-family);
@@ -321,6 +380,10 @@
 .planDate {
   font: 400 13px/23px var(--font-family);
   color: #666a80;
+}
+
+.pastRow .planDate {
+  letter-spacing: var(--tracking);
 }
 
 .otherTitle {

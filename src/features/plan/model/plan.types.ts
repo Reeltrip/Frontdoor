@@ -78,4 +78,6 @@ export type PlanSummary = Pick<Plan, 'id' | 'title' | 'startDate' | 'endDate' | 
   coverImageUrl?: string;
   /** 모든 일차에 들어 있는 장소 수 합계 */
   placeCount?: number;
+  /** 서울 시간대로 내려오는 계획 생성 시각 */
+  createdAt?: string;
 };
