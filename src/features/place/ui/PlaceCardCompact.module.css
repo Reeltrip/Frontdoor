@@ -23,6 +23,24 @@
   object-fit: cover;
 }
 
+.credits {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  max-width: calc(100% - 16px);
+  margin: 0;
+  padding: 0 6px;
+  overflow: hidden;
+  border-radius: 6px;
+  background: rgba(51, 51, 51, 0.45);
+  color: var(--color-white);
+  font: var(--font-caption);
+  letter-spacing: var(--tracking);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
+
 .openButton,
 .copyButton {
   display: flex;
