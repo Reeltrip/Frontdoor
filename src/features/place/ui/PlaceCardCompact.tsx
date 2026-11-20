@@ -3,12 +3,15 @@ import trashIcon from "@/shared/assets/icons/trash-compact.svg";
 import copyIcon from "@/shared/assets/icons/copy-dark.svg";
 import { useGooglePlacePhoto } from "@/shared/hooks/useGooglePlacePhoto";
 import { displayOrDash } from "@/shared/lib/displayValue";
+import { getCardSubline, type CardSublineMode } from "../lib/cardSubline";
 import type { Place } from "../model/place.types";
 import styles from "./PlaceCardCompact.module.css";
 import openPillIcon from "@/shared/assets/icons/open-arrow-pill.svg";
 
 type PlaceCardCompactProps = {
   place: Place;
+  /** 이름 아래 줄. 기본은 주소예요 */
+  subline?: CardSublineMode;
   onPick?: (place: Place) => void;
   onOpen?: (place: Place) => void;
   onCopy?: (place: Place) => void;
@@ -23,6 +26,7 @@ type PlaceCardCompactProps = {
 // 흰 바탕 작은 요약 카드 (지도에서 노드를 눌렀을 때 아래에 뜨는 카드). 추출하지 못한 항목은 '-'로 보여요 (기능명세서 5-2)
 export default function PlaceCardCompact({
   place,
+  subline = "address",
   onPick,
   onOpen,
   onCopy,
@@ -116,7 +120,9 @@ export default function PlaceCardCompact({
         </button>
       </div>
 
-      <p className={styles.address}>{displayOrDash(place.address)}</p>
+      <p className={styles.address}>
+        {displayOrDash(getCardSubline(place, subline))}
+      </p>
 
       <div className={styles.meta}>
         <span className={styles.tag}>{displayOrDash(place.tag)}</span>
