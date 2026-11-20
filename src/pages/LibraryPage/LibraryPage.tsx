@@ -13,6 +13,7 @@ import {
   type MapPosition,
 } from "@/shared/components/Map";
 import TabBar from "@/shared/components/TabBar";
+import { useScreenBackdrop, WHITE_BACKDROP } from "@/shared/hooks/useScreenBackdrop";
 import { toMapNodes } from "@/features/place/lib/mapNodes";
 import { useDeletePlace, usePlaces } from "@/features/place/model/usePlaces";
 import type { Place, PlaceCategory } from "@/features/place/model/place.types";
@@ -40,6 +41,8 @@ export default function LibraryPage() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Place | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  // 폰 맨 위 띠와 상태바 뒤도 헤더 그라데이션 색(#fafafa)으로 맞춰 위에서 색이 끊기지 않게 해요
+  useScreenBackdrop(WHITE_BACKDROP);
 
   const { places, viewStatus, refetch } = usePlaces(
     category === "all" ? {} : { category },
