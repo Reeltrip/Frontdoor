@@ -75,6 +75,17 @@
   background: var(--color-white);
 }
 
+/* 택시: 흰 바탕에 구간 색 테두리 점 */
+.taxiDot {
+  display: block;
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  border: 3px solid var(--leg-color, var(--color-plan-route));
+  border-radius: 50%;
+  background: var(--color-white);
+}
+
 .rideIcon {
   display: block;
   flex-shrink: 0;

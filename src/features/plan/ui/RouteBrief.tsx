@@ -21,9 +21,12 @@ type RouteBriefProps = {
 /** 막대에서 아주 짧은 구간도 아이콘이 들어갈 만큼은 보여요 */
 const MIN_SEGMENT_MINUTES = 3;
 
+const isWalk = (segment: RouteSegment) => segment.mode === 'WALK';
+
+/** 도보는 회색 점, 버스·지하철은 탈것 아이콘, 택시는 구간 색 점 */
 function SegmentDot({ segment }: { segment: RouteSegment }) {
   if (isRide(segment.mode)) return <TransitLegIcon className={styles.rideIcon} />;
-  return <span className={styles.walkDot} aria-hidden />;
+  return <span className={isWalk(segment) ? styles.walkDot : styles.taxiDot} aria-hidden />;
 }
 
 const describeSegment = (segment: RouteSegment) => {
@@ -65,7 +68,8 @@ export default function RouteBrief({ from, to, legIndex, date, canFetchRoutes }:
               {segments.map((segment, index) => (
                 <span
                   key={index}
-                  className={isRide(segment.mode) ? styles.rideBar : styles.walkBar}
+                  // 택시도 타고 가는 구간이라 지도·일정과 같은 구간 색으로 칠해요 (#206)
+                  className={isWalk(segment) ? styles.walkBar : styles.rideBar}
                   style={{ flexGrow: Math.max(segment.minutes, MIN_SEGMENT_MINUTES) }}
                 >
                   <SegmentDot segment={segment} />
