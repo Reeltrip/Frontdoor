@@ -1,5 +1,5 @@
 import { apiRequest, apiUpload } from '@/shared/api/client';
-import type { Place, PlaceCategory, PlaceListParams, UpdatePlaceRequest } from '../model/place.types';
+import type { Place, PlaceCategory, PlaceListParams, SummaryField, UpdatePlaceRequest } from '../model/place.types';
 
 // 장소 쿼리 키는 여기서만 만들어요. 무효화할 때 placeKeys.all을 쓰면 목록 전체가 다시 불러와져요
 export const placeKeys = {
@@ -68,9 +68,9 @@ const hasText = (value: string | null | undefined): value is string => Boolean(v
 /** BE 카드를 화면에서 쓰는 Place로 바꿔요. id가 없는 카드(분석 초안)는 fallbackId를 써요 */
 export function toPlace(item: ApiPlace, fallbackId = ''): Place {
   const isOffMap = item.category === 'TRANSPORT' || item.category === 'TIP';
-  const summary = isOffMap
-    ? [item.subType, item.applicableRegion].filter(hasText)
-    : [item.accessText, item.openingHours].filter(hasText);
+  const summaryFields: SummaryField[] = isOffMap ? ['subType', 'applicableRegion'] : ['accessText', 'openingHours'];
+  const shownFields = summaryFields.filter((field) => hasText(item[field]));
+  const summary = shownFields.map((field) => item[field] as string);
   const hasLocation = typeof item.latitude === 'number' && typeof item.longitude === 'number';
   return {
     id: item.placeId !== undefined ? String(item.placeId) : fallbackId,
@@ -80,6 +80,7 @@ export function toPlace(item: ApiPlace, fallbackId = ''): Place {
     ...(hasText(item.googlePlaceId) ? { googlePlaceId: item.googlePlaceId } : {}),
     ...(hasLocation ? { location: { lat: item.latitude as number, lng: item.longitude as number } } : {}),
     summary,
+    ...(shownFields[0] ? { summaryFirstField: shownFields[0] } : {}),
     ...(hasText(item.address) ? { address: item.address } : {}),
     ...(hasText(item.priceText ?? item.cost) ? { tag: (item.priceText ?? item.cost) as string } : {}),
     ...(typeof item.reviewCount === 'number' ? { reviewCount: item.reviewCount } : {}),
@@ -109,7 +110,9 @@ export function updatePlace(id: string, category: PlaceCategory, changes: Update
   if (changes.name !== undefined) body.name = changes.name;
   if (changes.address !== undefined) body.address = changes.address;
   if ('tag' in changes) body[isOffMap ? 'cost' : 'priceText'] = changes.tag ?? null;
-  if (changes.summaryFirst !== undefined) body[isOffMap ? 'subType' : 'accessText'] = changes.summaryFirst;
+  // 화면 첫 줄이 온 필드로 보내요. 영업시간이 첫 줄인데 가는 길로 보내면 고친 줄이 그대로 남아요 (#142)
+  if (changes.summaryFirst !== undefined)
+    body[changes.summaryFirstField ?? (isOffMap ? 'subType' : 'accessText')] = changes.summaryFirst;
   return apiRequest<ApiPlace>(`/places/${encodeURIComponent(id)}`, { method: 'PATCH', body }).then((item) =>
     toPlace(item),
   );
