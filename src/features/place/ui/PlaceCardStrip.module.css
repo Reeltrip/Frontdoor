@@ -1,7 +1,10 @@
+/* 가로 스크롤 상자는 위아래로 넘친 것도 잘라요. 카드 그림자(흐림 10.6px)가 카드 끝에서 잘려 곧은 선이 생기지 않게
+   위아래 12px 자리를 두고 같은 만큼 바깥 여백을 빼서 카드 위치는 그대로예요 (#220) */
 .strip {
   display: flex;
   gap: 12px;
-  padding: 0 20px;
+  margin: -12px 0;
+  padding: 12px 20px;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-padding-left: 20px;
@@ -18,9 +21,11 @@
   scroll-snap-align: start;
 }
 
+/* 여행계획 편집은 자기 위아래 여백으로 위치를 맞춰 둬서 바깥 여백을 되돌려요 */
 .planStrip {
   position: relative;
   gap: 16px;
+  margin: 0;
   padding-top: 12px;
   padding-bottom: 14px;
 }
