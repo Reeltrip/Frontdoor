@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import type { CardSublineMode } from "../lib/cardSubline";
 import type { Place } from "../model/place.types";
 import PlaceCardCompact from "./PlaceCardCompact";
 import styles from "./PlaceCardStrip.module.css";
@@ -10,6 +11,8 @@ type PlaceCardStripProps = {
   onPick?: (placeId: string) => void;
   isPlanCard?: boolean;
   isWide?: boolean;
+  /** 카드 이름 아래 줄. 없으면 주소예요 */
+  subline?: CardSublineMode;
   /** 없으면 삭제 버튼을 그리지 않아요 (여행계획 편집처럼 삭제가 없는 화면) */
   onDelete?: (place: Place) => void;
   onOpen?: (place: Place) => void;
@@ -33,6 +36,7 @@ export default function PlaceCardStrip({
   onPick,
   isPlanCard = false,
   isWide = false,
+  subline,
   onDelete,
   onOpen,
   onCopy,
@@ -88,6 +92,7 @@ export default function PlaceCardStrip({
           <div key={place.id} className={styles.item}>
             <PlaceCardCompact
               place={place}
+              subline={subline}
               className={isPlanCard ? styles.planCard : undefined}
               onPick={onPick && ((picked) => onPick(picked.id))}
               onOpen={onOpen}

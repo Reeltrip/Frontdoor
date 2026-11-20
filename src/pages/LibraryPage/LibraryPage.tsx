@@ -207,6 +207,8 @@ export default function LibraryPage() {
           <div className={styles.strip}>
             <PlaceCardStrip
               places={mappedPlaces}
+              // 요약카드에서 고친 위치 설명이 여기서도 보이게 주소 대신 그 줄을 보여줘요 (#199)
+              subline="summary"
               selectedId={selectedId}
               onSelect={selectPlace}
               onDelete={setDeleteTarget}
