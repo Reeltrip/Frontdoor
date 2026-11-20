@@ -1,0 +1,150 @@
+/* 피그마 S4-7a: 제목 16 굵게 → 소요시간 24 + 기준 12 → 수단 막대 → (상세) 수단 목록 → 버튼 */
+.brief {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  margin: 0;
+  font: var(--font-body1);
+  font-weight: 700;
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-900);
+}
+
+.summary {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin: 8px 0 0;
+}
+
+.minutes {
+  font: var(--font-h2);
+  font-weight: 700;
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-900);
+}
+
+.basis {
+  margin: 0;
+  font: var(--font-caption);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-500);
+}
+
+/* 수단별 막대. 도보는 회색, 타는 구간은 지도·일정과 같은 구간 색이에요 */
+.bar {
+  display: flex;
+  gap: 2px;
+  margin-top: 10px;
+}
+
+.walkBar,
+.rideBar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 6px;
+  min-width: 18px;
+  border-radius: 3px;
+}
+
+.walkBar {
+  background: var(--color-gray-100);
+}
+
+.rideBar {
+  background: var(--leg-color, var(--color-plan-route));
+}
+
+/* 막대 왼쪽 끝에 수단 아이콘을 얹어요 */
+.walkBar > *,
+.rideBar > * {
+  position: absolute;
+  left: 0;
+}
+
+.walkDot {
+  display: block;
+  flex-shrink: 0;
+  width: 12px;
+  height: 12px;
+  border: 3px solid var(--color-gray-200);
+  border-radius: 50%;
+  background: var(--color-white);
+}
+
+.rideIcon {
+  display: block;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--leg-color, var(--color-plan-route));
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.stepTitle,
+.stepRide {
+  flex-shrink: 0;
+  max-width: 60%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font: var(--font-body2);
+  font-weight: 700;
+  letter-spacing: var(--tracking);
+}
+
+.stepTitle {
+  color: var(--color-gray-700);
+}
+
+/* 피그마: 내리는 역은 구간 색 글자 */
+.stepRide {
+  color: var(--leg-color, var(--color-lime-600));
+}
+
+.stepDetail {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font: var(--font-caption);
+  letter-spacing: var(--tracking);
+  color: var(--color-gray-400);
+}
+
+.action {
+  margin-top: 20px;
+}
+
+/* 공통 Button(lg)과 같은 모양의 바깥 링크 */
+.mapLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 60px;
+  border-radius: 32px;
+  background: var(--color-gray-800);
+  font: var(--font-button);
+  letter-spacing: var(--tracking);
+  color: var(--color-white);
+  text-decoration: none;
+}

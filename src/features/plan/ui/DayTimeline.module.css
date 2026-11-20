@@ -77,8 +77,22 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  width: 100%;
   min-height: 28px;
-  padding-left: 4px;
+  padding: 0 0 0 4px;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* 누를 수 있는 줄이라는 표시 */
+.moveChevron {
+  flex-shrink: 0;
+  margin-left: auto;
+  font: var(--font-body2);
+  line-height: 1;
+  color: var(--color-gray-400);
 }
 
 .moveIcon {
@@ -102,14 +116,6 @@
   color: var(--leg-color, var(--color-lime-600));
 }
 
-.moveLink {
-  flex-shrink: 0;
-  margin-left: auto;
-  font: var(--font-caption);
-  letter-spacing: var(--tracking);
-  color: var(--color-lime-600);
-  text-decoration: underline;
-}
 
 .moveText {
   min-width: 0;

@@ -24,6 +24,7 @@ import type { ShareType } from '@/features/plan/model/plan.types';
 import DaySelector from '@/features/plan/ui/DaySelector';
 import DayRouteMap from '@/features/plan/ui/DayRouteMap';
 import DayTimeline, { type TimelineStop } from '@/features/plan/ui/DayTimeline';
+import RouteBrief from '@/features/plan/ui/RouteBrief';
 import styles from './PlanViewPage.module.css';
 
 /** 아래 시트가 지도 아래쪽을 가려서, 동선 가운데보다 조금 남쪽을 지도 가운데로 잡아요 */
@@ -65,6 +66,8 @@ export default function PlanViewPage() {
   const [category, setCategory] = useState<PlaceCategory | 'all'>(entry?.category ?? 'all');
   const [isPlanBVisible, setIsPlanBVisible] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // 일정의 이동 줄을 누르면 그 구간만 지도에 남기고 아래에 경로 간단히 보기를 열어요 (S4-7a)
+  const [selectedLeg, setSelectedLeg] = useState<number | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -190,14 +193,24 @@ export default function PlanViewPage() {
   const selectDay = (nextIndex: number) => {
     setSelectedDay(nextIndex);
     setSelectedId(null);
+    setSelectedLeg(null);
   };
+
+  const legFrom = selectedLeg === null ? undefined : stops[selectedLeg]?.place;
+  const legTo = selectedLeg === null ? undefined : stops[selectedLeg + 1]?.place;
+  const leg = selectedLeg !== null && legFrom && legTo ? { index: selectedLeg, from: legFrom, to: legTo } : null;
+  const legIds = leg ? new Set([leg.from.id, leg.to.id]) : null;
+  // 구간을 보는 동안은 그 두 곳만 사진 핀으로, 나머지는 점으로 줄여요
+  const shownNodes = legIds ? mapNodes.map((node) => ({ ...node, isDot: !legIds.has(node.id) })) : mapNodes;
+  const closeLeg = () => setSelectedLeg(null);
 
   return (
     <main className={styles.page}>
       <div className={styles.top}>
         <Header
           title="여행계획"
-          onBack={() => (isLoggedIn ? navigate(-1) : navigate('/'))}
+          // 구간 경로를 보고 있으면 뒤로 가기는 일정 목록으로 돌아가요
+          onBack={() => (leg ? closeLeg() : isLoggedIn ? navigate(-1) : navigate('/'))}
           action={
             // 고를 항목이 하나도 없으면(로그인하지 않은 공유 링크 등) ⋮ 자체를 숨겨요
             (canShare || canEdit || hasPlanB) && (
@@ -263,21 +276,42 @@ export default function PlanViewPage() {
 
       <div className={styles.mapArea}>
         <DayRouteMap
-          stopPlaces={stops.map((stop) => stop.place)}
+          stopPlaces={leg ? [leg.from, leg.to] : stops.map((stop) => stop.place)}
+          legIndexOffset={leg?.index ?? 0}
           date={day.date}
           canFetchRoutes={isLoggedIn}
           className={styles.map}
-          center={mapCenter}
-          nodes={mapNodes}
+          center={(leg && getRouteCenter([leg.from, leg.to])) || mapCenter}
+          nodes={shownNodes}
           selectedNodeId={selectedId}
-          route={route}
+          route={leg ? [{ nodeId: leg.from.id }, { nodeId: leg.to.id }] : route}
           isPlanning
           onSelectNode={setSelectedId}
-          onClickMap={() => setSelectedId(null)}
+          onClickMap={() => {
+            setSelectedId(null);
+            closeLeg();
+          }}
         />
+
+        {leg && (
+          <section className={styles.routeSheet} aria-label="경로 간단히 보기">
+            <span className={styles.routeSheetHandle} aria-hidden>
+              <img src={handleIcon} alt="" />
+            </span>
+            <RouteBrief
+              key={`${dayIndex}-${leg.index}`}
+              from={leg.from}
+              to={leg.to}
+              legIndex={leg.index}
+              date={day.date}
+              canFetchRoutes={isLoggedIn}
+            />
+          </section>
+        )}
 
         <section
           data-sheet
+          hidden={leg !== null}
           className={[styles.sheet, sheet.isExpanded && styles.sheetExpanded, sheet.isDragging && styles.sheetDragging]
             .filter(Boolean)
             .join(' ')}
@@ -317,7 +351,13 @@ export default function PlanViewPage() {
 
           <div key={dayIndex} className={styles.sheetBody}>
             {stops.length > 0 ? (
-              <DayTimeline stops={stops} isPlanBVisible={isPlanBVisible} date={day.date} canFetchRoutes={isLoggedIn} />
+              <DayTimeline
+                stops={stops}
+                isPlanBVisible={isPlanBVisible}
+                date={day.date}
+                canFetchRoutes={isLoggedIn}
+                onSelectLeg={setSelectedLeg}
+              />
             ) : (
               <div className={styles.empty}>
                 <p className={styles.statusText}>이 날은 아직 정한 장소가 없어요.</p>
