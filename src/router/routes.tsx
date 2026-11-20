@@ -5,6 +5,7 @@ import LoginPage from "@/pages/LoginPage/LoginPage";
 import SignupPage from "@/pages/SignupPage/SignupPage";
 import NicknamePage from "@/pages/NicknamePage/NicknamePage";
 import HomePage from "@/pages/HomePage/HomePage";
+import PlanTutorialTourPage from "@/pages/PlanTutorialTourPage/PlanTutorialTourPage";
 import PlanCreatePage from "@/pages/PlanCreatePage/PlanCreatePage";
 import PlanHomePage from "@/pages/PlanHomePage/PlanHomePage";
 import PlanEditPage from "@/pages/PlanEditPage/PlanEditPage";
@@ -45,6 +46,8 @@ export const routes: RouteObject[] = [
       // 가입 직후 한 번 보여주는 앱 사용안내 3장
       { path: "/welcome", element: <OnboardingGuidePage /> },
       { path: "/home", element: <HomePage /> },
+      // 튜토리얼 다시 보기의 여행계획 확정·플랜 B 안내 (#238)
+      { path: "/tutorial/plan", element: <PlanTutorialTourPage /> },
       { path: "/library", element: <LibraryPage /> },
       { path: "/library/trash", element: <LibraryTrashPage /> },
       { path: "/links/new", element: <LinkAddPage /> },

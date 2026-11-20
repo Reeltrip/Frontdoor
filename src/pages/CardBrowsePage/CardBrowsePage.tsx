@@ -150,7 +150,7 @@ export default function CardBrowsePage() {
     setIsEditTutorialOpen(false);
   };
 
-  // 편집 안내를 닫으면 다시 보기 중일 때 다음 안내(카드 직접 추가)로 이어서 가요 (#179)
+  // 편집 안내를 닫으면 다시 보기 중일 때 다음 안내(여행계획)로 이어서 가요 (#179, #238)
   const finishEditTutorial = () => {
     closeEditTutorial();
     if (getTutorialTourStep() === "cards") navigate(advanceTutorialTour());
@@ -196,8 +196,13 @@ export default function CardBrowsePage() {
   };
 
   const handleEdit = () => {
+    // 다시 보기 중에는 안내 위로 올라온 편집 버튼을 눌러도 다음 안내로 넘어가요 (#238)
+    if (isEditTutorialOpen && getTutorialTourStep() === "cards") {
+      finishEditTutorial();
+      return;
+    }
     closeEditTutorial();
-    // 안내 중에 편집을 직접 눌렀으면 이어 보기를 끝내고 편집을 이어가요
+    // 다시 보기 중이지만 안내를 이미 닫고 편집을 눌렀으면 이어 보기를 끝내고 편집을 이어가요
     if (getTutorialTourStep() === "cards") clearTutorialReplay();
     if (activePlace) setDraft(toDraft(activePlace));
     return;
