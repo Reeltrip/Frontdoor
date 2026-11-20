@@ -77,6 +77,7 @@ import {
   markPlanTutorialSeen,
 } from "@/features/plan/lib/planTutorialSeen";
 import styles from "./PlanEditPage.module.css";
+import type { Plan, PlanDay } from "@/features/plan/model/plan.types";
 
 /** lodging: 숙소 선택 / zone: 일자별 구역 선택 / nodes: 지도에서 노드 확정 (기능명세서 4-3) */
 type EditStep = "lodging" | "zone" | "nodes";
@@ -90,6 +91,8 @@ const STEP_TITLES: Record<EditStep, string> = {
 const TOAST_MS = 2000;
 
 const isOnMap = (place: Place) => toMapNodes([place]).length > 0;
+const hasRoute = (day: PlanDay | undefined) =>
+  Boolean(day?.zone) || (day?.nodes.length ?? 0) > 0;
 
 export default function PlanEditPage() {
   const { planId = "" } = useParams();
@@ -212,7 +215,7 @@ export default function PlanEditPage() {
     );
   }
 
-  const currentStep = step ?? (plan.days[0]?.zone ? "nodes" : "zone");
+  const currentStep = step ?? (hasRoute(plan.days[0]) ? "nodes" : "zone");
   const hasExistingRoute = plan.days.some(
     (planDay) => planDay.nodes.length > 0,
   );
@@ -255,7 +258,8 @@ export default function PlanEditPage() {
     setIsPreviewing(false);
   };
 
-  const goToStep = (nextStep: EditStep, nextDayIndex = dayIndex) => {
+  const goToDay = (nextDayIndex: number) =>
+    goToStep(hasRoute(plan.days[nextDayIndex]) ? "nodes" : "zone", nextDayIndex);
     resetSelection();
     setIsMenuOpen(false);
     setIsSearchingLodging(false);
