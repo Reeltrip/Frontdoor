@@ -5,6 +5,10 @@ import Button from "@/shared/components/Button";
 import ConfirmModal from "@/shared/components/ConfirmModal";
 import PlaceFeatureForm from "@/features/place/ui/PlaceFeatureForm";
 import CategoryDial from "@/features/place/ui/CategoryDial";
+import {
+  clearTutorialReplay,
+  getTutorialTourStep,
+} from "@/features/account/lib/tutorialReplay";
 import DialTutorial from "@/features/place/ui/DialTutorial";
 import AnalysisSteps from "@/features/source/ui/AnalysisSteps";
 import { LoadingBlob } from "@/shared/components/Loading";
@@ -144,8 +148,14 @@ export default function CardAddPage() {
     onError: (error) => setErrorMessage(getErrorMessage(error)),
   });
   useScreenBackdrop(saveCard.isPending ? "#fafafa" : "#ffffff");
-  const [isImportModalOpen, setIsImportModalOpen] = useState(true);
-  const [isTutorialOpen, setIsTutorialOpen] = useState(false);
+  // 다시 보기의 마지막 단계면 불러오기 질문 없이 바로 다이얼 안내부터 보여줘요 (#179)
+  const [isTourStep] = useState(() => getTutorialTourStep() === "cardAdd");
+  const [isImportModalOpen, setIsImportModalOpen] = useState(!isTourStep);
+  const [isTutorialOpen, setIsTutorialOpen] = useState(isTourStep);
+  // 마지막 단계라 화면에 들어오면 바로 이어 보기를 끝내요. 안내 대신 다이얼을 만져도 다음에 다시 뜨지 않아요
+  useEffect(() => {
+    if (isTourStep) clearTutorialReplay();
+  }, [isTourStep]);
   const [isArrowTutorialOpen, setIsArrowTutorialOpen] = useState(false);
 
   const nickname = useProfile().data?.nickname ?? DEFAULT_NICKNAME;
@@ -439,7 +449,11 @@ export default function CardAddPage() {
       {isArrowTutorialOpen && (
         <DialTutorial
           variant="arrows"
-          onClose={() => setIsArrowTutorialOpen(false)}
+          onClose={() => {
+            setIsArrowTutorialOpen(false);
+            // 다시 보기의 마지막 안내예요. 다 봤으면 시작한 마이페이지로 돌아가요
+            if (isTourStep) navigate("/my", { replace: true });
+          }}
           lines={["화살표를 눌러", "카드 카테고리를 정해보세요!"]}
         />
       )}

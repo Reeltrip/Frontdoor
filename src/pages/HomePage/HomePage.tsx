@@ -9,7 +9,11 @@ import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { sourceKeys } from "@/features/source/api/sources";
 import HomeTutorial from "@/features/source/ui/HomeTutorial";
-import { clearTutorialReplay, isTutorialReplay } from "@/features/account/lib/tutorialReplay";
+import {
+  advanceTutorialTour,
+  clearTutorialReplay,
+  isTutorialReplay,
+} from "@/features/account/lib/tutorialReplay";
 import ConfirmModal from "@/shared/components/ConfirmModal";
 import { readClipboardLink } from "@/features/source/lib/readClipboardLink";
 import type { LinkAddState } from "@/features/source/model/source.types";
@@ -95,13 +99,16 @@ export default function HomePage() {
 
   const handleTutorialClose = () => {
     markHomeTutorialSeen();
-    clearTutorialReplay();
     setHasSeenTutorial(true);
+    // 다시 보기 중이면 다음 안내(요약카드)로 이어서 가요 (#179)
+    if (isReplay) navigate(advanceTutorialTour());
   };
 
-  // 안내를 먼저 닫은 뒤 홈 버튼과 같은 흐름(클립보드 확인)을 따라요
+  // 안내를 먼저 닫은 뒤 홈 버튼과 같은 흐름(클립보드 확인)을 따라요. 직접 해 보기를 골랐으니 이어 보기는 끝내요
   const handleTutorialLoadLink = () => {
-    handleTutorialClose();
+    markHomeTutorialSeen();
+    clearTutorialReplay();
+    setHasSeenTutorial(true);
     void handleLoadLinkClick();
   };
 
