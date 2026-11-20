@@ -77,7 +77,7 @@ export default function HomePage() {
 
   // 클립보드에 링크가 있으면 팝업을 띄우고, 없으면 바로 링크 추가 화면으로 감
   const handleLoadLinkClick = async () => {
-    const link = await readClipboardLink();
+    const link = await readClipboardLink({ requireGrantedPermission: true });
     if (link === null) {
       navigate("/links/new");
       return;
