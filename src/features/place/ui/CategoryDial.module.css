@@ -181,6 +181,8 @@
 .arrow img {
   width: 14px;
   height: 14px;
+  /* 화살표 원래 색(#BBB9B2)이 다이얼 오른쪽 음영과 같아서 ▶가 묻혀요. 한 단계 진한 #999로 그려요 (피그마 댓글 #91, #198) */
+  filter: brightness(0) invert(0.6);
 }
 
 .arrowPrev {
