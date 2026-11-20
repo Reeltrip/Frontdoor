@@ -85,8 +85,29 @@
 }
 
 
+/* 피그마 2-1: 탭바 위쪽부터 기록 카드가 바탕색으로 풀려요. 화면에 고정해 두고 아래에 더 있을 때만 보여요 */
+.bottomFade {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    z-index: 1;
+    width: 100%;
+    max-width: var(--app-max-width);
+    height: 220px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), var(--color-bg) 75%);
+    opacity: 0;
+    transform: translateX(-50%);
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.bottomFadeVisible {
+    opacity: 1;
+}
+
 .page .tabBar {
     position: sticky;
+    z-index: 2;
     bottom: calc(var(--home-bar-height) + 10px);
     align-self: center;
     margin-top: auto;

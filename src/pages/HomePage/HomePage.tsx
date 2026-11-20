@@ -5,7 +5,7 @@ import RecentCollectionCard from "@/features/source/ui/RecentCollectionCard";
 import { useRecentCollections } from "@/features/source/model/useRecentCollections";
 import { LIME_BACKDROP, useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
 import styles from "./HomePage.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { sourceKeys } from "@/features/source/api/sources";
 import HomeTutorial from "@/features/source/ui/HomeTutorial";
@@ -33,12 +33,35 @@ function markHomeTutorialSeen(): void {
   }
 }
 
+/** 화면 아래로 더 내릴 내용이 남았는지. 홈은 페이지 전체가 스크롤돼서 window를 봐요 */
+function useHasMoreBelow(contentKey: number): boolean {
+  const [hasMoreBelow, setHasMoreBelow] = useState(false);
+
+  useEffect(() => {
+    const update = () => {
+      const { scrollHeight } = document.documentElement;
+      setHasMoreBelow(window.scrollY + window.innerHeight < scrollHeight - 1);
+    };
+    update();
+    window.addEventListener("scroll", update, { passive: true });
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [contentKey]);
+
+  return hasMoreBelow;
+}
+
 export default function HomePage() {
   useScreenBackdrop(LIME_BACKDROP, { hasStatusBarCap: false });
   const navigate = useNavigate();
   // 불러오는 중이거나 실패하면 목록 없이 링크 불러오기만 보여줘요
   const recentCollections = useRecentCollections();
   const hasRecentCollections = recentCollections.length > 0;
+  // 기록이 길어져 탭바 뒤로 내려가면 아래를 흐리게 덮어요. 끝까지 내리면 마지막 카드가 가려지지 않게 걷어요
+  const hasMoreBelow = useHasMoreBelow(recentCollections.length);
 
   // 불러오기가 끝났는데 0개일 때만 사용 안내를 띄워요. 불러오는 중·실패와 구분하려고 쿼리 상태를 직접 봐요
   const queryClient = useQueryClient();
@@ -128,6 +151,10 @@ export default function HomePage() {
         confirmLabel="링크 추가하기"
         onCancel={handleClipboardCancel}
         onConfirm={handleClipboardConfirm}
+      />
+      <div
+        className={`${styles.bottomFade} ${hasMoreBelow ? styles.bottomFadeVisible : ""}`}
+        aria-hidden
       />
       <TabBar activeTab="sources" className={styles.tabBar} />
       {isTutorialOpen && (

@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useBeforeUnload, useBlocker, useLocation, useNavigate } from "react-router";
 import checkIcon from "@/shared/assets/icons/dial-check.svg";
 import editIcon from "@/shared/assets/icons/dial-edit.svg";
+import kebabIcon from "@/shared/assets/icons/kebab.svg";
 import Header from "@/shared/components/Header";
 import CategoryDial from "@/features/place/ui/CategoryDial";
 import DialTutorial from "@/features/place/ui/DialTutorial";
@@ -35,6 +36,7 @@ import styles from "./CardBrowsePage.module.css";
 const TUTORIAL_SEEN_KEY = "reeltrip:dial-tutorial-seen";
 const EDIT_TUTORIAL_SEEN_KEY = "reeltrip:edit-tutorial-seen";
 const TOAST_DURATION_MS = 2000;
+const SAVED_MESSAGE = "편집하신 내용이 저장되었습니다.";
 
 function hasSeen(key: string): boolean {
   try {
@@ -76,6 +78,8 @@ export default function CardBrowsePage() {
   const [isEditTutorialOpen, setIsEditTutorialOpen] = useState(false);
   const [draft, setDraft] = useState<PlaceDraft | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
   const isToastVisible = toastMessage !== null;
 
   const category = items[categoryIndex];
@@ -108,6 +112,25 @@ export default function CardBrowsePage() {
     return () => window.clearTimeout(timer);
   }, [isToastVisible]);
 
+  // 메뉴 바깥을 누르거나 Esc를 누르면 닫아요 (보관함·여행계획 ⋮ 메뉴와 같은 방식)
+  useEffect(() => {
+    if (!isMenuOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!menuRef.current?.contains(event.target as Node)) setIsMenuOpen(false);
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setIsMenuOpen(false);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown, true);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown, true);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isMenuOpen]);
+
   const closeTutorial = () => {
     markSeen(TUTORIAL_SEEN_KEY);
     setIsTutorialOpen(false);
@@ -134,13 +157,16 @@ export default function CardBrowsePage() {
         changes: {
           ...(next.name !== place.name ? { name: next.name } : {}),
           ...(next.summary[0] !== place.summary[0]
-            ? { summaryFirst: next.summary[0] ?? "" }
+            ? {
+                summaryFirst: next.summary[0] ?? "",
+                summaryFirstField: place.summaryFirstField,
+              }
             : {}),
           ...(next.tag !== place.tag ? { tag: next.tag } : {}),
         },
       },
       {
-        onSuccess: () => setToastMessage("편집하신 내용이 저장되었습니다."),
+        onSuccess: () => setToastMessage(SAVED_MESSAGE),
         onError: (error) =>
           setToastMessage("저장하지 못했어요. " + getErrorMessage(error)),
       },
@@ -163,6 +189,17 @@ export default function CardBrowsePage() {
     setDraft(null);
   };
 
+  // 카드는 링크 분석이 끝날 때 이미 보관함에 저장돼요. 고친 내용이 있을 때만 서버에 보내요
+  const handleSaveCards = () => {
+    setIsMenuOpen(false);
+    if (isChanged) {
+      handleSave();
+      return;
+    }
+    setDraft(null);
+    setToastMessage(SAVED_MESSAGE);
+  };
+
   const finishLeave = () => {
     setDraft(null);
     if (leaveBlocker.state === "blocked") leaveBlocker.proceed();
@@ -175,7 +212,38 @@ export default function CardBrowsePage() {
 
   return (
     <main className={styles.page}>
-      <Header title={title} onBack={() => navigate(-1)} />
+      <Header
+        title={title}
+        onBack={() => navigate(-1)}
+        action={
+          places.length > 0 && (
+            <div ref={menuRef} className={styles.menuWrap}>
+              <button
+                type="button"
+                className={styles.moreButton}
+                aria-label="더보기"
+                aria-haspopup="menu"
+                aria-expanded={isMenuOpen}
+                onClick={() => setIsMenuOpen((isOpen) => !isOpen)}
+              >
+                <img src={kebabIcon} alt="" />
+              </button>
+              {isMenuOpen && (
+                <div className={styles.menu} role="menu">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className={styles.menuItem}
+                    onClick={handleSaveCards}
+                  >
+                    카드 저장하기
+                  </button>
+                </div>
+              )}
+            </div>
+          )
+        }
+      />
 
       <div className={styles.stage}>
         {places.length > 0 ? (

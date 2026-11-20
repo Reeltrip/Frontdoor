@@ -57,3 +57,54 @@
 .aboveTutorial {
     z-index: 12;
 }
+
+.moreButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    margin-right: -8px;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: pointer;
+}
+
+/* ⋮ 메뉴. 보관함·여행계획의 ⋮ 메뉴와 같은 모양이에요 (피그마 2-14) */
+.menuWrap {
+    position: relative;
+    z-index: 13;
+}
+
+.menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    box-sizing: border-box;
+    width: 213px;
+    padding: 5px 7px;
+    border-radius: 14px;
+    background: var(--color-surface);
+    box-shadow: 0 0 32.15px 0 rgba(26, 26, 26, 0.13);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+.menuItem {
+    display: flex;
+    align-items: center;
+    height: 36px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 10px;
+    background: none;
+    font: var(--font-body2);
+    letter-spacing: var(--tracking);
+    color: var(--color-gray-900);
+    white-space: nowrap;
+    cursor: pointer;
+}
