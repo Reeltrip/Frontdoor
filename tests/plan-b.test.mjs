@@ -41,11 +41,11 @@ test('플랜B를 다시 고르면 이전 플랜B를 바꿔요', () => {
   assert.deepEqual(next.days[0].nodes[1].planB, { placeId: 'y' });
 });
 
-test('canSetPlanB: 같은 카테고리이고 계획 어디에도 없는 카드만 돼요', () => {
+test('canSetPlanB: 카테고리와 상관없이 계획 어디에도 없는 카드만 돼요', () => {
   const plan = localPlan();
   const target = place('a');
   assert.equal(edits.canSetPlanB(plan, 0, target, place('x')), true);
-  assert.equal(edits.canSetPlanB(plan, 0, target, place('x', 'cafe')), false, '다른 카테고리');
+  assert.equal(edits.canSetPlanB(plan, 0, target, place('x', 'cafe')), true, '다른 카테고리도 돼요');
   assert.equal(edits.canSetPlanB(plan, 0, target, place('stay')), false, '숙소');
   assert.equal(edits.canSetPlanB(plan, 0, target, place('c')), false, '같은 일차 노드');
   assert.equal(edits.canSetPlanB(plan, 0, target, place('b2')), false, '같은 일차 다른 노드의 플랜B');

@@ -91,7 +91,7 @@ function toEmbeddedPlaces(plan: ApiPlan): Place[] {
         ...toLocation(node.latitude, node.longitude),
         ...(node.googlePlaceId ? { googlePlaceId: node.googlePlaceId } : {}),
       },
-      // 플랜B는 대신할 노드와 같은 카테고리만 넣을 수 있어요 (서버 규칙)
+      // 서버가 플랜B 카테고리를 주지 않아서 대신할 노드 카테고리로 채워요. 다른 카테고리 플랜B면 틀릴 수 있어요
       ...node.alternatives.map((alternative) => ({
         id: String(alternative.placeId),
         category: fromApiCategory(node.category),
