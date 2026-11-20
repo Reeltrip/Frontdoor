@@ -226,13 +226,22 @@
   backdrop-filter: blur(2px);
 }
 
+.featured[aria-pressed="true"]::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: rgba(26, 26, 26, .14);
+  box-shadow: inset 0 0 0 3px var(--color-gray-800);
+  content: "";
+  pointer-events: none;
+}
+
+.featuredOpen,
 .featuredDelete {
   position: absolute;
   z-index: 1;
   top: 19px;
-  right: 19px;
   display: grid;
-  width: 44px;
   height: 44px;
   place-items: center;
   padding: 0;
@@ -240,6 +249,18 @@
   border-radius: 54px;
   background: transparent;
   cursor: pointer;
+}
+
+.featuredOpen {
+  right: 63px;
+  width: 36px;
+  justify-items: end;
+  padding-inline-end: 1px;
+}
+
+.featuredDelete {
+  right: 19px;
+  width: 44px;
 }
 
 .pastSection {
