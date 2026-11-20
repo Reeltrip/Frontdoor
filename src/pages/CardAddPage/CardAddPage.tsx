@@ -34,7 +34,7 @@ import {
   type CardFeatures,
 } from "@/features/place/model/cardAdd.types";
 import styles from "./CardAddPage.module.css";
-import { useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
+import { useScreenBackdrop, WHITE_BACKDROP } from "@/shared/hooks/useScreenBackdrop";
 
 const STEP_TITLES: Record<CardAddStep, string | null> = {
   category: null,
@@ -143,7 +143,8 @@ export default function CardAddPage() {
     },
     onError: (error) => setErrorMessage(getErrorMessage(error)),
   });
-  useScreenBackdrop(saveCard.isPending ? "#fafafa" : "#ffffff");
+  // 입력 화면도 만드는 중 화면도 배경이 #fafafa라 상태바도 같은 색이에요 (#185)
+  useScreenBackdrop(WHITE_BACKDROP);
   const [isImportModalOpen, setIsImportModalOpen] = useState(true);
   const [isTutorialOpen, setIsTutorialOpen] = useState(false);
   const [isArrowTutorialOpen, setIsArrowTutorialOpen] = useState(false);

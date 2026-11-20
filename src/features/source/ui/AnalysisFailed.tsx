@@ -1,4 +1,5 @@
 import Button from "@/shared/components/Button";
+import { useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
 import styles from "./AnalysisFailed.module.css";
 
 type AnalysisFailedProps = {
@@ -14,6 +15,8 @@ export default function AnalysisFailed({
   onQuit,
   message,
 }: AnalysisFailedProps) {
+  // 화면 위쪽이 연두(#f1ffc8)로 끝나는 그라디언트예요. 분석 중 화면(#fafafa) 색을 덮어써요 (#185)
+  useScreenBackdrop("#f1ffc8");
   return (
     <main className={styles.page}>
       <header className={styles.header}>

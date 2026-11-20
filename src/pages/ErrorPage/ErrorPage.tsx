@@ -1,5 +1,6 @@
 import { isRouteErrorResponse, useNavigate, useRouteError } from "react-router";
 import Button from "@/shared/components/Button";
+import { LIME_BACKDROP, useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
 import styles from "./ErrorPage.module.css";
 
 type ErrorPageProps = {
@@ -14,6 +15,8 @@ const reloadPage = () => window.location.reload();
 export default function ErrorPage({ isNotFound = false }: ErrorPageProps) {
   const error = useRouteError();
   const navigate = useNavigate();
+  // 화면 위쪽이 연두(--color-lime-50)라 상태바도 같은 색이에요 (#185)
+  useScreenBackdrop(LIME_BACKDROP);
   const isMissingPage =
     isNotFound || (isRouteErrorResponse(error) && error.status === 404);
 
