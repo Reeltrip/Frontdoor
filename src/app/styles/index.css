@@ -45,6 +45,8 @@
   --color-gray-900: #1a1a1a;
   --color-white: #fafafa;
   --color-surface: #fefefe;
+  /* 마이 프로필 카드와 마이 화면 바탕 흰색 (피그마) */
+  --color-card-white: #fdfdff;
   /* 어두운 모달 배경 */
   --color-surface-dark: #272727;
   /* 캘린더 요일·화살표 */

@@ -3,7 +3,7 @@
   flex-direction: column;
   min-height: 100dvh;
   padding-top: var(--page-top);
-  background: var(--color-white);
+  background: var(--color-card-white);
 }
 
 .withTabs {

@@ -25,7 +25,8 @@ export default function AccountLayout({
   className,
 }: AccountLayoutProps) {
   const navigate = useNavigate();
-  useScreenBackdrop("#fafafa");
+  // 노치 색과 theme-color에도 쓰여서 토큰 대신 값을 그대로 넘겨요 (--color-card-white)
+  useScreenBackdrop("#fdfdff");
   return (
     <main className={[styles.page, hasTabBar && styles.withTabs, className].filter(Boolean).join(" ")}>
       <header className={styles.header}>
