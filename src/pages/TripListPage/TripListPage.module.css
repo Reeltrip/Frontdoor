@@ -108,6 +108,18 @@
   font-weight: 600;
 }
 
+.featuredWrap {
+  position: relative;
+}
+
+/* ↗ 왼쪽에 같은 크기 원으로 놓아요 */
+.featuredMenu {
+  position: absolute;
+  top: 20px;
+  right: 64px;
+  z-index: 2;
+}
+
 .featured {
   position: relative;
   display: block;
@@ -168,7 +180,7 @@
   position: absolute;
   top: 28px;
   left: 24px;
-  right: 64px;
+  right: 108px;
   display: block;
   text-align: left;
   overflow: hidden;
@@ -237,6 +249,18 @@
   list-style: none;
 }
 
+.planItem {
+  position: relative;
+}
+
+/* 줄 오른쪽 가운데. 줄 버튼 위에 따로 얹어요 */
+.rowMenu {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+}
+
 .planRow {
   display: flex;
   flex-direction: column;
@@ -244,7 +268,7 @@
   box-sizing: border-box;
   width: 100%;
   min-height: 68px;
-  padding: 13px 16px;
+  padding: 13px 48px 13px 16px;
   border: 1px solid #eee;
   border-radius: 15px;
   background: white;

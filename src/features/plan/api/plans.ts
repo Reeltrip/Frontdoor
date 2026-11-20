@@ -176,6 +176,7 @@ export async function createPlan(request: CreatePlanRequest): Promise<Plan> {
   return fetchPlan(String(created.planId));
 }
 
+/** 계획 삭제. 계획을 만든 사람(OWNER)만 할 수 있고 되돌릴 수 없어요 */
 export function deletePlan(id: string): Promise<void> {
   return apiRequest<void>(planPath(id), { method: 'DELETE' });
 }
