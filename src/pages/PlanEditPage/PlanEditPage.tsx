@@ -656,7 +656,11 @@ export default function PlanEditPage() {
     if (selectedPlace && !isSelectedLodging) return null;
     if (planBTargetId)
       return (
-        <Button variant="outline" onClick={resetSelection}>
+        <Button
+          variant="outline"
+          className={styles.cancelPlanB}
+          onClick={resetSelection}
+        >
           취소
         </Button>
       );

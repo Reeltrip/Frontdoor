@@ -59,6 +59,7 @@
 
   /* 기존 이름 유지 (다른 화면에서 쓰는 중) */
   --color-bg: var(--color-gray-0);
+  --color-category-chip-bg: color-mix(in srgb, var(--color-gray-300) 30%, var(--color-bg));
   --color-page: #f2f2f0;
   --color-text: var(--color-gray-900);
   --color-text-sub: var(--color-gray-500);
