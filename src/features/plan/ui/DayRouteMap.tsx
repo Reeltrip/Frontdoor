@@ -11,11 +11,13 @@ type DayRouteMapProps = Omit<MapViewProps, 'legPaths' | 'legColors'> & {
   date: string;
   /** 로그인한 사람만 경로 API를 부를 수 있어요. false면 직선으로 그려요 */
   canFetchRoutes: boolean;
+  /** 한 구간만 보여줄 때 그 구간이 그날 몇 번째인지. 일정 목록과 같은 색을 쓰려고 받아요 */
+  legIndexOffset?: number;
 };
 
 // 계획 보기 지도. 동선을 장소끼리 직선으로 잇지 않고 실제 길을 따라 그려요.
 // 길 모양은 타임라인이 소요시간을 받으려고 부르는 경로 조회에 같이 들어 있어서 호출이 늘지 않아요
-export default function DayRouteMap({ stopPlaces, date, canFetchRoutes, ...mapProps }: DayRouteMapProps) {
+export default function DayRouteMap({ stopPlaces, date, canFetchRoutes, legIndexOffset = 0, ...mapProps }: DayRouteMapProps) {
   const pairs = stopPlaces.slice(0, -1).map((from, index) => ({ from, to: stopPlaces[index + 1] }));
   const routes = useQueries({
     queries: pairs.map(({ from, to }) => getDayRouteQuery(from, to, date, canFetchRoutes)),
@@ -33,13 +35,13 @@ export default function DayRouteMap({ stopPlaces, date, canFetchRoutes, ...mapPr
       const separator = line.indexOf('=');
       if (separator <= 0) return;
       const key = line.slice(0, separator);
-      colors[key] = getRouteLegColorToken(index);
+      colors[key] = getRouteLegColorToken(index + legIndexOffset);
       const path = decodePolyline(line.slice(separator + 1));
       // 받지 못했거나 풀지 못한 구간은 넣지 않아요. 지도가 그 구간을 직선으로 그려요
       if (path.length > 1) paths[key] = path;
     });
     return { legPaths: paths, legColors: colors };
-  }, [signature]);
+  }, [signature, legIndexOffset]);
 
   return <MapView {...mapProps} legPaths={legPaths} legColors={legColors} />;
 }
