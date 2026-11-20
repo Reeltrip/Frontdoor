@@ -3,7 +3,9 @@
     isolation: isolate;
     display: flex;
     flex-direction: column;
-    min-height: 100dvh;
+    /* 화면 한 장 높이로 묶어 페이지는 스크롤되지 않아요. 최근 수집 목록(.recentScroll)만 스크롤돼요 (#192) */
+    height: 100dvh;
+    overflow: hidden;
     padding: 0 20px;
     background: linear-gradient(180deg, var(--color-lime-50) 0%, var(--color-lime-10) 28%, var(--color-bg) 62%);
 }
@@ -66,16 +68,33 @@
 }
 
 .recent {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
     margin-top: 56px;
-    padding-bottom: 40px;
 }
 
+/* 제목과 첫 카드 사이 12px = 이 4px + .recentScroll 위 여백 8px */
 .recentTitle {
-    margin: 0 0 12px;
+    margin: 0 0 4px;
     font: var(--font-body2);
     font-weight: 500;
     letter-spacing: var(--tracking);
     color: var(--color-gray-800);
+}
+
+/* 카드 그림자가 스크롤 상자 가장자리에서 잘리지 않게 좌우 20px·위 8px까지 넓혀요.
+   아래 여백은 탭바 높이 60px + 탭바 아래 띄움(홈 막대 + 10px) + 카드와 탭바 사이 40px이에요.
+   끝까지 내리면 마지막 카드가 예전처럼 탭바 40px 위에 멈춰요 */
+.recentScroll {
+    flex: 1;
+    min-height: 0;
+    margin: 0 -20px;
+    padding: 8px 20px calc(var(--home-bar-height) + 110px);
+    overflow-y: auto;
+    /* 목록 끝에서 더 밀어도 화면 전체가 끌려오지 않게 해요 */
+    overscroll-behavior-y: contain;
 }
 
 .recentList {
@@ -107,13 +126,13 @@
     opacity: 1;
 }
 
+/* 페이지가 스크롤되지 않아서 화면 아래 같은 자리에 띄워 두고, 목록이 그 뒤로 지나가요 */
 .page .tabBar {
-    position: sticky;
+    position: absolute;
     z-index: 2;
     bottom: calc(var(--home-bar-height) + 10px);
-    align-self: center;
-    margin-top: auto;
-    margin-bottom: calc(var(--home-bar-height) + 10px);
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 /* 상태바는 단색(연두)이라 사진과 바로 맞닿으면 경계선이 보여요. 맨 위에서 연두가 사진으로 풀리게 해요.
