@@ -1,7 +1,7 @@
 import { skipToken, useIsMutating, useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { getViewStatus } from '@/shared/api/viewStatus';
-import { createAiDraft, createPlan, createShareLink, fetchPlan, fetchPlans, planKeys, updatePlan } from '../api/plans';
-import type { Plan, PlanListParams, ShareType } from './plan.types';
+import { createAiDraft, createPlan, createShareLink, deletePlan, fetchPlan, fetchPlans, planKeys, updatePlan } from '../api/plans';
+import type { Plan, PlanListParams, PlanSummary, ShareType } from './plan.types';
 
 type SaveBatch = { pending: number; confirmed: Plan | undefined };
 const saveBatches = new WeakMap<QueryClient, Map<string, SaveBatch>>();
@@ -59,6 +59,22 @@ export function useCreateAiDraft(planId: string) {
     onSuccess: (plan) => {
       queryClient.setQueryData(planKeys.detail(planId), plan);
       void queryClient.invalidateQueries({ queryKey: [...planKeys.all, 'list'] });
+    },
+  });
+}
+
+/** 계획 삭제. 성공하면 목록 캐시에서 바로 빼고, 서버 목록으로 다시 맞춰요 */
+export function useDeletePlan() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: deletePlan,
+    onSuccess: (_data, planId) => {
+      queryClient.setQueriesData<PlanSummary[]>({ queryKey: [...planKeys.all, 'list'] }, (plans) =>
+        plans?.filter((plan) => plan.id !== planId),
+      );
+      queryClient.removeQueries({ queryKey: planKeys.detail(planId) });
+      return queryClient.invalidateQueries({ queryKey: [...planKeys.all, 'list'] });
     },
   });
 }

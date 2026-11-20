@@ -1,17 +1,32 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router";
 import { getErrorMessage } from "@/shared/api/client";
 import {
   isDraftPlanStatus,
   type PlanSummary,
 } from "@/features/plan/model/plan.types";
-import { usePlans } from "@/features/plan/model/usePlan";
+import { useDeletePlan, usePlans } from "@/features/plan/model/usePlan";
+import PlanDeleteDialog, {
+  type PlanDeleteStep,
+} from "@/features/plan/ui/PlanDeleteDialog";
+import PlanMoreMenu from "@/features/plan/ui/PlanMoreMenu";
+import Toast from "@/shared/components/Toast";
 import TabBar from "@/shared/components/TabBar";
 import Button from "@/shared/components/Button";
 import styles from "./TripListPage.module.css";
 import { useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
 
 type PlanTab = "mine" | "shared";
+
+/** 이 계획의 ⋮ 메뉴를 그릴 때 넘겨요. 없으면 ⋮를 숨겨요 (공유받은 계획) */
+type PlanMenuProps = {
+  openMenuPlanId: string | null;
+  onMenuOpenChange: (planId: string, isOpen: boolean) => void;
+  onDelete: (plan: PlanSummary) => void;
+};
+
+const DELETED_MESSAGE = "여행계획을 삭제했어요.";
+const TOAST_DURATION_MS = 2000;
 
 const formatDate = (date: string) => date.replaceAll("-", ".");
 
@@ -23,12 +38,14 @@ function isUpcoming(plan: PlanSummary) {
 function PlanRow({
   plan,
   onOpen,
+  menu,
 }: {
   plan: PlanSummary;
   onOpen: (plan: PlanSummary) => void;
+  menu?: PlanMenuProps;
 }) {
   return (
-    <li>
+    <li className={styles.planItem}>
       <button
         type="button"
         className={styles.planRow}
@@ -42,6 +59,15 @@ function PlanRow({
             : `${formatDate(plan.startDate)} — ${formatDate(plan.endDate)}`}
         </span>
       </button>
+      {menu && (
+        <PlanMoreMenu
+          className={styles.rowMenu}
+          planTitle={plan.title}
+          isOpen={menu.openMenuPlanId === plan.id}
+          onOpenChange={(isOpen) => menu.onMenuOpenChange(plan.id, isOpen)}
+          onDelete={() => menu.onDelete(plan)}
+        />
+      )}
     </li>
   );
 }
@@ -50,9 +76,11 @@ function PlanRow({
 function FeaturedPlanCard({
   plan,
   onOpen,
+  menu,
 }: {
   plan: PlanSummary;
   onOpen: (plan: PlanSummary) => void;
+  menu: PlanMenuProps;
 }) {
   const [failedImageUrl, setFailedImageUrl] = useState<string>();
   const { coverImageUrl } = plan;
@@ -60,26 +88,39 @@ function FeaturedPlanCard({
     coverImageUrl !== undefined && coverImageUrl !== failedImageUrl;
 
   return (
-    <button
-      type="button"
-      className={styles.featured}
-      onClick={() => onOpen(plan)}
-    >
-      {hasCover && (
-        <img
-          className={styles.featuredImage}
-          src={coverImageUrl}
-          alt=""
-          onError={() => setFailedImageUrl(coverImageUrl)}
-        />
-      )}
-      {/* 사진이 없을 때도 밝은 그라데이션 위 흰 글자가 읽히게 늘 덮어요 */}
-      <span className={styles.featuredShade} />
-      <span className={styles.featuredLabel}>다가오는 여행 | {plan.title}</span>
-      <span className={styles.openIcon} aria-hidden="true">
-        ↗
-      </span>
-    </button>
+    <div className={styles.featuredWrap}>
+      <button
+        type="button"
+        className={styles.featured}
+        onClick={() => onOpen(plan)}
+      >
+        {hasCover && (
+          <img
+            className={styles.featuredImage}
+            src={coverImageUrl}
+            alt=""
+            onError={() => setFailedImageUrl(coverImageUrl)}
+          />
+        )}
+        {/* 사진이 없을 때도 밝은 그라데이션 위 흰 글자가 읽히게 늘 덮어요 */}
+        <span className={styles.featuredShade} />
+        <span className={styles.featuredLabel}>
+          다가오는 여행 | {plan.title}
+        </span>
+        <span className={styles.openIcon} aria-hidden="true">
+          ↗
+        </span>
+      </button>
+      {/* 카드 전체가 버튼이라 ⋮는 그 위에 따로 얹어요 */}
+      <PlanMoreMenu
+        className={styles.featuredMenu}
+        tone="photo"
+        planTitle={plan.title}
+        isOpen={menu.openMenuPlanId === plan.id}
+        onOpenChange={(isOpen) => menu.onMenuOpenChange(plan.id, isOpen)}
+        onDelete={() => menu.onDelete(plan)}
+      />
+    </div>
   );
 }
 
@@ -90,6 +131,49 @@ export default function TripListPage() {
   const [showAllPast, setShowAllPast] = useState(false);
   const { plans, viewStatus, error, refetch } = usePlans({ owner: "me" });
   const shared = usePlans({ owner: "shared" });
+  const deletePlan = useDeletePlan();
+  const [openMenuPlanId, setOpenMenuPlanId] = useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{
+    plan: PlanSummary;
+    step: PlanDeleteStep;
+  } | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const isToastVisible = toastMessage !== null;
+
+  useEffect(() => {
+    if (!isToastVisible) return;
+    const timer = window.setTimeout(
+      () => setToastMessage(null),
+      TOAST_DURATION_MS,
+    );
+    return () => window.clearTimeout(timer);
+  }, [isToastVisible]);
+
+  // ⋮는 내 계획에만 그려요. 삭제는 계획을 만든 사람만 할 수 있어요 (공유받은 계획은 편집·보기 멤버)
+  const planMenu: PlanMenuProps = {
+    openMenuPlanId,
+    onMenuOpenChange: (planId, isOpen) =>
+      setOpenMenuPlanId(isOpen ? planId : null),
+    onDelete: (plan) => {
+      deletePlan.reset();
+      setDeleteTarget({ plan, step: "confirm" });
+    },
+  };
+
+  const closeDeleteDialog = () => {
+    if (deletePlan.isPending) return;
+    setDeleteTarget(null);
+  };
+
+  const confirmDelete = () => {
+    if (!deleteTarget) return;
+    deletePlan.mutate(deleteTarget.plan.id, {
+      onSuccess: () => {
+        setDeleteTarget(null);
+        setToastMessage(DELETED_MESSAGE);
+      },
+    });
+  };
   const { upcoming, past } = useMemo(() => {
     const sorted = [...plans].sort((a, b) =>
       a.startDate.localeCompare(b.startDate),
@@ -193,7 +277,11 @@ export default function TripListPage() {
           <div role="tabpanel" className={styles.planContent}>
             {upcoming[0] ? (
               <section className={styles.upcoming} aria-label="다가오는 여행">
-                <FeaturedPlanCard plan={upcoming[0]} onOpen={openPlan} />
+                <FeaturedPlanCard
+                  plan={upcoming[0]}
+                  onOpen={openPlan}
+                  menu={planMenu}
+                />
               </section>
             ) : (
               <section
@@ -238,7 +326,12 @@ export default function TripListPage() {
               {past.length ? (
                 <ul className={styles.list}>
                   {(showAllPast ? past : past.slice(0, 3)).map((plan) => (
-                    <PlanRow key={plan.id} plan={plan} onOpen={openPlan} />
+                    <PlanRow
+                      key={plan.id}
+                      plan={plan}
+                      onOpen={openPlan}
+                      menu={planMenu}
+                    />
                   ))}
                 </ul>
               ) : (
@@ -249,7 +342,12 @@ export default function TripListPage() {
                   <h2 className={styles.otherTitle}>다가오는 여행</h2>
                   <ul className={styles.list}>
                     {upcoming.slice(1).map((plan) => (
-                      <PlanRow key={plan.id} plan={plan} onOpen={openPlan} />
+                      <PlanRow
+                        key={plan.id}
+                        plan={plan}
+                        onOpen={openPlan}
+                        menu={planMenu}
+                      />
                     ))}
                   </ul>
                 </>
@@ -260,6 +358,22 @@ export default function TripListPage() {
       </div>
 
       <TabBar activeTab="menu" className={styles.tabBar} />
+      {toastMessage && <Toast message={toastMessage} />}
+      {deleteTarget && (
+        <PlanDeleteDialog
+          step={deleteTarget.step}
+          planTitle={deleteTarget.plan.title}
+          isPending={deletePlan.isPending}
+          errorMessage={
+            deletePlan.isError
+              ? `삭제하지 못했어요. ${getErrorMessage(deletePlan.error)}`
+              : undefined
+          }
+          onCancel={closeDeleteDialog}
+          onNext={() => setDeleteTarget({ ...deleteTarget, step: "final" })}
+          onConfirm={confirmDelete}
+        />
+      )}
     </main>
   );
 }

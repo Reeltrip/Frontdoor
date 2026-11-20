@@ -43,6 +43,8 @@ import mapMarkerReferenceSmall from "./assets/map-marker-reference-small.png";
 import mapMarkerReferenceLarge from "./assets/map-marker-reference-large.png";
 import RecentCollectionCard from "@/features/source/ui/RecentCollectionCard";
 import PlaceCardStrip from "@/features/place/ui/PlaceCardStrip";
+import PlanMoreMenu from "@/features/plan/ui/PlanMoreMenu";
+import PlanDeleteDialog from "@/features/plan/ui/PlanDeleteDialog";
 
 export type ComponentDemo = {
   /** 컴포넌트 이름 */
@@ -182,6 +184,124 @@ export const componentDemos: ComponentDemo[] = [
                 })}
               />
             }
+          />
+        ),
+      },
+    ],
+  },
+
+  {
+    name: "PlanMoreMenu",
+    path: "features/plan/ui/PlanMoreMenu",
+    description:
+      "여행목록 내 계획 ⋮ 메뉴. 보관함·카드 보기 ⋮ 메뉴와 같은 모양이에요. 공유받은 계획에는 그리지 않아요",
+    variants: [
+      {
+        label: "닫힘",
+        render: () => (
+          <PlanMoreMenu
+            planTitle="교토 당일치기"
+            isOpen={false}
+            onOpenChange={noop}
+            onDelete={noop}
+          />
+        ),
+      },
+      {
+        label: "메뉴 열림",
+        render: () => (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "flex-end",
+              alignItems: "flex-start",
+              width: 240,
+              height: 100,
+            }}
+          >
+            <PlanMoreMenu
+              planTitle="교토 당일치기"
+              isOpen
+              onOpenChange={noop}
+              onDelete={noop}
+            />
+          </div>
+        ),
+      },
+      {
+        label: "사진 위 (다가오는 여행 카드)",
+        render: () => (
+          <DarkBox>
+            <PlanMoreMenu
+              tone="photo"
+              planTitle="오사카 여행"
+              isOpen={false}
+              onOpenChange={noop}
+              onDelete={noop}
+            />
+          </DarkBox>
+        ),
+      },
+    ],
+  },
+
+  {
+    name: "PlanDeleteDialog",
+    path: "features/plan/ui/PlanDeleteDialog",
+    description:
+      "여행계획 삭제 확인. 되돌릴 수 없어서 두 번 물어요. 2차 확인은 바깥을 눌러도 닫히지 않아요",
+    variants: [
+      {
+        label: "1차 확인",
+        render: () => (
+          <PlanDeleteDialog
+            isInline
+            step="confirm"
+            planTitle="교토 당일치기"
+            onCancel={noop}
+            onNext={noop}
+            onConfirm={noop}
+          />
+        ),
+      },
+      {
+        label: "2차 확인",
+        render: () => (
+          <PlanDeleteDialog
+            isInline
+            step="final"
+            planTitle="교토 당일치기"
+            onCancel={noop}
+            onNext={noop}
+            onConfirm={noop}
+          />
+        ),
+      },
+      {
+        label: "삭제 중",
+        render: () => (
+          <PlanDeleteDialog
+            isInline
+            step="final"
+            planTitle="교토 당일치기"
+            isPending
+            onCancel={noop}
+            onNext={noop}
+            onConfirm={noop}
+          />
+        ),
+      },
+      {
+        label: "삭제 실패",
+        render: () => (
+          <PlanDeleteDialog
+            isInline
+            step="final"
+            planTitle="교토 당일치기"
+            errorMessage="삭제하지 못했어요. 네트워크 연결을 확인해 주세요."
+            onCancel={noop}
+            onNext={noop}
+            onConfirm={noop}
           />
         ),
       },
@@ -487,7 +607,9 @@ export const componentDemos: ComponentDemo[] = [
         label: "글자 수 끝까지 (이름 40자, 더 못 써요)",
         render: () => (
           <PlaceEditCardDemo
-            edit={{ name: "하카타 잇소 본점 돈코츠 라멘 진한 국물 맛집 (博多一双 本店) 하카타역" }}
+            edit={{
+              name: "하카타 잇소 본점 돈코츠 라멘 진한 국물 맛집 (博多一双 本店) 하카타역",
+            }}
           />
         ),
       },
