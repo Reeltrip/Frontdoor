@@ -167,6 +167,8 @@
   pointer-events: auto;
 }
 
+/* 피그마 3-1 Ellipse 1818: #FAFAFA 52% 위에 배경 흐림을 얹은 글라스 원이에요. 뒤 지도가 흐리게 비쳐요 (#220).
+   아이콘 그림에는 + 획만 있고 원은 여기서 그려요 */
 .addButton {
   display: flex;
   align-self: flex-end;
@@ -174,8 +176,12 @@
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: none;
-  box-shadow: 0 0 38.58px 0 rgba(26, 26, 26, 0.17);
+  background: rgba(250, 250, 250, 0.52);
+  box-shadow:
+    0 0 77.16px 0 rgba(26, 26, 26, 0.17),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.6);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   cursor: pointer;
 }
 
