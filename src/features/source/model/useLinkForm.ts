@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { LinkRow } from "./source.types";
 
-export const INITIAL_LINK_COUNT = 4;
+export const INITIAL_LINK_COUNT = 1;
 
 export function isLinkValid(value: string): boolean {
   try {
