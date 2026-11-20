@@ -49,7 +49,8 @@ type ApiNode = {
   imageUrl: string | null;
   /** 마커에 Google 장소 사진을 그릴 때 써요. 없는 카드는 null */
   googlePlaceId?: string | null;
-  alternatives: { placeId: number; name: string }[];
+  /** category는 플랜B를 다른 카테고리로 넣을 수 있게 되면서 서버가 같이 줘요 */
+  alternatives: { placeId: number; name: string; category?: ApiCategory }[];
 };
 
 type ApiDay = {
@@ -91,10 +92,10 @@ function toEmbeddedPlaces(plan: ApiPlan): Place[] {
         ...toLocation(node.latitude, node.longitude),
         ...(node.googlePlaceId ? { googlePlaceId: node.googlePlaceId } : {}),
       },
-      // 서버가 플랜B 카테고리를 주지 않아서 대신할 노드 카테고리로 채워요. 다른 카테고리 플랜B면 틀릴 수 있어요
+      // 플랜B는 다른 카테고리일 수 있어요. 예전 응답처럼 카테고리가 없으면 대신할 노드 카테고리로 채워요
       ...node.alternatives.map((alternative) => ({
         id: String(alternative.placeId),
-        category: fromApiCategory(node.category),
+        category: fromApiCategory(alternative.category ?? node.category),
         name: alternative.name,
         imageUrl: '',
         summary: [],
