@@ -13,6 +13,7 @@ import PlanMoreMenu from "@/features/plan/ui/PlanMoreMenu";
 import Toast from "@/shared/components/Toast";
 import TabBar from "@/shared/components/TabBar";
 import Button from "@/shared/components/Button";
+import openArrowIcon from "@/shared/assets/icons/open-arrow-pill.svg";
 import styles from "./TripListPage.module.css";
 import { useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
 
@@ -110,8 +111,9 @@ function FeaturedPlanCard({
         <span className={styles.featuredLabel}>
           다가오는 여행 | {plan.title}
         </span>
+        {/* 글자 ↗는 글꼴 여백 때문에 원 가운데에 안 맞아서 아이콘으로 그려요 (피그마 댓글 #98) */}
         <span className={styles.openIcon} aria-hidden="true">
-          ↗
+          <img src={openArrowIcon} alt="" />
         </span>
       </button>
       {/* 카드 전체가 버튼이라 ⋮는 그 위에 따로 얹어요 */}
