@@ -42,28 +42,30 @@
   background: var(--color-gray-900);
 }
 
+/* 탭 아래 전체 회색 줄은 없애고 선택한 탭의 연두 밑줄만 남겨요 (피그마 댓글 #95) */
 .tabs {
   display: flex;
   flex-shrink: 0;
   margin-top: 18px;
-  border-bottom: 1px solid var(--color-gray-200);
 }
 
+/* 탭 글자 16px, 선택한 탭만 500 (피그마 댓글 #99) */
 .tabs button {
   flex: 1;
   height: 48px;
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
-  font: var(--font-body2);
+  font: var(--font-body1);
   letter-spacing: var(--tracking);
-  color: var(--color-gray-500);
+  color: #666a80;
   cursor: pointer;
 }
 
 .tabs .activeTab {
   border-bottom-color: #d5f337;
-  color: var(--color-gray-900);
+  font-weight: 500;
+  color: #262838;
 }
 
 .content {
@@ -166,12 +168,21 @@
   opacity: .88;
 }
 
-/* 피그마의 안쪽 그림자 3겹(가장자리가 흐리게 번짐)과 흰 점무늬. 사진 위에 얹어야 보여서 따로 덮어요 */
+/* 흰 점무늬(땡땡이). 가로를 3등분해 왼쪽·오른쪽 1/3에만 깔고 가운데는 사진이 잘 보이게 비워요 */
+.featuredDots {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle, rgba(255, 255, 255, .3) 1px, transparent 1.6px) 0 0 / 9px 9px;
+  -webkit-mask-image: linear-gradient(90deg, #000 33.333%, transparent 33.333% 66.667%, #000 66.667%);
+  mask-image: linear-gradient(90deg, #000 33.333%, transparent 33.333% 66.667%, #000 66.667%);
+  pointer-events: none;
+}
+
+/* 피그마의 안쪽 그림자 3겹(가장자리가 흐리게 번짐). 사진 위에 얹어야 보여서 따로 덮어요 */
 .featuredGlow {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: radial-gradient(circle, rgba(255, 255, 255, .3) 1px, transparent 1.6px) 0 0 / 9px 9px;
   box-shadow:
     inset 0 0 65.4px #faffe6,
     inset 0 0 6.1px #e6ffc8,
@@ -191,18 +202,19 @@
   z-index: 1;
 }
 
-/* 피그마: 사진 왼쪽 위(좌 24·위 28). 오른쪽은 ↗ 버튼 자리를 비워요 */
+/* 피그마: 사진 왼쪽 위(좌 24·위 27). 오른쪽은 ↗ 버튼 자리를 비워요 (피그마 댓글 #96) */
 .featuredLabel {
   position: absolute;
-  top: 28px;
+  top: 27px;
   left: 24px;
   right: 108px;
   display: block;
   text-align: left;
   overflow: hidden;
-  font: var(--font-body2);
+  font: 700 16px/1.75 var(--font-family);
   letter-spacing: var(--tracking);
-  line-height: 1.2;
+  color: #fdfdff;
+  opacity: .8;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
@@ -217,8 +229,13 @@
   place-items: center;
   border-radius: 50%;
   background: rgba(255, 255, 255, .72);
-  color: #333;
-  font-size: 23px;
+}
+
+/* 장소 카드와 같이 쓰는 흰 화살표 아이콘이라 여기서만 #333으로 바꿔요 (피그마 댓글 #98) */
+.openIcon img {
+  width: 20px;
+  height: 20px;
+  filter: brightness(0) invert(0.2);
 }
 
 .pastSection {
@@ -235,15 +252,13 @@
 .sectionHeading h2,
 .otherTitle {
   margin: 0;
-  font: var(--font-body1);
-  font-weight: 600;
-  letter-spacing: var(--tracking);
+  font: 400 16px/1 var(--font-family);
+  letter-spacing: 0;
 }
 
+/* 글자는 400, 숫자만 600으로 굵게 해요 (피그마 댓글 #94). 사이는 피그마처럼 공백 한 칸만 둬요 */
 .sectionHeading h2 span {
-  margin-left: 4px;
-  color: var(--color-gray-500);
-  font-weight: 400;
+  font-weight: 600;
 }
 
 .sectionHeading button {
@@ -293,18 +308,19 @@
   cursor: pointer;
 }
 
+/* 목록 카드 제목은 굵게 하지 않아요 (피그마 댓글 #93) */
 .planName {
   overflow: hidden;
-  font: var(--font-body2);
-  font-weight: 600;
-  color: var(--color-gray-900);
+  font: 400 15px/1.6 var(--font-family);
+  letter-spacing: var(--tracking);
+  color: #16171f;
   white-space: nowrap;
   text-overflow: ellipsis;
 }
 
 .planDate {
-  font: var(--font-caption);
-  color: var(--color-gray-500);
+  font: 400 13px/23px var(--font-family);
+  color: #666a80;
 }
 
 .otherTitle {

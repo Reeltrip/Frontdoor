@@ -13,6 +13,7 @@ import PlanMoreMenu from "@/features/plan/ui/PlanMoreMenu";
 import Toast from "@/shared/components/Toast";
 import TabBar from "@/shared/components/TabBar";
 import Button from "@/shared/components/Button";
+import openArrowIcon from "@/shared/assets/icons/open-arrow-pill.svg";
 import styles from "./TripListPage.module.css";
 import { useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
 
@@ -102,15 +103,17 @@ function FeaturedPlanCard({
             onError={() => setFailedImageUrl(coverImageUrl)}
           />
         )}
-        {/* 가장자리 흐림과 점무늬 (피그마 S5-1) */}
+        {/* 점무늬(양쪽 1/3)와 가장자리 흐림 (피그마 S5-1) */}
+        <span className={styles.featuredDots} />
         <span className={styles.featuredGlow} />
         {/* 사진이 없을 때도 밝은 그라데이션 위 흰 글자가 읽히게 늘 덮어요 */}
         <span className={styles.featuredShade} />
         <span className={styles.featuredLabel}>
           다가오는 여행 | {plan.title}
         </span>
+        {/* 글자 ↗는 글꼴 여백 때문에 원 가운데에 안 맞아서 아이콘으로 그려요 (피그마 댓글 #98) */}
         <span className={styles.openIcon} aria-hidden="true">
-          ↗
+          <img src={openArrowIcon} alt="" />
         </span>
       </button>
       {/* 카드 전체가 버튼이라 ⋮는 그 위에 따로 얹어요 */}
