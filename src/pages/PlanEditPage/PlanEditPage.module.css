@@ -252,10 +252,11 @@
   background: linear-gradient(to top, var(--color-white) 64%, rgba(250, 250, 250, 0));
 }
 
+/* 플랜 B 고르는 중 취소 버튼은 선택한 카테고리 칩과 같은 색 (CategoryChip .selected) */
 .actions .cancelPlanB {
   border-color: transparent;
-  background: var(--color-category-chip-bg);
-  color: var(--color-gray-700);
+  background: var(--color-gray-900);
+  color: var(--color-white);
 }
 
 .bottom>section+.actions {
