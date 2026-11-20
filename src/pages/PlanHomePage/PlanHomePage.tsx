@@ -1,9 +1,11 @@
-import { useNavigate } from 'react-router';
+import { useEffect, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router';
 import { getErrorMessage } from '@/shared/api/client';
 import bgImage from '@/shared/assets/images/plan-home-bg.jpg';
 import globeImage from '@/shared/assets/images/plan-home-globe.svg';
 import { LoadingSpinner } from '@/shared/components/Loading';
 import TabBar from '@/shared/components/TabBar';
+import Toast from '@/shared/components/Toast';
 import { isDraftPlanStatus, type PlanSummary } from '@/features/plan/model/plan.types';
 import { usePlans } from '@/features/plan/model/usePlan';
 import { DARK_BACKDROP, useScreenBackdrop } from '@/shared/hooks/useScreenBackdrop';
@@ -23,6 +25,19 @@ const formatDate = (date: string) => date.replaceAll('-', '.');
 export default function PlanHomePage() {
   useScreenBackdrop(DARK_BACKDROP, { hasStatusBarCap: false });
   const navigate = useNavigate();
+  const location = useLocation();
+  const planAutoSaved = (location.state as { planAutoSaved?: boolean } | null)?.planAutoSaved === true;
+  const [showSavedToast, setShowSavedToast] = useState(planAutoSaved);
+
+  useEffect(() => {
+    if (planAutoSaved) navigate('.', { replace: true, state: null });
+  }, [navigate, planAutoSaved]);
+
+  useEffect(() => {
+    if (!showSavedToast) return;
+    const timer = window.setTimeout(() => setShowSavedToast(false), 2000);
+    return () => window.clearTimeout(timer);
+  }, [showSavedToast]);
   const { plans, viewStatus, error, refetch } = usePlans();
 
   // 작성 중인 계획은 이어서 편집하고, 다 만든 계획은 보기 화면으로 가요
@@ -95,6 +110,7 @@ export default function PlanHomePage() {
       </section>
 
       <TabBar activeTab="plan" theme="dark" className={styles.tabBar} />
+      {showSavedToast && <Toast message="여행계획이 자동 저장됐어요." />}
     </main>
   );
 }

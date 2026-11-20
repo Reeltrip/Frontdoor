@@ -164,10 +164,7 @@ export default function PlanCreatePage() {
         }}
         onConfirm={() => {
           if (createdPlan)
-            navigate(`/plans/${createdPlan.id}/edit`, {
-              replace: true,
-              state: { returnTo: "plans" },
-            });
+            navigate(`/plans/${createdPlan.id}/edit`, { replace: true });
         }}
       />
     </form>

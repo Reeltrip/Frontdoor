@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import kebabIcon from "@/shared/assets/icons/kebab.svg";
 import handleIcon from "@/shared/assets/icons/sheet-handle.svg";
@@ -96,7 +96,6 @@ const hasRoute = (day: PlanDay | undefined) =>
 export default function PlanEditPage() {
   const { planId = "" } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
   const queryClient = useQueryClient();
   const { plan, viewStatus, error, refetch } = usePlan(planId);
   const { places: libraryPlaces, viewStatus: placesStatus } = usePlaces();
@@ -168,9 +167,18 @@ export default function PlanEditPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [isContinuing, setIsContinuing] = useState(false);
+  const [isLeaving, setIsLeaving] = useState(false);
+  const leavingRef = useRef(false);
   const continuingRef = useRef(false);
+  const pendingSave = useRef<Promise<Plan> | null>(null);
   const saveAttempt = useRef(0);
   const failedSave = useRef<{ plan: Plan; onSaved?: () => void } | null>(null);
+
+  useEffect(() => {
+    return () => {
+      leavingRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!toastMessage) return;
@@ -235,8 +243,10 @@ export default function PlanEditPage() {
     }
     failedSave.current = null;
     setSaveError(null);
+    const request = updatePlan.mutateAsync(nextPlan);
+    pendingSave.current = request;
     try {
-      await updatePlan.mutateAsync(nextPlan);
+      await request;
       if (attempt === saveAttempt.current) {
         failedSave.current = null;
         setSaveError(null);
@@ -248,6 +258,7 @@ export default function PlanEditPage() {
         setSaveError(getErrorMessage(error));
       }
     } finally {
+      if (pendingSave.current === request) pendingSave.current = null;
       if (onSaved) {
         continuingRef.current = false;
         setIsContinuing(false);
@@ -284,28 +295,26 @@ export default function PlanEditPage() {
       nextDayIndex,
     );
 
-  const handleBack = () => {
-    if (continuingRef.current || createLodging.isPending) return;
-    if (isPreviewing) return setIsPreviewing(false);
-    // 플랜 B를 고르는 중에 다른 장소를 봤다면 선택만 풀고 플랜 B 고르기는 이어가요
-    if (selectedId) return browsePlace(null);
-    if (planBTargetId) return resetSelection();
-    if (currentStep === "lodging") {
-      if (lodgingResult) return setLodgingResult(undefined);
-      if (isSearchingLodging) return setIsSearchingLodging(false);
-      return goToDay(dayIndex);
+  const handleBack = async () => {
+    if (leavingRef.current || createLodging.isPending || aiDraft.isPending) return;
+    leavingRef.current = true;
+    setIsLeaving(true);
+    try {
+      const failed = failedSave.current;
+      if (pendingSave.current) await pendingSave.current;
+      else if (failed) await save(failed.plan, failed.onSaved);
+
+      if (leavingRef.current && !failedSave.current) {
+        navigate("/plans", { replace: true, state: { planAutoSaved: true } });
+      }
+    } catch {
+      // 저장 실패 안내와 재시도는 기존 편집 화면에서 보여줘요.
+    } finally {
+      if (leavingRef.current) {
+        leavingRef.current = false;
+        setIsLeaving(false);
+      }
     }
-    if (isReviewing) {
-      setIsReviewing(false);
-      setHasFinishedPlan(false);
-      return;
-    }
-    if (currentStep === "nodes") return goToStep("zone");
-    if (currentStep === "zone" && dayIndex > 0) return goToDay(dayIndex - 1);
-    const returnTo = (location.state as { returnTo?: string } | null)?.returnTo;
-    if (returnTo === "plans") navigate("/plans", { replace: true });
-    else if (location.key === "default") navigate("/plans", { replace: true });
-    else navigate(-1);
   };
 
   // ── 화면에 올릴 장소 ──
@@ -590,7 +599,7 @@ export default function PlanEditPage() {
     void save(completePlanDay(plan, dayIndex), () => goToDay(dayIndex + 1));
   };
 
-  const isBusy = isContinuing || aiDraft.isPending || createLodging.isPending;
+  const isBusy = isLeaving || isContinuing || aiDraft.isPending || createLodging.isPending;
 
   const handleCompleteDay = () => {
     if (day.nodes.length === 0) setIsSkipDayOpen(true);
@@ -735,12 +744,12 @@ export default function PlanEditPage() {
       {isPlanBTutorialOpen && (
         <PlanTutorialOverlay kind="planB" onClose={closePlanBTutorial} />
       )}
-      <div className={styles.top} inert={isBusy}>
+      <div className={styles.top} inert={aiDraft.isPending || createLodging.isPending}>
         <Header
           title={STEP_TITLES[currentStep]}
           onBack={handleBack}
           action={
-            <div ref={menuRef} className={styles.menuWrap}>
+            <div ref={menuRef} className={styles.menuWrap} inert={isBusy}>
               <button
                 type="button"
                 className={styles.moreButton}
@@ -821,7 +830,7 @@ export default function PlanEditPage() {
           }
         />
         {currentStep !== "lodging" && (
-          <div className={styles.toolbar}>
+          <div className={styles.toolbar} inert={isBusy}>
             <DaySelector
               days={plan.days}
               selectedIndex={dayIndex}
@@ -1016,8 +1025,8 @@ export default function PlanEditPage() {
         onConfirm={completeDay}
       />
       {toastMessage && <Toast message={toastMessage} />}
-      {isContinuing && (
-        <div className={styles.aiDraftLoading} role="status">
+      {(isContinuing || isLeaving) && (
+        <div className={styles.saveLoading} role="status">
           <div>
             <LoadingSpinner label="여행 일정을 저장하는 중" />
             <p>저장이 끝나면 다음 화면으로 이동해요.</p>
