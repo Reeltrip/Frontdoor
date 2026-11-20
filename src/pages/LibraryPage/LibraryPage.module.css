@@ -185,8 +185,23 @@
   height: 56px;
 }
 
+/* 피그마 3-2(236:10723): 카드 위 55px부터 #fafafa가 올라와 카드 위쪽 21px 아래로는 단색이에요.
+   아래로는 화면 끝까지 덮어요(.page가 넘치는 부분을 잘라요) */
 .strip {
+  position: relative;
   width: 100%;
+}
+
+.strip::before {
+  position: absolute;
+  top: -55px;
+  right: 0;
+  bottom: -100dvh;
+  left: 0;
+  z-index: -1;
+  background: linear-gradient(transparent -13px, var(--color-white) 76px);
+  pointer-events: none;
+  content: '';
 }
 
 .tabBar {
