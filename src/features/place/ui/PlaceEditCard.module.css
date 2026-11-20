@@ -23,8 +23,10 @@
     min-width: 100%;
 }
 
-.underline:focus-within {
-    box-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+/* 피그마: 고치는 칸은 같은 크기에 굵은 글씨, 밑줄 없음 */
+.sizer:focus-within,
+.sizer.isEmpty {
+    font-weight: 700;
 }
 
 .input {
@@ -41,7 +43,8 @@
 }
 
 .input::placeholder {
-    color: var(--color-gray-300);
+    color: currentColor;
+    opacity: 1;
 }
 
 .title {
@@ -73,7 +76,8 @@
     transition: background-color 0.15s;
 }
 
-.tagField:focus-within {
+.tagField:focus-within,
+.tagField:has(.isEmpty) {
     background: rgba(255, 255, 255, 0.3);
 }
 

@@ -18,7 +18,6 @@ type AutoWidthInputProps = {
   maxLength: number;
   label: string;
   className: string;
-  hasUnderline?: boolean;
   onChange: (value: string) => void;
   onKeyDown: (event: KeyboardEvent<HTMLInputElement>) => void;
 };
@@ -29,13 +28,13 @@ function AutoWidthInput({
   maxLength,
   label,
   className,
-  hasUnderline = true,
   onChange,
   onKeyDown,
 }: AutoWidthInputProps) {
   return (
     <span
-      className={`${styles.sizer} ${className} ${hasUnderline ? styles.underline : ""}`}
+      // 빈 칸은 고치는 중이라 안내 문구도 굵게 보여요 (피그마 '편집 중 ㅣ')
+      className={`${styles.sizer} ${className} ${value ? "" : styles.isEmpty}`}
       data-value={value || placeholder}
     >
       <input
@@ -114,10 +113,9 @@ export default function PlaceEditCard({
             <AutoWidthInput
               className={styles.tagInput}
               value={draft.tag}
-              placeholder="편집"
+              placeholder="가격 입력중"
               maxLength={PLACE_EDIT_MAX_LENGTH.tag}
               label="가격"
-              hasUnderline={false}
               onChange={(value) => update("tag", value)}
               onKeyDown={handleKeyDown}
             />
