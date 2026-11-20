@@ -149,13 +149,26 @@
   right: 30px;
 }
 
+.cardFocus article {
+  position: relative;
+}
+
+.cardFocus article::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: 12px;
+  background: rgb(51 51 51 / 62%);
+  pointer-events: none;
+}
+
 
 .cardFocus button {
   z-index: 2;
 }
 
-.cardFocus button:not([aria-label]),
-.cardFocus button[aria-label$='계획에서 제거'] {
+.cardFocus button:not([aria-label]) {
   border-color: transparent;
   background: #ffffff;
   color: #1a1a1a;
@@ -172,18 +185,22 @@
   z-index: 2;
 }
 
-/* 피그마: 화살표도 휴지통과 같은 38px 흰 원, 둘 사이 6px */
-.cardFocus button[aria-label$='새 탭에서 열기'] {
-  top: 12px;
-  right: 10px;
-  align-items: center;
-  justify-content: center;
+/* 튜토리얼 중에는 알약을 풀어서 38px 흰 원 두 개로 보여요 */
+.cardFocus article>div:first-child>div {
+  width: auto;
+  padding: 0;
+  gap: 6px;
+  background: none;
+  backdrop-filter: none;
+}
+
+.cardFocus article>div:first-child>div button {
   width: 38px;
   height: 38px;
   border-radius: 50%;
   background: #ffffff;
 }
 
-.cardFocus button[aria-label$='계획에서 제거'] {
-  right: 54px;
+.cardFocus article>div:first-child>div img {
+  filter: brightness(0);
 }
