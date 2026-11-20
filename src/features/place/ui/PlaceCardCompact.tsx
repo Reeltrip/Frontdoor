@@ -1,6 +1,7 @@
 import openIcon from "@/shared/assets/icons/open-arrow-compact.svg";
 import trashIcon from "@/shared/assets/icons/trash-compact.svg";
 import copyIcon from "@/shared/assets/icons/copy-dark.svg";
+import { useGooglePlacePhoto } from "@/shared/hooks/useGooglePlacePhoto";
 import { displayOrDash } from "@/shared/lib/displayValue";
 import type { Place } from "../model/place.types";
 import styles from "./PlaceCardCompact.module.css";
@@ -32,12 +33,26 @@ export default function PlaceCardCompact({
   className,
 }: PlaceCardCompactProps) {
   const name = displayOrDash(place.name);
+  // 같은 링크에서 나온 카드는 BE 사진이 모두 같아서, 지도 마커처럼 Google 장소 사진을 먼저 보여줘요
+  const photo = useGooglePlacePhoto(place.googlePlaceId, place.imageUrl);
 
   return (
     <article className={[styles.card, className].filter(Boolean).join(" ")}>
       <div className={styles.photoBox}>
-        {place.imageUrl && (
-          <img src={place.imageUrl} alt="" className={styles.photo} />
+        {photo.imageUrl && (
+          <img
+            src={photo.imageUrl}
+            alt=""
+            className={styles.photo}
+            onLoad={photo.onLoad}
+            onError={photo.onError}
+          />
+        )}
+        {photo.authors.length > 0 && (
+          // Google 장소 사진은 올린 사람을 함께 보여줘야 해요. 아래 버튼이 눌리게 터치는 통과시켜요
+          <p className={styles.credits}>
+            사진: {photo.authors.map(({ displayName }) => displayName).join(", ")}
+          </p>
         )}
         {onPick && (
           <button
