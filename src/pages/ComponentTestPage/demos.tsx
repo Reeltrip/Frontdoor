@@ -587,6 +587,8 @@ export const componentDemos: ComponentDemo[] = [
       "요약카드를 좌우로 끌어서 넘겨 보는 목록. 양옆 카드는 기울어져 보임",
     variants: [
       { label: "기본 (카드 3장)", render: () => <PlaceCarouselDemo /> },
+      { label: "카드 2장", render: () => <PlaceCarouselDemo count={2} /> },
+      { label: "카드 1장", render: () => <PlaceCarouselDemo count={1} /> },
     ],
   },
 

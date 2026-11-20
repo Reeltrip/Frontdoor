@@ -23,6 +23,7 @@ import {
   DEMO_RESULT_INITIAL_INDEX,
 } from "./demoData";
 import CategoryDial from "@/features/place/ui/CategoryDial";
+import sampleRestaurant from "@/shared/assets/images/result/food.png";
 import PlaceCarousel from "@/features/place/ui/PlaceCarousel";
 import Toast from "@/shared/components/Toast";
 import PlaceEditCard from "@/features/place/ui/PlaceEditCard";
@@ -96,13 +97,22 @@ export function TextFieldDemo({ initialValue }: { initialValue: string }) {
     />
   );
 }
-export function PlaceCarouselDemo() {
-  const [activeIndex, setActiveIndex] = useState(1);
-  const places = DEMO_PLACES;
+const carouselPlaces = [
+  ...DEMO_PLACES,
+  {
+    ...DEMO_PLACES[0],
+    id: "demo-place-3",
+    name: "하카타 모츠나베 오오야마",
+    imageUrl: sampleRestaurant,
+  },
+];
+
+export function PlaceCarouselDemo({ count = 3 }: { count?: number }) {
+  const [activeIndex, setActiveIndex] = useState(0);
   return (
-    <div style={{ width: 390, height: 360, overflow: "hidden" }}>
+    <div style={{ width: 390, height: 390, overflow: "hidden" }}>
       <PlaceCarousel
-        places={places}
+        places={carouselPlaces.slice(0, count)}
         activeIndex={activeIndex}
         onChange={setActiveIndex}
       />

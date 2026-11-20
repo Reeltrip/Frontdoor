@@ -3,7 +3,7 @@ import { useRef, useState, type MouseEvent, type PointerEvent } from "react";
 type UseDragStepperOptions = {
   count: number;
   index: number;
-  onChange: (index: number) => void;
+  onChange: (index: number, unwrappedIndex: number) => void;
   stepPx: number;
   startPx?: number;
   loop?: boolean;
@@ -73,7 +73,8 @@ export function useDragStepper({
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId);
     }
-    if (next !== index) onChange(next);
+    const current = loop ? wrapIndex(index, count) : index;
+    if (next !== current) onChange(next, loop ? rounded : next);
   };
 
   const handleClickCapture = (event: MouseEvent<HTMLElement>) => {
