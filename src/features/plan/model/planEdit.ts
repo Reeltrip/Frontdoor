@@ -89,7 +89,8 @@ export function buildDayRoute(plan: Plan, dayIndex: number): MapRouteStop[] {
 }
 
 export function canSetPlanB(plan: Plan, dayIndex: number, target: Place, candidate: Place): boolean {
-  return candidate.category === target.category &&
+  // 플랜 B는 다른 카테고리 장소도 고를 수 있어요 (예: 맛집 대신 카페)
+  return candidate.id !== target.id &&
     candidate.id !== plan.accommodationPlaceId &&
     !plan.days[dayIndex]?.nodes.some((node) => node.placeId === candidate.id || node.planB?.placeId === candidate.id) &&
     findOtherDayNumber(plan, dayIndex, candidate.id) === undefined;

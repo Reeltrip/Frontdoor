@@ -888,7 +888,7 @@ export default function PlanEditPage() {
         )}
         {planBTargetId && selectedPlace && canPreviewPlanB && !canSavePlanB && (
           <p className={styles.notice}>
-            플랜 B는 같은 종류의 장소만 넣을 수 있어요.
+            이 장소는 플랜 B로 넣을 수 없어요.
           </p>
         )}
         {placesStatus === "loading" && (
