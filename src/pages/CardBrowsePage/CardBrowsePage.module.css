@@ -52,10 +52,8 @@
     cursor: default;
 }
 
-.saveButton {
-    left: 16px;
-}
-
+/* 편집 중에는 편집 버튼 자리에서 체크(저장) 버튼으로 바뀌어요. 왼쪽 아래에는 버튼을 두지 않아요 */
+.saveButton,
 .editButton {
     right: 16px;
 }
