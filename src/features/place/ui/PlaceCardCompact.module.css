@@ -59,8 +59,7 @@
 }
 
 /* 피그마 'S4-5c 플랜 B 추가': 확정 카드 사진 위의 흰 알약과 휴지통 */
-.planBButton,
-.removeButton {
+.planBButton {
   position: absolute;
   top: 12px;
   display: flex;
@@ -81,12 +80,6 @@
   font: 500 12px/1 var(--font-family);
   letter-spacing: var(--tracking);
   white-space: nowrap;
-}
-
-.removeButton {
-  right: 50px;
-  width: 30px;
-  border-radius: 50%;
 }
 
 .titleRow {
@@ -165,8 +158,7 @@
   outline-offset: -4px;
 }
 
-.planBButton,
-.removeButton {
+.planBButton {
   height: 38px;
   border-radius: 22px;
   background: rgba(51, 51, 51, 0.45);
@@ -180,10 +172,6 @@
   border: 1px solid rgba(254, 254, 254, 0.32);
 }
 
-.removeButton {
-  right: 46px;
-  width: 38px;
-}
 
 .actionPill {
   position: absolute;

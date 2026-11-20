@@ -51,7 +51,8 @@ export default function PlaceCardCompact({
         {photo.authors.length > 0 && (
           // Google 장소 사진은 올린 사람을 함께 보여줘야 해요. 아래 버튼이 눌리게 터치는 통과시켜요
           <p className={styles.credits}>
-            사진: {photo.authors.map(({ displayName }) => displayName).join(", ")}
+            사진:{" "}
+            {photo.authors.map(({ displayName }) => displayName).join(", ")}
           </p>
         )}
         {onPick && (
@@ -71,23 +72,14 @@ export default function PlaceCardCompact({
             {planBLabel ?? "플랜 B추가"}
           </button>
         )}
-        {onRemove && (
-          <button
-            type="button"
-            className={styles.removeButton}
-            onClick={() => onRemove(place)}
-            aria-label={`${name} 계획에서 제거`}
-          >
-            <img src={trashIcon} alt="" />
-          </button>
-        )}
-        {onDelete ? (
+        {onDelete || onRemove ? (
+          // 휴지통과 원본 열기를 보관함 카드와 같은 알약 하나로 묶어요
           <div className={styles.actionPill}>
             <button
               type="button"
               className={styles.pillButton}
-              onClick={() => onDelete(place)}
-              aria-label={`${name} 삭제`}
+              onClick={() => (onDelete ?? onRemove)?.(place)}
+              aria-label={onDelete ? `${name} 삭제` : `${name} 계획에서 제거`}
             >
               <img src={trashIcon} alt="" />
             </button>
