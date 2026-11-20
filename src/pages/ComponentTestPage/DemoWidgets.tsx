@@ -109,13 +109,25 @@ export function PlaceCarouselDemo() {
   );
 }
 
-export function PlaceEditCardDemo() {
+/** edit에 넣은 칸만 바꿔서 시작해요. 빈 문자열이면 그 칸을 고치는 중인 모양이에요 */
+export function PlaceEditCardDemo({
+  edit = {},
+}: {
+  edit?: Partial<PlaceDraft>;
+}) {
   const place = DEMO_PLACES[0];
-  const [draft, setDraft] = useState<PlaceDraft>(() => toDraft(place));
+  const [draft, setDraft] = useState<PlaceDraft>(() => ({
+    ...toDraft(place),
+    ...edit,
+  }));
   return <PlaceEditCard place={place} draft={draft} onDraftChange={setDraft} />;
 }
 
-export function ToastDemo() {
+export function ToastDemo({
+  message = "편집하신 내용이 저장되었습니다.",
+}: {
+  message?: string;
+}) {
   return (
     <div
       style={{
@@ -125,7 +137,7 @@ export function ToastDemo() {
         overflow: "hidden",
       }}
     >
-      <Toast message="편집하신 내용이 저장되었습니다." />
+      <Toast message={message} />
     </div>
   );
 }

@@ -471,6 +471,49 @@ export const componentDemos: ComponentDemo[] = [
     description: "요약카드를 편집하는 모양. 이름·위치·가격 칸을 눌러 바로 고침",
     variants: [
       { label: "기본 (눌러서 입력)", render: () => <PlaceEditCardDemo /> },
+      {
+        label: "이름 고치는 중 (빈 칸)",
+        render: () => <PlaceEditCardDemo edit={{ name: "" }} />,
+      },
+      {
+        label: "위치 고치는 중 (빈 칸)",
+        render: () => <PlaceEditCardDemo edit={{ location: "" }} />,
+      },
+      {
+        label: "가격 고치는 중 (빈 칸)",
+        render: () => <PlaceEditCardDemo edit={{ tag: "" }} />,
+      },
+      {
+        label: "글자 수 끝까지 (이름 40자, 더 못 써요)",
+        render: () => (
+          <PlaceEditCardDemo
+            edit={{ name: "하카타 잇소 본점 돈코츠 라멘 진한 국물 맛집 (博多一双 本店) 하카타역" }}
+          />
+        ),
+      },
+      {
+        label: "저장 안 하고 나갈 때",
+        render: () => (
+          <ConfirmModal
+            isOpen
+            isInline
+            icon="alert"
+            title="변경사항이 감지되었어요."
+            description="변경하신 내용을 저장할까요?"
+            cancelLabel="그만두기"
+            confirmLabel="저장하기"
+            onCancel={noop}
+            onConfirm={noop}
+          />
+        ),
+      },
+      { label: "저장 성공", render: () => <ToastDemo /> },
+      {
+        label: "저장 실패",
+        render: () => (
+          <ToastDemo message="저장하지 못했어요. 네트워크 연결을 확인해 주세요." />
+        ),
+      },
     ],
   },
 
