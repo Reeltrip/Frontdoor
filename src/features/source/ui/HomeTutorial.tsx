@@ -66,10 +66,10 @@ export default function HomeTutorial({ onClose, onLoadLink }: HomeTutorialProps)
               <path className={styles.head} d="M1 1L6 4L1 7" />
             </marker>
           </defs>
-          {/* 안내 글 첫 줄 오른쪽에서 버튼 오른쪽 아래로 휘어 올라가요 */}
+          {/* 안내 글 첫 줄 오른쪽에서 버튼 오른쪽 아래로 휘어 올라가요. 버튼 위치·크기를 바꾸면 끝점도 옮겨요 */}
           <path
             className={styles.dotted}
-            d="M186 344C250 346 296 282 260 253"
+            d="M186 344C254 346 306 270 270 240"
             markerEnd="url(#home-tutorial-head)"
           />
         </svg>
