@@ -193,6 +193,7 @@ export default function LibraryPage() {
         )}
       </div>
 
+      <div className={styles.bottomFade} aria-hidden />
       <div className={styles.bottom}>
         <button
           type="button"
