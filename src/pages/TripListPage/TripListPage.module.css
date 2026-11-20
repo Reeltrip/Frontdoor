@@ -140,24 +140,7 @@
   cursor: pointer;
 }
 
-.featured::before,
-.featured::after {
-  position: absolute;
-  content: '';
-  border: 1px solid rgba(255, 255, 255, .16);
-  border-radius: 50%;
-  transform: rotate(-24deg);
-}
-
-.featured::before {
-  inset: 26px -36px 54px 34%;
-}
-
-.featured::after {
-  inset: 58px 14% 28px -22px;
-}
-
-/* 표지 사진은 그라데이션과 장식 원 위를 덮어요. 사진이 없으면 그라데이션이 그대로 보여요 */
+/* 표지 사진은 연두 바탕 위를 덮어요. 사진이 없으면 바탕이 그대로 보여요 */
 .featuredImage {
   position: absolute;
   inset: 0;
@@ -166,6 +149,20 @@
   object-fit: cover;
   /* 피그마: 사진 불투명도 88%. 아래 연두 바탕이 살짝 비쳐요 */
   opacity: .88;
+}
+
+/* 피그마 대표 카드 안의 원 4개(Ellipse 5412·5413·5409·5410). 테두리 없이 가운데에서 바깥으로 옅어지는 원이에요.
+   위치·크기는 카드 왼쪽 위 기준 피그마 값이고, 카드 밖으로 나간 부분은 카드가 잘라요 (#214).
+   먼저 적은 원이 위에 그려져요(피그마 레이어 순서) */
+.featuredOrbs {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(closest-side, #ffffff, rgba(255, 255, 255, 0)) 289px 320px / 205px 205px no-repeat,
+    radial-gradient(closest-side, rgba(132, 173, 0, .53), rgba(132, 173, 0, 0)) -145px -144px / 361px 361px no-repeat,
+    radial-gradient(closest-side, #9ec12e, rgba(158, 193, 46, 0)) -144.5px 187px / 361px 361px no-repeat,
+    radial-gradient(closest-side, #ffffd5, rgba(255, 255, 213, 0)) -148px 239px / 286px 286px no-repeat;
+  pointer-events: none;
 }
 
 /* 흰 점무늬(땡땡이). 가로를 3등분해 왼쪽·오른쪽 1/3에만 깔고 가운데는 사진이 잘 보이게 비워요 */
