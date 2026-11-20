@@ -3,7 +3,8 @@
     isolation: isolate;
     display: flex;
     flex-direction: column;
-    min-height: 100dvh;
+    height: 100dvh;
+    overflow: clip;
     padding: 0 20px;
     background: linear-gradient(180deg, var(--color-lime-50) 0%, var(--color-lime-10) 28%, var(--color-bg) 62%);
 }
@@ -28,6 +29,7 @@
 
 .header {
     display: flex;
+    flex-shrink: 0;
     flex-direction: column;
     align-items: center;
     margin-top: 80px;
@@ -66,16 +68,37 @@
 }
 
 .recent {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
     margin-top: 56px;
-    padding-bottom: 40px;
+    margin-bottom: 12px;
 }
 
 .recentTitle {
+    flex-shrink: 0;
     margin: 0 0 12px;
     font: var(--font-body2);
     font-weight: 500;
     letter-spacing: var(--tracking);
     color: var(--color-gray-800);
+}
+
+.recentBody {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    margin: 0 -20px;
+}
+
+.recentScroll {
+    height: 100%;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: none;
+    padding: 0 20px 12px;
+    outline-offset: -2px;
 }
 
 .recentList {
@@ -86,19 +109,13 @@
     padding: 0;
 }
 
-
-/* 피그마 2-1: 탭바 위쪽부터 기록 카드가 바탕색으로 풀려요. 화면에 고정해 두고 아래에 더 있을 때만 보여요 */
 .bottomFade {
-    position: fixed;
+    position: absolute;
+    inset-inline: 0;
     bottom: 0;
-    left: 50%;
-    z-index: 1;
-    width: 100%;
-    max-width: var(--app-max-width);
-    height: 220px;
-    background: linear-gradient(to bottom, rgba(255, 255, 255, 0), var(--color-bg) 75%);
+    height: min(104px, 100%);
+    background: linear-gradient(to bottom, transparent, var(--color-bg));
     opacity: 0;
-    transform: translateX(-50%);
     pointer-events: none;
     transition: opacity 0.2s ease;
 }
@@ -108,10 +125,9 @@
 }
 
 .page .tabBar {
-    position: sticky;
-    z-index: 2;
-    bottom: calc(var(--home-bar-height) + 10px);
     align-self: center;
+    flex-shrink: 0;
+    max-width: 100%;
     margin-top: auto;
     margin-bottom: calc(var(--home-bar-height) + 10px);
 }
