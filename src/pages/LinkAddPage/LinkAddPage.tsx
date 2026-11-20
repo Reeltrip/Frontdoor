@@ -51,7 +51,7 @@ export default function LinkAddPage() {
       <button
         type="button"
         className={styles.backButton}
-        onClick={() => navigate(-1)}
+        onClick={() => navigate("/home", { replace: true })}
         aria-label="뒤로 가기"
       >
         <img src={backIcon} alt="" />
