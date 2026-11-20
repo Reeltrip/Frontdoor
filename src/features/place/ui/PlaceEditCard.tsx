@@ -1,3 +1,4 @@
+import { useGooglePlacePhoto } from "@/shared/hooks/useGooglePlacePhoto";
 import { Fragment, type KeyboardEvent } from "react";
 import openIcon from "@/shared/assets/icons/open-arrow.svg";
 import copyIcon from "@/shared/assets/icons/copy-light.svg";
@@ -65,10 +66,24 @@ export default function PlaceEditCard({
     if (event.key === "Enter") event.currentTarget.blur();
   };
 
+  // 보기 카드와 같은 사진을 보여줘요 (#193)
+  const photo = useGooglePlacePhoto(place.googlePlaceId, place.imageUrl);
+
   return (
     <article className={cardStyles.card}>
-      <img src={place.imageUrl} alt="" className={cardStyles.photo} />
+      {photo.imageUrl && (
+        <img
+          src={photo.imageUrl}
+          alt=""
+          className={cardStyles.photo}
+          onLoad={photo.onLoad}
+          onError={photo.onError}
+        />
+      )}
       <span className={cardStyles.shade} aria-hidden />
+      {photo.authors.length > 0 && (
+        <p className={cardStyles.credits}>사진: {photo.authors.map(({ displayName }) => displayName).join(", ")}</p>
+      )}
 
       <span className={cardStyles.openButton} aria-hidden>
         <img src={openIcon} alt="" />

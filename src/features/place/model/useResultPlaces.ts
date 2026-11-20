@@ -57,6 +57,8 @@ export function useResultPlaces() {
         title,
         description: first?.name ?? EMPTY_DESCRIPTION,
         ...(imageUrl ? { imageUrl } : {}),
+        // 설명에 이름이 나오는 첫 카드의 Google 사진을 써요
+        ...(first?.googlePlaceId ? { googlePlaceId: first.googlePlaceId } : {}),
       };
     },
   );
