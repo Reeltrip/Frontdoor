@@ -40,15 +40,23 @@ export function useResultPlaces() {
     (placesByCategory[key] ??= []).push(place);
   });
 
+  // 한 링크에서 만든 카드들이 같은 원본 썸네일을 받을 수 있어요.
+  // 카테고리 대표 사진은 앞 카테고리에서 쓰지 않은 사진을 먼저 골라 반복을 피해요.
+  const usedImageUrls = new Set<string>();
   const items: ResultCategoryItem[] = RESULT_CATEGORIES.map(
     ({ category, title }) => {
-      const first = placesByCategory[category]?.[0];
+      const categoryPlaces = placesByCategory[category] ?? [];
+      const first = categoryPlaces[0];
+      const imageUrl = categoryPlaces.find(
+        (place) => place.imageUrl && !usedImageUrls.has(place.imageUrl),
+      )?.imageUrl;
+      if (imageUrl) usedImageUrls.add(imageUrl);
       return {
         id: category,
         category,
         title,
         description: first?.name ?? EMPTY_DESCRIPTION,
-        ...(first?.imageUrl ? { imageUrl: first.imageUrl } : {}),
+        ...(imageUrl ? { imageUrl } : {}),
       };
     },
   );
