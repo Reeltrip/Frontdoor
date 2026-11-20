@@ -9,7 +9,9 @@
 
 .header {
     align-self: stretch;
-    margin-top: 112px;
+    /* 피그마 112px에는 상태바 자리가 들어 있어요. 폰은 상태바가 화면 밖에 따로 있어서
+       --page-top처럼 40px을 빼요. 아래 로딩·단계는 이 제목을 따라 같이 올라가요 (#175) */
+    margin-top: max(calc(112px * var(--status-bar-space)), calc(env(safe-area-inset-top) + 72px));
 }
 
 .title {
