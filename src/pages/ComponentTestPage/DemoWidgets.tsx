@@ -6,6 +6,7 @@ import TabBar, { type TabKey } from "@/shared/components/TabBar";
 import ConfirmModal from "@/shared/components/ConfirmModal";
 import CategoryWheel from "@/features/place/ui/CategoryWheel";
 import CategoryChip from "@/features/place/ui/CategoryChip";
+import CategoryFilterBar from "@/features/place/ui/CategoryFilterBar";
 import {
   LoadingArc,
   LoadingBlob,
@@ -298,6 +299,23 @@ export function DarkBox({ children }: { children: ReactNode }) {
       }}
     >
       {children}
+    </div>
+  );
+}
+
+/** 보관함 헤더처럼 #fafafa 바탕 위 가로 스크롤 칩 바. 넘치면 오른쪽 페이드가 보여요 */
+export function CategoryFilterBarDemo() {
+  const [selected, setSelected] = useState<PlaceCategory | "all">("all");
+  return (
+    <div
+      style={{
+        width: "100%",
+        padding: "12px 0",
+        background: "var(--color-white)",
+        ["--filter-fade-color" as string]: "var(--color-white)",
+      }}
+    >
+      <CategoryFilterBar selected={selected} onChange={setSelected} />
     </div>
   );
 }
