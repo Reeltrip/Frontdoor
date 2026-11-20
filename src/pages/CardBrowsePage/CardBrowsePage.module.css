@@ -26,15 +26,16 @@
     color: var(--color-text-sub);
 }
 
+/* 누르기 쉽게 44px. 가운데 위치는 34px 때와 같아서 편집 안내의 고리도 그대로 맞아요 */
 .roundButton {
     position: absolute;
-    bottom: 44px;
+    bottom: 39px;
     z-index: 6;
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 34px;
-    height: 34px;
+    width: 44px;
+    height: 44px;
     padding: 0;
     border: none;
     border-radius: 50%;
@@ -42,16 +43,21 @@
     cursor: pointer;
 }
 
+.roundButton img {
+    width: 100%;
+    height: 100%;
+}
+
 .roundButton:disabled {
     cursor: default;
 }
 
 .saveButton {
-    left: 21px;
+    left: 16px;
 }
 
 .editButton {
-    right: 21px;
+    right: 16px;
 }
 
 .aboveTutorial {

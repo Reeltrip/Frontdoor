@@ -53,10 +53,11 @@
 
 .ring {
   position: absolute;
-  right: 10px;
-  bottom: 33px;
-  width: 56px;
-  height: 56px;
+  /* 44px 편집 버튼보다 10px 바깥 */
+  right: 6px;
+  bottom: 29px;
+  width: 64px;
+  height: 64px;
   border: 2px solid var(--color-lime-600);
   border-radius: 50%;
 }
