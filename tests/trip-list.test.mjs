@@ -70,3 +70,15 @@ test('조회 실패 시에는 재시도를 보여주고 빈 안내를 숨겨요'
   assert.match(html, /다시 시도/);
   assert.doesNotMatch(html, /모아둔 여행자료로|여행계획 생성하기/);
 });
+
+// 피그마 S5-1: 지난 여행 카드 제목 옆에 만든 날을 YY.MM.DD로 보여줘요 (#210)
+test('지난 여행 카드 제목 옆에 만든 날을 보여줘요', () => {
+  const html = renderList([{ ...pastPlan, createdAt: '2026-07-17T10:20:00+09:00' }]);
+  assert.match(html, /교토 당일치기<\/span><span[^>]*>26\.07\.17<\/span>/);
+  assert.match(html, /2000\.05\.03 \| 장소 5곳/);
+});
+
+test('만든 날이 없으면 제목만 보여줘요', () => {
+  const html = renderList([pastPlan]);
+  assert.doesNotMatch(html, /\d{2}\.\d{2}\.\d{2}<\/span>/);
+});

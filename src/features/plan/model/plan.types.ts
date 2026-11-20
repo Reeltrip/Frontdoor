@@ -78,4 +78,6 @@ export type PlanSummary = Pick<Plan, 'id' | 'title' | 'startDate' | 'endDate' | 
   coverImageUrl?: string;
   /** 모든 일차에 들어 있는 장소 수 합계 */
   placeCount?: number;
+  /** 계획을 만든 시각 (서버 시간대 그대로). 여행목록 카드에 YY.MM.DD로 보여줘요 */
+  createdAt?: string;
 };

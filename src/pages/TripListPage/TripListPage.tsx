@@ -30,6 +30,8 @@ const DELETED_MESSAGE = "여행계획을 삭제했어요.";
 const TOAST_DURATION_MS = 2000;
 
 const formatDate = (date: string) => date.replaceAll("-", ".");
+/** '2026-07-17T10:20:00+09:00' → '26.07.17'. 서버가 보낸 날짜 부분을 그대로 써요 (피그마 S5-1, #210) */
+const formatCreatedDate = (createdAt: string) => createdAt.slice(2, 10).replaceAll("-", ".");
 
 function isUpcoming(plan: PlanSummary) {
   const endDate = new Date(`${plan.endDate}T23:59:59`);
@@ -52,7 +54,12 @@ function PlanRow({
         className={styles.planRow}
         onClick={() => onOpen(plan)}
       >
-        <span className={styles.planName}>{plan.title}</span>
+        <span className={styles.planTitleRow}>
+          <span className={styles.planName}>{plan.title}</span>
+          {plan.createdAt && (
+            <span className={styles.planCreated}>{formatCreatedDate(plan.createdAt)}</span>
+          )}
+        </span>
         <span className={styles.planDate}>
           {/* 장소 수는 목록 응답의 placeCount예요. 값이 없으면 기간을 보여줘요 */}
           {plan.placeCount !== undefined
