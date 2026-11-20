@@ -16,10 +16,9 @@
   will-change: transform, opacity;
 }
 
-.slot:not([inert]) {
+.slot:has(> :not([inert])) {
   cursor: grab;
 }
-
 
 .animated {
   transition:

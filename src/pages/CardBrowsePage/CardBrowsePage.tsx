@@ -248,6 +248,7 @@ export default function CardBrowsePage() {
       <div className={styles.stage}>
         {places.length > 0 ? (
           <PlaceCarousel
+            key={category.category}
             places={places}
             activeIndex={placeIndex}
             onChange={setPlaceIndex}
