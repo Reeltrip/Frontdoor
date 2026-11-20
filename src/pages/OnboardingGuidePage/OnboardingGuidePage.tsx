@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type MouseEvent } from "react";
 import { useNavigate } from "react-router";
 import Button from "@/shared/components/Button";
 import { useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
@@ -45,9 +45,16 @@ export default function OnboardingGuidePage() {
   // 가입 직후 한 번만 보는 화면이라 뒤로 가기로 돌아오지 않게 해요
   const handleFinish = () => navigate("/home", { replace: true });
   const handleNext = () => setStep((current) => Math.min(current + 1, LAST_STEP));
+  // 화면 아무 곳이나 눌러도 다음 장으로, 마지막 장이면 홈으로 넘어가요 (#238).
+  // 건너뛰기·다음·시작하기 버튼은 자기 동작만 해요
+  const handlePageClick = (event: MouseEvent) => {
+    if ((event.target as Element).closest("button")) return;
+    if (isLastStep) handleFinish();
+    else handleNext();
+  };
 
   return (
-    <main className={styles.page}>
+    <main className={styles.page} onClick={handlePageClick}>
       <img className={styles.art} src={art} alt="" width={330} height={250} />
 
       <h1 className={styles.title}>{title}</h1>

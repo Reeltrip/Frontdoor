@@ -120,6 +120,11 @@ export default function HomePage() {
 
   // 안내를 먼저 닫은 뒤 홈 버튼과 같은 흐름(클립보드 확인)을 따라요. 직접 해 보기를 골랐으니 이어 보기는 끝내요
   const handleTutorialLoadLink = () => {
+    // 다시 보기 중에는 안내 안 버튼을 눌러도 다음 안내로 넘어가요 (#238)
+    if (isReplay) {
+      handleTutorialClose();
+      return;
+    }
     markHomeTutorialSeen();
     clearTutorialReplay();
     setHasSeenTutorial(true);
