@@ -53,3 +53,31 @@ test('지우는 키가 각 화면에서 쓰는 키와 같아요', () => {
     assert.ok(sources.includes(`"${key}"`) || sources.includes(`'${key}'`), key);
   }
 });
+
+// 다시 보기는 안내가 있는 화면을 차례로 옮겨 가며 보여줘요 (#179)
+test('다시 보기는 홈 → 요약카드 → 카드 직접 추가 순서로 이어져요', () => {
+  assert.equal(replay.getTutorialTourStep(), null);
+  replay.replayTutorials();
+  assert.equal(replay.getTutorialTourStep(), 'home');
+  assert.equal(replay.advanceTutorialTour(), '/cards');
+  assert.equal(replay.getTutorialTourStep(), 'cards');
+  assert.equal(replay.advanceTutorialTour(), '/cards/new');
+  assert.equal(replay.getTutorialTourStep(), 'cardAdd');
+  // 마지막 안내 다음에는 마이페이지로 돌아가고 이어 보기는 끝나요
+  assert.equal(replay.advanceTutorialTour(), '/my');
+  assert.equal(replay.getTutorialTourStep(), null);
+});
+
+test('이어 보기를 끝내면 어느 화면에서도 이어지지 않아요', () => {
+  replay.replayTutorials();
+  replay.advanceTutorialTour();
+  replay.clearTutorialReplay();
+  assert.equal(replay.getTutorialTourStep(), null);
+  assert.equal(replay.isTutorialReplay(), false);
+});
+
+test('예전 다시 보기 표시(1)는 홈 단계로 읽어요', () => {
+  localStorage.setItem('wayvi.tutorialReplay', '1');
+  assert.equal(replay.getTutorialTourStep(), 'home');
+  assert.equal(replay.isTutorialReplay(), true);
+});
