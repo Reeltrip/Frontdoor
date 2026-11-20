@@ -123,7 +123,10 @@ export default function CardBrowsePage() {
         changes: {
           ...(next.name !== place.name ? { name: next.name } : {}),
           ...(next.summary[0] !== place.summary[0]
-            ? { summaryFirst: next.summary[0] ?? "" }
+            ? {
+                summaryFirst: next.summary[0] ?? "",
+                summaryFirstField: place.summaryFirstField,
+              }
             : {}),
           ...(next.tag !== place.tag ? { tag: next.tag } : {}),
         },
