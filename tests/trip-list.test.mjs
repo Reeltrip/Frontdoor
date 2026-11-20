@@ -62,6 +62,12 @@ test('다가오는 여행이 있으면 대표 카드를 보여주고 빈 안내�
   assert.doesNotMatch(html, /모아둔 여행자료로|여행계획 생성하기/);
 });
 
+test('다가오는 여행만 있어도 여행목록 편집을 할 수 있어요', () => {
+  const html = renderList([upcomingPlan]);
+  assert.match(html, /aria-label="여행목록 편집">편집<\/button>/);
+  assert.match(html, /아직 지난 여행이 없어요\./);
+});
+
 test('불러오는 중에는 빈 안내를 보여주지 않아요', () => {
   const html = renderList(undefined);
   assert.match(html, /여행목록을 불러오는 중이에요\./);

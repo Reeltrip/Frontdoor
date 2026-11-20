@@ -77,7 +77,13 @@ function FeaturedPlanCard({
   plan,
   onOpen,
   onDelete,
-}: PlanCardProps & { onDelete: (plan: PlanSummary) => void }) {
+  onSelect,
+  isSelected,
+}: PlanCardProps & {
+  onDelete: (plan: PlanSummary) => void;
+  onSelect?: (plan: PlanSummary) => void;
+  isSelected?: boolean;
+}) {
   const [failedImageUrl, setFailedImageUrl] = useState<string>();
   const { coverImageUrl } = plan;
   const hasCover =
@@ -88,7 +94,8 @@ function FeaturedPlanCard({
       <button
         type="button"
         className={styles.featured}
-        onClick={() => onOpen(plan)}
+        onClick={() => (onSelect ?? onOpen)(plan)}
+        aria-pressed={isSelected}
       >
         {hasCover && (
           <img
@@ -108,9 +115,19 @@ function FeaturedPlanCard({
           다가오는 여행 | {plan.title}
         </span>
         <span className={styles.featuredActions} aria-hidden="true">
-          <img src={featuredOpenIcon} alt="" />
+          {!onSelect && <img src={featuredOpenIcon} alt="" />}
         </span>
       </button>
+      {onSelect && (
+        <button
+          type="button"
+          className={styles.featuredOpen}
+          aria-label={plan.title + " 열기"}
+          onClick={() => onOpen(plan)}
+        >
+          <img src={featuredOpenIcon} alt="" />
+        </button>
+      )}
       <button
         type="button"
         className={styles.featuredDelete}
@@ -178,7 +195,7 @@ export default function TripListPage() {
         }
         setDeleteTarget(null);
         setToastMessage(DELETED_MESSAGE);
-        if (deleteTarget.fromSelection) finishEditing();
+        if (deleteTarget.fromSelection || deletedIds.size === plans.length) finishEditing();
       },
     });
   };
@@ -191,13 +208,15 @@ export default function TripListPage() {
       past: sorted.filter((plan) => !isUpcoming(plan)).reverse(),
     };
   }, [plans]);
-  const selectedPast = past.filter(({ id }) => selectedIds.includes(id));
-  const isSelectingPast = isEditing && past.length > 0;
-  const editLabel = isSelectingPast ? "완료" : "편집";
-  const handlePastAction = () => {
-    if (selectedPast.length) {
-      startDelete(selectedPast.map(({ id }) => id), true);
-    } else if (isSelectingPast) {
+  const selectedPlans = plans.filter(({ id }) => selectedIds.includes(id));
+  const isSelecting = isEditing && plans.length > 0;
+  const editLabel = isSelecting ? "완료" : "편집";
+  const getSelection = (plan: PlanSummary) =>
+    isSelecting ? selectedIds.includes(plan.id) : undefined;
+  const handleListAction = () => {
+    if (selectedPlans.length) {
+      startDelete(selectedPlans.map(({ id }) => id), true);
+    } else if (isSelecting) {
       finishEditing();
     } else {
       setIsEditing(true);
@@ -304,6 +323,8 @@ export default function TripListPage() {
                   plan={upcoming[0]}
                   onOpen={openPlan}
                   onDelete={(plan) => startDelete([plan.id])}
+                  onSelect={isSelecting ? toggleSelection : undefined}
+                  isSelected={getSelection(upcoming[0])}
                 />
               </section>
             ) : (
@@ -336,17 +357,17 @@ export default function TripListPage() {
               <div className={styles.sectionHeading}>
                 <h2
                   id="past-trips-title"
-                  className={isSelectingPast ? styles.selectionHeading : undefined}
+                  className={isSelecting ? styles.selectionHeading : undefined}
                   aria-live="polite"
                 >
-                  {isSelectingPast ? (
-                    <><span>{selectedPast.length}</span>개 선택됨</>
+                  {isSelecting ? (
+                    <><span>{selectedPlans.length}</span>개 선택됨</>
                   ) : (
                     <>지난 여행 <span>{past.length}</span></>
                   )}
                 </h2>
                 <div className={styles.sectionActions}>
-                  {past.length > 3 && !isSelectingPast && (
+                  {past.length > 3 && !isSelecting && (
                     <button
                       type="button"
                       className={styles.showAllButton}
@@ -355,26 +376,26 @@ export default function TripListPage() {
                       {showAllPast ? "접기" : "모두보기"}
                     </button>
                   )}
-                  {past.length > 0 && (
+                  {plans.length > 0 && (
                     <button
                       type="button"
                       className={styles.editButton}
-                      aria-label={selectedPast.length ? "선택한 여행 삭제" : `여행목록 편집${isSelectingPast ? " 완료" : ""}`}
-                      onClick={handlePastAction}
+                      aria-label={selectedPlans.length ? "선택한 여행 삭제" : `여행목록 편집${isSelecting ? " 완료" : ""}`}
+                      onClick={handleListAction}
                     >
-                      {selectedPast.length ? "삭제" : editLabel}
+                      {selectedPlans.length ? "삭제" : editLabel}
                     </button>
                   )}
                 </div>
               </div>
               {past.length ? (
                 <ul className={styles.list}>
-                  {(isSelectingPast || showAllPast ? past : past.slice(0, 3)).map((plan) => (
+                  {(isSelecting || showAllPast ? past : past.slice(0, 3)).map((plan) => (
                     <PlanRow
                       key={plan.id}
                       plan={plan}
-                      onOpen={isSelectingPast ? toggleSelection : openPlan}
-                      isSelected={isSelectingPast ? selectedIds.includes(plan.id) : undefined}
+                      onOpen={isSelecting ? toggleSelection : openPlan}
+                      isSelected={getSelection(plan)}
                       isPast
                     />
                   ))}
@@ -390,7 +411,8 @@ export default function TripListPage() {
                       <PlanRow
                         key={plan.id}
                         plan={plan}
-                        onOpen={openPlan}
+                        onOpen={isSelecting ? toggleSelection : openPlan}
+                        isSelected={getSelection(plan)}
                       />
                     ))}
                   </ul>
