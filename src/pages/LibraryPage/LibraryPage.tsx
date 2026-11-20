@@ -13,7 +13,10 @@ import {
   type MapPosition,
 } from "@/shared/components/Map";
 import TabBar from "@/shared/components/TabBar";
-import { useScreenBackdrop, WHITE_BACKDROP } from "@/shared/hooks/useScreenBackdrop";
+import {
+  useScreenBackdrop,
+  WHITE_BACKDROP,
+} from "@/shared/hooks/useScreenBackdrop";
 import { toMapNodes } from "@/features/place/lib/mapNodes";
 import { useDeletePlace, usePlaces } from "@/features/place/model/usePlaces";
 import type { Place, PlaceCategory } from "@/features/place/model/place.types";
@@ -211,15 +214,18 @@ export default function LibraryPage() {
                 if (!openPlace(place)) setToastMessage(SOURCE_MISSING_MESSAGE);
               }}
               onCopy={async (place) =>
-                setToastMessage((await copyPlace(place)) ? COPY_DONE_MESSAGE : COPY_FAILED_MESSAGE)
+                setToastMessage(
+                  (await copyPlace(place))
+                    ? COPY_DONE_MESSAGE
+                    : COPY_FAILED_MESSAGE,
+                )
               }
             />
           </div>
         )}
-        <TabBar
-          activeTab="archive"
-          className={styles.tabBar}
-        />
+        {!hasSelection && (
+          <TabBar activeTab="archive" className={styles.tabBar} />
+        )}
       </div>
       {toastMessage && <Toast message={toastMessage} />}
       <ConfirmModal
