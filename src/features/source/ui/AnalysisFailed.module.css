@@ -7,7 +7,8 @@
 }
 
 .header {
-    margin-top: 132px;
+    /* 링크 분석 중 화면과 같이 폰에서는 상태바 자리 40px을 빼요 (#175) */
+    margin-top: max(calc(132px * var(--status-bar-space)), calc(env(safe-area-inset-top) + 92px));
 }
 
 .title {
