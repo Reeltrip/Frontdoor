@@ -46,7 +46,7 @@
 
 .green {
     stroke: var(--color-lime-600);
-    stroke-width: 2;
+    stroke-width: 1.5;
     stroke-linecap: round;
 }
 
@@ -68,7 +68,7 @@
 
 .touch {
     position: absolute;
-    top: 481px;
+    top: 475px;
     left: 189.5px;
     width: 56px;
     height: 56px;
@@ -90,7 +90,7 @@
 
 .hand {
     position: absolute;
-    top: 414px;
+    top: 408px;
     left: 218px;
     width: 126px;
     height: auto;

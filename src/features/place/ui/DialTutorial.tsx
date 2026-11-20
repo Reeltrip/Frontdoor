@@ -42,13 +42,14 @@ export default function DialTutorial({
             {}
             <marker
               id="tutorial-head-green"
-              markerWidth="8"
-              markerHeight="8"
-              refX="6"
-              refY="4"
+              markerUnits="userSpaceOnUse"
+              markerWidth="12"
+              markerHeight="12"
+              refX="9"
+              refY="6"
               orient="auto-start-reverse"
             >
-              <path className={styles.headGreen} d="M1 1L6 4L1 7" />
+              <path className={styles.headGreen} d="M4 1L9 6L4 11" />
             </marker>
           </defs>
           {}
@@ -60,11 +61,7 @@ export default function DialTutorial({
           {}
           <path
             className={styles.green}
-            d={
-              isArrows
-                ? "M124 546H266"
-                : "M84 552C120 528 175 512 217 509C257 512 285 526 302 543"
-            }
+            d={isArrows ? "M124 546H266" : "M83 538C150 491 234 491 301 538"}
             markerStart="url(#tutorial-head-green)"
             markerEnd="url(#tutorial-head-green)"
           />
