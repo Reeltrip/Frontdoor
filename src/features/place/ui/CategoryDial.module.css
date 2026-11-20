@@ -216,6 +216,11 @@
   font-size: 17px;
 }
 
+.summary .arrowNext img {
+  /* 오른쪽 음영 위에서도 보이도록 라벨과 같은 #4d4d4d를 써요. */
+  filter: brightness(0) invert(0.302);
+}
+
 /* 화살표 안내: 어두운 안내 화면 위로 올라와 아이콘·글자·화살표만 흰색으로 보임 */
 .arrowGuide {
   z-index: 11;
