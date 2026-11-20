@@ -142,7 +142,7 @@ test('계획 생성의 실제 응답은 상세를 다시 읽고, 목록은 plans
     calls.push({ url, options });
     const path = new URL(url, 'https://example.com').pathname;
     if (options.method === 'POST') return response({ planId: 10, status: 'DRAFT', totalDayCount: 2, loadedPlaceCount: 6 }, 201);
-    return path === '/plans' ? response({ plans: [fixture()], totalCount: 1 }) : response(fixture());
+    return path === '/plans' ? response({ plans: [{ ...fixture(), createdAt: '2026-07-17T00:30:00+09:00' }], totalCount: 1 }) : response(fixture());
   };
   const plan = await api.createPlan({ title: '저장 검증', destination: '오사카', startDate: '2026-12-01', endDate: '2026-12-02' });
   assert.deepEqual(JSON.parse(calls[0].options.body), { name: '저장 검증', city: '오사카', startDate: '2026-12-01', endDate: '2026-12-02' });
@@ -151,6 +151,7 @@ test('계획 생성의 실제 응답은 상세를 다시 읽고, 목록은 plans
   const list = await api.fetchPlans();
   assert.equal(list[0].title, '원래 계획');
   assert.equal(list[0].destination, '오사카');
+  assert.equal(list[0].createdAt, '2026-07-17T00:30:00+09:00');
 });
 
 test('여러 편집 API 중 일부가 실패하면 실제 서버의 부분 저장 상태를 다시 읽어요', async () => {

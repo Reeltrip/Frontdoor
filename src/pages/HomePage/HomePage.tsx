@@ -5,7 +5,7 @@ import RecentCollectionCard from "@/features/source/ui/RecentCollectionCard";
 import { useRecentCollections } from "@/features/source/model/useRecentCollections";
 import { LIME_BACKDROP, useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
 import styles from "./HomePage.module.css";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type RefObject } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { sourceKeys } from "@/features/source/api/sources";
 import HomeTutorial from "@/features/source/ui/HomeTutorial";
@@ -37,38 +37,49 @@ function markHomeTutorialSeen(): void {
   }
 }
 
+/** 아래로 더 내릴 카드가 남았는지. 홈은 페이지가 아니라 최근 수집 목록 상자만 스크롤돼서 그 상자를 봐요 (#192) */
+function useHasMoreBelow(
+  scrollRef: RefObject<HTMLElement | null>,
+  contentKey: number,
+): boolean {
+  const [hasMoreBelow, setHasMoreBelow] = useState(false);
+
+  useEffect(() => {
+    const scrollArea = scrollRef.current;
+    // 기록이 0개면 목록 상자를 그리지 않아요
+    if (scrollArea === null) {
+      setHasMoreBelow(false);
+      return;
+    }
+    const update = () => {
+      const { scrollTop, clientHeight, scrollHeight } = scrollArea;
+      setHasMoreBelow(scrollTop + clientHeight < scrollHeight - 1);
+    };
+    update();
+    scrollArea.addEventListener("scroll", update, { passive: true });
+    // 목록 상자 높이는 화면 높이를 따라가서, 화면 크기가 바뀌면 다시 재요
+    window.addEventListener("resize", update);
+    return () => {
+      scrollArea.removeEventListener("scroll", update);
+      window.removeEventListener("resize", update);
+    };
+  }, [scrollRef, contentKey]);
+
+  return hasMoreBelow;
+}
+
 export default function HomePage() {
   useScreenBackdrop(LIME_BACKDROP, { hasStatusBarCap: false });
   const navigate = useNavigate();
   // 불러오는 중이거나 실패하면 목록 없이 링크 불러오기만 보여줘요
   const recentCollections = useRecentCollections();
   const hasRecentCollections = recentCollections.length > 0;
+  // 기록이 길어져 탭바 뒤로 내려가면 아래를 흐리게 덮어요. 끝까지 내리면 마지막 카드가 가려지지 않게 걷어요
   const recentScrollRef = useRef<HTMLDivElement>(null);
-  const recentListRef = useRef<HTMLUListElement>(null);
-  const [hasMoreBelow, setHasMoreBelow] = useState(false);
-
-  useEffect(() => {
-    const scrollArea = recentScrollRef.current;
-    const list = recentListRef.current;
-    if (!hasRecentCollections || !scrollArea || !list) return;
-
-    const updateFade = () => {
-      const { scrollTop, clientHeight, scrollHeight } = scrollArea;
-      setHasMoreBelow(scrollTop + clientHeight < scrollHeight - 1);
-    };
-
-    // 화면 높이와 카드 내용이 바뀔 때도 그라데이션을 다시 확인해요
-    const observer = new ResizeObserver(updateFade);
-    observer.observe(scrollArea);
-    observer.observe(list);
-    scrollArea.addEventListener("scroll", updateFade, { passive: true });
-    updateFade();
-
-    return () => {
-      observer.disconnect();
-      scrollArea.removeEventListener("scroll", updateFade);
-    };
-  }, [hasRecentCollections]);
+  const hasMoreBelow = useHasMoreBelow(
+    recentScrollRef,
+    recentCollections.length,
+  );
 
   // 불러오기가 끝났는데 0개일 때만 사용 안내를 띄워요. 불러오는 중·실패와 구분하려고 쿼리 상태를 직접 봐요
   const queryClient = useQueryClient();
@@ -141,30 +152,17 @@ export default function HomePage() {
 
       {hasRecentCollections && (
         <section className={styles.recent}>
-          <h2 id="recent-collections-title" className={styles.recentTitle}>
-            최근 수집 내역
-          </h2>
-          <div className={styles.recentBody}>
-            <div
-              ref={recentScrollRef}
-              className={styles.recentScroll}
-              role="region"
-              aria-labelledby="recent-collections-title"
-              tabIndex={0}
-            >
-              <ul ref={recentListRef} className={styles.recentList}>
-                {recentCollections.map((collection) => (
-                  <RecentCollectionCard
-                    key={collection.id}
-                    collection={collection}
-                  />
-                ))}
-              </ul>
-            </div>
-            <div
-              className={`${styles.bottomFade} ${hasMoreBelow ? styles.bottomFadeVisible : ""}`}
-              aria-hidden
-            />
+          <h2 className={styles.recentTitle}>최근 수집 내역</h2>
+          {/* 이 상자만 스크롤돼서 위쪽 안내·[링크 불러오기]·내역 제목과 탭바는 제자리에 있어요 (#192) */}
+          <div ref={recentScrollRef} className={styles.recentScroll}>
+            <ul className={styles.recentList}>
+              {recentCollections.map((collection) => (
+                <RecentCollectionCard
+                  key={collection.id}
+                  collection={collection}
+                />
+              ))}
+            </ul>
           </div>
         </section>
       )}
@@ -177,6 +175,10 @@ export default function HomePage() {
         confirmLabel="링크 추가하기"
         onCancel={handleClipboardCancel}
         onConfirm={handleClipboardConfirm}
+      />
+      <div
+        className={`${styles.bottomFade} ${hasMoreBelow ? styles.bottomFadeVisible : ""}`}
+        aria-hidden
       />
       <TabBar activeTab="sources" className={styles.tabBar} />
       {isTutorialOpen && (

@@ -42,7 +42,6 @@
   background: var(--color-gray-900);
 }
 
-/* 탭 아래 전체 회색 줄은 없애고 선택한 탭의 연두 밑줄만 남겨요 (피그마 댓글 #95) */
 .tabs {
   display: flex;
   flex-shrink: 0;
@@ -51,8 +50,11 @@
 
 /* 탭 글자 16px, 선택한 탭만 500 (피그마 댓글 #99) */
 .tabs button {
+  display: grid;
   flex: 1;
   height: 48px;
+  padding: 0;
+  place-items: center;
   border: 0;
   border-bottom: 2px solid transparent;
   background: transparent;
@@ -62,8 +64,9 @@
   cursor: pointer;
 }
 
+/* 선택한 탭에만 탭 너비만큼 연두 밑줄 (피그마 S5-1 1381:13179, Sub_400 → lime-400 토큰) */
 .tabs .activeTab {
-  border-bottom-color: #d5f337;
+  border-bottom-color: var(--color-lime-400);
   font-weight: 500;
   color: #262838;
 }
@@ -114,12 +117,10 @@
   position: relative;
 }
 
-/* ↗ 왼쪽에 같은 크기 원으로 놓아요 */
-.featuredMenu {
-  position: absolute;
-  top: 20px;
-  right: 64px;
-  z-index: 2;
+.featuredWrap .deleteTrip {
+  top: 16px;
+  right: 16px;
+  transform: none;
 }
 
 .featured {
@@ -140,24 +141,7 @@
   cursor: pointer;
 }
 
-.featured::before,
-.featured::after {
-  position: absolute;
-  content: '';
-  border: 1px solid rgba(255, 255, 255, .16);
-  border-radius: 50%;
-  transform: rotate(-24deg);
-}
-
-.featured::before {
-  inset: 26px -36px 54px 34%;
-}
-
-.featured::after {
-  inset: 58px 14% 28px -22px;
-}
-
-/* 표지 사진은 그라데이션과 장식 원 위를 덮어요. 사진이 없으면 그라데이션이 그대로 보여요 */
+/* 표지 사진은 연두 바탕 위를 덮어요. 사진이 없으면 바탕이 그대로 보여요 */
 .featuredImage {
   position: absolute;
   inset: 0;
@@ -166,6 +150,20 @@
   object-fit: cover;
   /* 피그마: 사진 불투명도 88%. 아래 연두 바탕이 살짝 비쳐요 */
   opacity: .88;
+}
+
+/* 피그마 대표 카드 안의 원 4개(Ellipse 5412·5413·5409·5410). 테두리 없이 가운데에서 바깥으로 옅어지는 원이에요.
+   위치·크기는 카드 왼쪽 위 기준 피그마 값이고, 카드 밖으로 나간 부분은 카드가 잘라요 (#214).
+   먼저 적은 원이 위에 그려져요(피그마 레이어 순서) */
+.featuredOrbs {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(closest-side, #ffffff, rgba(255, 255, 255, 0)) 289px 320px / 205px 205px no-repeat,
+    radial-gradient(closest-side, rgba(132, 173, 0, .53), rgba(132, 173, 0, 0)) -145px -144px / 361px 361px no-repeat,
+    radial-gradient(closest-side, #9ec12e, rgba(158, 193, 46, 0)) -144.5px 187px / 361px 361px no-repeat,
+    radial-gradient(closest-side, #ffffd5, rgba(255, 255, 213, 0)) -148px 239px / 286px 286px no-repeat;
+  pointer-events: none;
 }
 
 /* 흰 점무늬(땡땡이). 가로를 3등분해 왼쪽·오른쪽 1/3에만 깔고 가운데는 사진이 잘 보이게 비워요 */
@@ -246,7 +244,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 10px;
+  min-height: 44px;
+  margin-bottom: 12px;
 }
 
 .sectionHeading h2,
@@ -256,12 +255,36 @@
   letter-spacing: 0;
 }
 
-/* 글자는 400, 숫자만 600으로 굵게 해요 (피그마 댓글 #94). 사이는 피그마처럼 공백 한 칸만 둬요 */
+.sectionHeading h2 {
+  color: #42403a;
+  line-height: normal;
+}
+
 .sectionHeading h2 span {
+  color: var(--color-gray-900);
   font-weight: 600;
 }
 
-.sectionHeading button {
+.sectionActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editButton {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--color-gray-900);
+  font: var(--font-body2);
+  cursor: pointer;
+}
+
+.showAllButton {
   border: 0;
   border-radius: 18px;
   padding: 7px 12px;
@@ -284,12 +307,20 @@
   position: relative;
 }
 
-/* 줄 오른쪽 가운데. 줄 버튼 위에 따로 얹어요 */
-.rowMenu {
+.deleteTrip {
   position: absolute;
   top: 50%;
   right: 4px;
+  display: grid;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  place-items: center;
   transform: translateY(-50%);
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-gray-0);
+  cursor: pointer;
 }
 
 .planRow {
@@ -299,7 +330,7 @@
   box-sizing: border-box;
   width: 100%;
   min-height: 68px;
-  padding: 13px 48px 13px 16px;
+  padding: 13px 16px;
   border: 1px solid #eee;
   border-radius: 15px;
   background: white;
@@ -308,7 +339,35 @@
   cursor: pointer;
 }
 
-/* 목록 카드 제목은 굵게 하지 않아요 (피그마 댓글 #93) */
+.pastRow {
+  gap: 2px;
+  padding-block: 11px;
+  padding-inline-start: 19px;
+}
+
+.editingRow {
+  padding-inline-end: 48px;
+}
+
+.planRow:disabled,
+.featured:disabled {
+  cursor: default;
+}
+
+.planTitleLine {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.planCreatedAt {
+  flex-shrink: 0;
+  font: 400 12px/18px var(--font-family);
+  letter-spacing: var(--tracking);
+  color: #a9adbe;
+}
+
 .planName {
   overflow: hidden;
   font: 400 15px/1.6 var(--font-family);
@@ -321,6 +380,10 @@
 .planDate {
   font: 400 13px/23px var(--font-family);
   color: #666a80;
+}
+
+.pastRow .planDate {
+  letter-spacing: var(--tracking);
 }
 
 .otherTitle {

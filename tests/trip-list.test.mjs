@@ -30,7 +30,7 @@ function renderList(plans, error) {
   }
 }
 
-const pastPlan = { id: 'past', title: '교토 당일치기', startDate: '2000-05-03', endDate: '2000-05-03', status: 'COMPLETED', placeCount: 5 };
+const pastPlan = { id: 'past', title: '교토 당일치기', startDate: '2000-05-03', endDate: '2000-05-03', status: 'COMPLETED', placeCount: 5, createdAt: '2026-07-17T00:30:00+09:00' };
 const upcomingPlan = { id: 'upcoming', title: '오사카 여행', startDate: '2999-12-01', endDate: '2999-12-02', status: 'DRAFT' };
 
 test('지난 여행만 있어도 생성 안내와 지난 여행 목록을 함께 보여줘요', () => {
@@ -39,7 +39,10 @@ test('지난 여행만 있어도 생성 안내와 지난 여행 목록을 함께
   assert.match(html, /여행계획을 만들어 보세요\./);
   assert.match(html, /여행계획 생성하기/);
   assert.match(html, /교토 당일치기/);
-  assert.match(html, /장소 5곳/);
+  assert.match(html, /<time[^>]+dateTime="2026-07-17T00:30:00\+09:00">26\.07\.17<\/time>/);
+  assert.match(html, /2000\.05\.03 \| 장소 5곳/);
+  assert.match(html, /aria-label="여행목록 편집"/);
+  assert.doesNotMatch(html, /aria-label="교토 당일치기 (?:더보기|삭제)"/);
   assert.doesNotMatch(html, /다가오는 여행 \|/);
 });
 

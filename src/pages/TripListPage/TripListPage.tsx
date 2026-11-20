@@ -9,21 +9,21 @@ import { useDeletePlan, usePlans } from "@/features/plan/model/usePlan";
 import PlanDeleteDialog, {
   type PlanDeleteStep,
 } from "@/features/plan/ui/PlanDeleteDialog";
-import PlanMoreMenu from "@/features/plan/ui/PlanMoreMenu";
 import Toast from "@/shared/components/Toast";
 import TabBar from "@/shared/components/TabBar";
 import Button from "@/shared/components/Button";
+import editIcon from "@/shared/assets/icons/trip-list-edit.svg";
+import trashIcon from "@/shared/assets/icons/trash-outline-red.svg";
 import openArrowIcon from "@/shared/assets/icons/open-arrow-pill.svg";
 import styles from "./TripListPage.module.css";
 import { useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
 
 type PlanTab = "mine" | "shared";
 
-/** 이 계획의 ⋮ 메뉴를 그릴 때 넘겨요. 없으면 ⋮를 숨겨요 (공유받은 계획) */
-type PlanMenuProps = {
-  openMenuPlanId: string | null;
-  onMenuOpenChange: (planId: string, isOpen: boolean) => void;
-  onDelete: (plan: PlanSummary) => void;
+type PlanCardProps = {
+  plan: PlanSummary;
+  onOpen: (plan: PlanSummary) => void;
+  onDelete?: (plan: PlanSummary) => void;
 };
 
 const DELETED_MESSAGE = "여행계획을 삭제했어요.";
@@ -36,23 +36,54 @@ function isUpcoming(plan: PlanSummary) {
   return !Number.isNaN(endDate.getTime()) && endDate.getTime() >= Date.now();
 }
 
+function DeleteTripButton({
+  plan,
+  onDelete,
+}: {
+  plan: PlanSummary;
+  onDelete: (plan: PlanSummary) => void;
+}) {
+  return (
+    <button
+      type="button"
+      className={styles.deleteTrip}
+      aria-label={plan.title + " 삭제"}
+      onClick={() => onDelete(plan)}
+    >
+      <img src={trashIcon} alt="" width={24} height={24} />
+    </button>
+  );
+}
+
 function PlanRow({
   plan,
   onOpen,
-  menu,
-}: {
-  plan: PlanSummary;
-  onOpen: (plan: PlanSummary) => void;
-  menu?: PlanMenuProps;
-}) {
+  onDelete,
+  isPast = false,
+}: PlanCardProps & { isPast?: boolean }) {
+  const createdAt = isPast ? plan.createdAt : undefined;
+  const rowClassName = [
+    styles.planRow,
+    isPast && styles.pastRow,
+    onDelete && styles.editingRow,
+  ].filter(Boolean).join(" ");
+
   return (
     <li className={styles.planItem}>
       <button
         type="button"
-        className={styles.planRow}
+        className={rowClassName}
         onClick={() => onOpen(plan)}
+        disabled={Boolean(onDelete)}
       >
-        <span className={styles.planName}>{plan.title}</span>
+        <span className={styles.planTitleLine}>
+          <span className={styles.planName}>{plan.title}</span>
+          {createdAt && (
+            <time className={styles.planCreatedAt} dateTime={createdAt}>
+              {formatDate(createdAt.slice(2, 10))}
+            </time>
+          )}
+        </span>
         <span className={styles.planDate}>
           {/* 장소 수는 목록 응답의 placeCount예요. 값이 없으면 기간을 보여줘요 */}
           {plan.placeCount !== undefined
@@ -60,29 +91,13 @@ function PlanRow({
             : `${formatDate(plan.startDate)} — ${formatDate(plan.endDate)}`}
         </span>
       </button>
-      {menu && (
-        <PlanMoreMenu
-          className={styles.rowMenu}
-          planTitle={plan.title}
-          isOpen={menu.openMenuPlanId === plan.id}
-          onOpenChange={(isOpen) => menu.onMenuOpenChange(plan.id, isOpen)}
-          onDelete={() => menu.onDelete(plan)}
-        />
-      )}
+      {onDelete && <DeleteTripButton plan={plan} onDelete={onDelete} />}
     </li>
   );
 }
 
 // 다가오는 여행 큰 카드 (피그마 S5-1). 표지 사진이 없거나 못 불러오면 뒤의 그라데이션이 그대로 보여요
-function FeaturedPlanCard({
-  plan,
-  onOpen,
-  menu,
-}: {
-  plan: PlanSummary;
-  onOpen: (plan: PlanSummary) => void;
-  menu: PlanMenuProps;
-}) {
+function FeaturedPlanCard({ plan, onOpen, onDelete }: PlanCardProps) {
   const [failedImageUrl, setFailedImageUrl] = useState<string>();
   const { coverImageUrl } = plan;
   const hasCover =
@@ -94,6 +109,7 @@ function FeaturedPlanCard({
         type="button"
         className={styles.featured}
         onClick={() => onOpen(plan)}
+        disabled={Boolean(onDelete)}
       >
         {hasCover && (
           <img
@@ -103,7 +119,8 @@ function FeaturedPlanCard({
             onError={() => setFailedImageUrl(coverImageUrl)}
           />
         )}
-        {/* 점무늬(양쪽 1/3)와 가장자리 흐림 (피그마 S5-1) */}
+        {/* 원형 그라데이션 4개, 점무늬(양쪽 1/3), 가장자리 흐림 (피그마 S5-1) */}
+        <span className={styles.featuredOrbs} />
         <span className={styles.featuredDots} />
         <span className={styles.featuredGlow} />
         {/* 사진이 없을 때도 밝은 그라데이션 위 흰 글자가 읽히게 늘 덮어요 */}
@@ -111,20 +128,13 @@ function FeaturedPlanCard({
         <span className={styles.featuredLabel}>
           다가오는 여행 | {plan.title}
         </span>
-        {/* 글자 ↗는 글꼴 여백 때문에 원 가운데에 안 맞아서 아이콘으로 그려요 (피그마 댓글 #98) */}
-        <span className={styles.openIcon} aria-hidden="true">
-          <img src={openArrowIcon} alt="" />
-        </span>
+        {!onDelete && (
+          <span className={styles.openIcon} aria-hidden="true">
+            <img src={openArrowIcon} alt="" />
+          </span>
+        )}
       </button>
-      {/* 카드 전체가 버튼이라 ⋮는 그 위에 따로 얹어요 */}
-      <PlanMoreMenu
-        className={styles.featuredMenu}
-        tone="photo"
-        planTitle={plan.title}
-        isOpen={menu.openMenuPlanId === plan.id}
-        onOpenChange={(isOpen) => menu.onMenuOpenChange(plan.id, isOpen)}
-        onDelete={() => menu.onDelete(plan)}
-      />
+      {onDelete && <DeleteTripButton plan={plan} onDelete={onDelete} />}
     </div>
   );
 }
@@ -137,7 +147,7 @@ export default function TripListPage() {
   const { plans, viewStatus, error, refetch } = usePlans({ owner: "me" });
   const shared = usePlans({ owner: "shared" });
   const deletePlan = useDeletePlan();
-  const [openMenuPlanId, setOpenMenuPlanId] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<{
     plan: PlanSummary;
     step: PlanDeleteStep;
@@ -154,16 +164,11 @@ export default function TripListPage() {
     return () => window.clearTimeout(timer);
   }, [isToastVisible]);
 
-  // ⋮는 내 계획에만 그려요. 삭제는 계획을 만든 사람만 할 수 있어요 (공유받은 계획은 편집·보기 멤버)
-  const planMenu: PlanMenuProps = {
-    openMenuPlanId,
-    onMenuOpenChange: (planId, isOpen) =>
-      setOpenMenuPlanId(isOpen ? planId : null),
-    onDelete: (plan) => {
-      deletePlan.reset();
-      setDeleteTarget({ plan, step: "confirm" });
-    },
+  const startDelete = (plan: PlanSummary) => {
+    deletePlan.reset();
+    setDeleteTarget({ plan, step: "confirm" });
   };
+  const onDelete = isEditing ? startDelete : undefined;
 
   const closeDeleteDialog = () => {
     if (deletePlan.isPending) return;
@@ -176,6 +181,7 @@ export default function TripListPage() {
       onSuccess: () => {
         setDeleteTarget(null);
         setToastMessage(DELETED_MESSAGE);
+        if (plans.length === 1) setIsEditing(false);
       },
     });
   };
@@ -227,7 +233,10 @@ export default function TripListPage() {
           role="tab"
           aria-selected={activeTab === "shared"}
           className={activeTab === "shared" ? styles.activeTab : ""}
-          onClick={() => setActiveTab("shared")}
+          onClick={() => {
+            setActiveTab("shared");
+            setIsEditing(false);
+          }}
         >
           공유받은 계획
         </button>
@@ -285,7 +294,7 @@ export default function TripListPage() {
                 <FeaturedPlanCard
                   plan={upcoming[0]}
                   onOpen={openPlan}
-                  menu={planMenu}
+                  onDelete={onDelete}
                 />
               </section>
             ) : (
@@ -319,23 +328,37 @@ export default function TripListPage() {
                 <h2 id="past-trips-title">
                   지난 여행 <span>{past.length}</span>
                 </h2>
-                {past.length > 3 && (
-                  <button
-                    type="button"
-                    onClick={() => setShowAllPast((isShowing) => !isShowing)}
-                  >
-                    {showAllPast ? "접기" : "모두보기"}
-                  </button>
-                )}
+                <div className={styles.sectionActions}>
+                  {past.length > 3 && !isEditing && (
+                    <button
+                      type="button"
+                      className={styles.showAllButton}
+                      onClick={() => setShowAllPast((isShowing) => !isShowing)}
+                    >
+                      {showAllPast ? "접기" : "모두보기"}
+                    </button>
+                  )}
+                  {plans.length > 0 && (
+                    <button
+                      type="button"
+                      className={styles.editButton}
+                      aria-label={isEditing ? "여행목록 편집 완료" : "여행목록 편집"}
+                      onClick={() => setIsEditing((editing) => !editing)}
+                    >
+                      {isEditing ? "완료" : <img src={editIcon} alt="" />}
+                    </button>
+                  )}
+                </div>
               </div>
               {past.length ? (
                 <ul className={styles.list}>
-                  {(showAllPast ? past : past.slice(0, 3)).map((plan) => (
+                  {(isEditing || showAllPast ? past : past.slice(0, 3)).map((plan) => (
                     <PlanRow
                       key={plan.id}
                       plan={plan}
                       onOpen={openPlan}
-                      menu={planMenu}
+                      onDelete={onDelete}
+                      isPast
                     />
                   ))}
                 </ul>
@@ -351,7 +374,7 @@ export default function TripListPage() {
                         key={plan.id}
                         plan={plan}
                         onOpen={openPlan}
-                        menu={planMenu}
+                        onDelete={onDelete}
                       />
                     ))}
                   </ul>
