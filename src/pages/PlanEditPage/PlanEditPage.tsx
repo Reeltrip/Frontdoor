@@ -40,7 +40,9 @@ import {
   isPlaceInZone,
   type PlanZone,
 } from "@/features/plan/lib/planZones";
+import { pickPlanMapCenter } from "@/features/plan/lib/planMapCenter";
 import { mergePlanPlaces } from "@/features/plan/model/planPlaces";
+import { useDestinationCenter } from "@/features/plan/model/useDestinationCenter";
 import {
   completePlanDay,
   formatDayDate,
@@ -98,6 +100,7 @@ export default function PlanEditPage() {
   const { places: libraryPlaces, viewStatus: placesStatus } = usePlaces();
   // 공유받은 계획의 카드는 내 보관함에 없어서 계획 응답에 든 카드로 채워요
   const places = mergePlanPlaces(libraryPlaces, plan);
+  const destinationCenter = useDestinationCenter(plan?.destination);
   const updatePlan = useUpdatePlan(planId);
   const aiDraft = useCreateAiDraft(planId);
 
@@ -431,13 +434,23 @@ export default function PlanEditPage() {
   const zoneCenter = (
     currentStep === "zone" ? (selectedZone ?? dayZone) : dayZone
   )?.center;
-  const mapCenter =
-    lodgingResultPosition ??
-    zoneCenter ??
-    lodgingPlace?.location ??
-    getFirstNodePosition(visiblePlaces) ??
-    getFirstNodePosition(places) ??
-    DEFAULT_MAP_CENTER;
+  // 보관함 카드는 여러 도시가 섞여 있어서, 여행주소 좌표를 보관함 카드보다 먼저 써요
+  const mapCenter = pickPlanMapCenter(
+    {
+      lodgingPreview: lodgingResultPosition,
+      zone: zoneCenter,
+      lodging: lodgingPlace?.location,
+      // 숙소 단계의 visiblePlaces는 보관함 숙소 전체라서 빼요
+      planPlace:
+        currentStep === "lodging"
+          ? undefined
+          : getFirstNodePosition(visiblePlaces),
+      destination: destinationCenter.center,
+      isDestinationPending: destinationCenter.isPending,
+      library: getFirstNodePosition(places),
+    },
+    DEFAULT_MAP_CENTER,
+  );
 
   const browsePlace = (placeId: string | null) => {
     setIsPreviewing(false);
