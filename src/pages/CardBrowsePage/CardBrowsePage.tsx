@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router";
+import { useBeforeUnload, useBlocker, useLocation, useNavigate } from "react-router";
 import checkIcon from "@/shared/assets/icons/dial-check.svg";
 import editIcon from "@/shared/assets/icons/dial-edit.svg";
 import kebabIcon from "@/shared/assets/icons/kebab.svg";
@@ -77,7 +77,6 @@ export default function CardBrowsePage() {
   );
   const [isEditTutorialOpen, setIsEditTutorialOpen] = useState(false);
   const [draft, setDraft] = useState<PlaceDraft | null>(null);
-  const [pendingLeave, setPendingLeave] = useState<"back" | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -91,6 +90,18 @@ export default function CardBrowsePage() {
     activePlace !== undefined &&
     draft !== null &&
     isDraftChanged(activePlace, draft);
+  // 상단 < 버튼뿐 아니라 폰 뒤로 가기 제스처·브라우저 뒤로 가기도 여기서 막아요
+  const leaveBlocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      isChanged && currentLocation.pathname !== nextLocation.pathname,
+  );
+
+  useBeforeUnload((event) => {
+    if (isChanged) {
+      event.preventDefault();
+      event.returnValue = "";
+    }
+  });
 
   useEffect(() => {
     if (!isToastVisible) return;
@@ -189,16 +200,9 @@ export default function CardBrowsePage() {
     setToastMessage(SAVED_MESSAGE);
   };
 
-  const handleBack = () => {
-    if (isChanged) setPendingLeave("back");
-    else navigate(-1);
-  };
-
   const finishLeave = () => {
-    const action = pendingLeave;
-    setPendingLeave(null);
     setDraft(null);
-    if (action === "back") navigate(-1);
+    if (leaveBlocker.state === "blocked") leaveBlocker.proceed();
   };
 
   const handleLeaveSave = () => {
@@ -210,7 +214,7 @@ export default function CardBrowsePage() {
     <main className={styles.page}>
       <Header
         title={title}
-        onBack={handleBack}
+        onBack={() => navigate(-1)}
         action={
           places.length > 0 && (
             <div ref={menuRef} className={styles.menuWrap}>
@@ -300,7 +304,7 @@ export default function CardBrowsePage() {
       {isTutorialOpen && <DialTutorial onClose={closeTutorial} />}
       {isEditTutorialOpen && <EditTutorial onClose={closeEditTutorial} />}
       <ConfirmModal
-        isOpen={pendingLeave !== null}
+        isOpen={leaveBlocker.state === "blocked"}
         icon="alert"
         title="변경사항이 감지되었어요."
         description="변경하신 내용을 저장할까요?"
