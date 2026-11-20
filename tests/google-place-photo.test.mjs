@@ -34,9 +34,60 @@ const photoOf = (id) => ({
   authorAttributions: [{ displayName: `작성자 ${id}` }],
 });
 
-test('지도 스크립트가 없으면 조회하지 않고 undefined를 돌려줘요', async () => {
+const makeStorage = () => {
+  const data = new Map();
+  return {
+    getItem: (key) => (data.has(key) ? data.get(key) : null),
+    setItem: (key, value) => data.set(key, String(value)),
+    removeItem: (key) => data.delete(key),
+    clear: () => data.clear(),
+  };
+};
+
+test('지도 스크립트도 로그인도 없으면 조회하지 않고 undefined를 돌려줘요', async () => {
   delete globalThis.google;
   assert.equal(await photos.loadGooglePlacePhoto('no-google'), undefined);
+});
+
+// 요약카드 화면처럼 지도가 없는 곳은 서버(GET /place-photos)로 받아요 (#193)
+test('지도 스크립트가 없으면 서버에서 사진과 올린 사람을 받아요', async () => {
+  delete globalThis.google;
+  const realFetch = globalThis.fetch;
+  globalThis.localStorage = makeStorage();
+  localStorage.setItem('reeltrip:access-token', 'a');
+  localStorage.setItem('reeltrip:refresh-token', 'r');
+  const urls = [];
+  globalThis.fetch = async (url) => {
+    urls.push(String(url));
+    return new Response(JSON.stringify({ photoUrl: 'https://photo.test/server', attributions: [{ displayName: '올린 사람', uri: 'https://maps.test/u' }] }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  };
+  try {
+    const photo = await photos.loadGooglePlacePhoto('server-1');
+    assert.equal(photo.url, 'https://photo.test/server');
+    assert.equal(photo.authors[0].displayName, '올린 사람');
+    assert.ok(urls[0].includes('/place-photos?googlePlaceId=server-1'), urls[0]);
+    // 같은 장소는 다시 묻지 않아요 (사진 조회는 과금돼요)
+    await photos.loadGooglePlacePhoto('server-1');
+    assert.equal(urls.length, 1);
+  } finally {
+    globalThis.fetch = realFetch;
+    delete globalThis.localStorage;
+  }
+});
+
+test('서버가 사진이 없다고 하면 undefined라 카드 사진을 그대로 써요', async () => {
+  delete globalThis.google;
+  const realFetch = globalThis.fetch;
+  globalThis.localStorage = makeStorage();
+  localStorage.setItem('reeltrip:access-token', 'a');
+  localStorage.setItem('reeltrip:refresh-token', 'r');
+  globalThis.fetch = async () => new Response(JSON.stringify({ photoUrl: null, attributions: [] }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  try {
+    assert.equal(await photos.loadGooglePlacePhoto('server-none'), undefined);
+  } finally {
+    globalThis.fetch = realFetch;
+    delete globalThis.localStorage;
+  }
 });
 
 test('장소마다 다른 사진을 돌려주고, 같은 장소는 한 번만 조회해요', async () => {

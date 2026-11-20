@@ -1,3 +1,4 @@
+import { useGooglePlacePhoto } from "@/shared/hooks/useGooglePlacePhoto";
 import {
   useRef,
   useState,
@@ -53,6 +54,34 @@ function getItemStyle(offset: number): CSSProperties {
     "--active": activeness,
     "--blur": `${Math.min(distance * BLUR_PER_STEP_PX, MAX_BLUR_PX)}px`,
   } as CSSProperties;
+}
+
+/** 휠 동그라미 사진. Google 장소 사진 → 카드 사진 → 카테고리 기본 그림 순서로 보여줘요 (#193) */
+function WheelPhoto({
+  googlePlaceId,
+  imageUrl,
+  fallbackPhoto,
+}: {
+  googlePlaceId?: string;
+  imageUrl?: string;
+  fallbackPhoto: string;
+}) {
+  const photo = useGooglePlacePhoto(googlePlaceId, imageUrl || fallbackPhoto);
+  return (
+    <img
+      src={photo.imageUrl}
+      alt=""
+      className={styles.photo}
+      draggable={false}
+      onLoad={photo.onLoad}
+      onError={(event) => {
+        photo.onError();
+        if (event.currentTarget.getAttribute("src") !== fallbackPhoto && !googlePlaceId) {
+          event.currentTarget.src = fallbackPhoto;
+        }
+      }}
+    />
+  );
 }
 
 export default function CategoryWheel({
@@ -163,16 +192,10 @@ export default function CategoryWheel({
               onClick={() => handleRowClick(index)}
             >
               <span className={styles.thumb}>
-                <img
-                  src={item.imageUrl || fallbackPhoto}
-                  alt=""
-                  className={styles.photo}
-                  draggable={false}
-                  onError={(event) => {
-                    if (event.currentTarget.getAttribute("src") !== fallbackPhoto) {
-                      event.currentTarget.src = fallbackPhoto;
-                    }
-                  }}
+                <WheelPhoto
+                  googlePlaceId={item.googlePlaceId}
+                  imageUrl={item.imageUrl}
+                  fallbackPhoto={fallbackPhoto}
                 />
                 <img
                   src={item.category === "food" ? foodPhotoShade : photoShade}

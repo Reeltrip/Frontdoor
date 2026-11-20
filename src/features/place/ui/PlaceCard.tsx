@@ -2,6 +2,7 @@ import { Fragment } from 'react';
 import openIcon from '@/shared/assets/icons/open-arrow.svg';
 import copyIcon from '@/shared/assets/icons/copy-light.svg';
 import { displayOrDash, EMPTY_VALUE_TEXT, hasDisplayValue } from '@/shared/lib/displayValue';
+import { useGooglePlacePhoto } from '@/shared/hooks/useGooglePlacePhoto';
 import type { Place } from '../model/place.types';
 import styles from './PlaceCard.module.css';
 
@@ -17,11 +18,25 @@ type PlaceCardProps = {
 export default function PlaceCard({ place, onOpen, onCopy, onAddMemo, className }: PlaceCardProps) {
   const name = displayOrDash(place.name);
   const summary = place.summary.filter(hasDisplayValue);
+  // 한 링크에서 나온 카드는 영상 썸네일이 모두 같아요. 지도 핀처럼 Google 장소 사진을 먼저 보여줘요 (#193)
+  const photo = useGooglePlacePhoto(place.googlePlaceId, place.imageUrl);
 
   return (
     <article className={[styles.card, className].filter(Boolean).join(' ')}>
-      {place.imageUrl && <img src={place.imageUrl} alt="" className={styles.photo} />}
+      {photo.imageUrl && (
+        <img
+          src={photo.imageUrl}
+          alt=""
+          className={styles.photo}
+          onLoad={photo.onLoad}
+          onError={photo.onError}
+        />
+      )}
       <span className={styles.shade} aria-hidden />
+      {photo.authors.length > 0 && (
+        // Google 장소 사진은 올린 사람을 함께 보여줘야 해요
+        <p className={styles.credits}>사진: {photo.authors.map(({ displayName }) => displayName).join(', ')}</p>
+      )}
 
       <button
         type="button"
