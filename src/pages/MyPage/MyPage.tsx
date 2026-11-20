@@ -10,6 +10,7 @@ import logoutIcon from '@/features/account/assets/logout.svg';
 import ConfirmModal from '@/shared/components/ConfirmModal';
 import { clearAuthTokens, getAuthTokens } from '@/shared/lib/authToken';
 import { logout } from '@/features/auth/api/auth';
+import { replayTutorials } from '@/features/account/lib/tutorialReplay';
 import styles from './MyPage.module.css';
 
 export default function MyPage() {
@@ -52,6 +53,11 @@ export default function MyPage() {
         )}
       </section>
       <nav className={styles.settings} aria-label="내 설정">
+        {/* 본 기록을 지우고 앱 안내부터 카드 안내까지 차례로 다시 보여줘요 (#124, #179). 피그마 개편 때 빠져서 되살렸어요 (#207) */}
+        <button type="button" className={styles.row} onClick={() => { replayTutorials(); navigate('/welcome'); }}>
+          <span className={styles.icon}><img src={helpIcon} alt="" /></span>
+          튜토리얼 다시 보기
+        </button>
         <button type="button" className={styles.row} onClick={() => navigate('/my/terms')}>
           <span className={styles.icon}><img src={helpIcon} alt="" /></span>
           이용약관
