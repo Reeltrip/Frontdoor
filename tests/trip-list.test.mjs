@@ -41,7 +41,7 @@ test('지난 여행만 있어도 생성 안내와 지난 여행 목록을 함께
   assert.match(html, /교토 당일치기/);
   assert.match(html, /<time[^>]+dateTime="2026-07-17T00:30:00\+09:00">26\.07\.17<\/time>/);
   assert.match(html, /2000\.05\.03 \| 장소 5곳/);
-  assert.match(html, /aria-label="여행목록 편집"/);
+  assert.match(html, /aria-label="여행목록 편집">편집<\/button>/);
   assert.doesNotMatch(html, /aria-label="교토 당일치기 (?:더보기|삭제)"/);
   assert.doesNotMatch(html, /다가오는 여행 \|/);
 });
@@ -57,6 +57,7 @@ test('다가오는 여행이 있으면 대표 카드를 보여주고 빈 안내�
   const html = renderList([pastPlan, upcomingPlan]);
   assert.match(html, /다가오는 여행 \| /);
   assert.match(html, /오사카 여행/);
+  assert.match(html, /aria-label="오사카 여행 삭제"/);
   assert.match(html, /교토 당일치기/);
   assert.doesNotMatch(html, /모아둔 여행자료로|여행계획 생성하기/);
 });

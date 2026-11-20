@@ -12,9 +12,9 @@ import PlanDeleteDialog, {
 import Toast from "@/shared/components/Toast";
 import TabBar from "@/shared/components/TabBar";
 import Button from "@/shared/components/Button";
-import editIcon from "@/shared/assets/icons/trip-list-edit.svg";
 import trashIcon from "@/shared/assets/icons/trash-outline-red.svg";
-import openArrowIcon from "@/shared/assets/icons/open-arrow-pill.svg";
+import featuredOpenIcon from "@/shared/assets/icons/trip-list-open.svg";
+import featuredTrashIcon from "@/shared/assets/icons/trip-list-trash.svg";
 import styles from "./TripListPage.module.css";
 import { useScreenBackdrop } from "@/shared/hooks/useScreenBackdrop";
 
@@ -97,7 +97,7 @@ function PlanRow({
 }
 
 // 다가오는 여행 큰 카드 (피그마 S5-1). 표지 사진이 없거나 못 불러오면 뒤의 그라데이션이 그대로 보여요
-function FeaturedPlanCard({ plan, onOpen, onDelete }: PlanCardProps) {
+function FeaturedPlanCard({ plan, onOpen, onDelete }: Required<PlanCardProps>) {
   const [failedImageUrl, setFailedImageUrl] = useState<string>();
   const { coverImageUrl } = plan;
   const hasCover =
@@ -109,7 +109,6 @@ function FeaturedPlanCard({ plan, onOpen, onDelete }: PlanCardProps) {
         type="button"
         className={styles.featured}
         onClick={() => onOpen(plan)}
-        disabled={Boolean(onDelete)}
       >
         {hasCover && (
           <img
@@ -128,13 +127,18 @@ function FeaturedPlanCard({ plan, onOpen, onDelete }: PlanCardProps) {
         <span className={styles.featuredLabel}>
           다가오는 여행 | {plan.title}
         </span>
-        {!onDelete && (
-          <span className={styles.openIcon} aria-hidden="true">
-            <img src={openArrowIcon} alt="" />
-          </span>
-        )}
+        <span className={styles.featuredActions} aria-hidden="true">
+          <img src={featuredOpenIcon} alt="" />
+        </span>
       </button>
-      {onDelete && <DeleteTripButton plan={plan} onDelete={onDelete} />}
+      <button
+        type="button"
+        className={styles.featuredDelete}
+        aria-label={plan.title + " 삭제"}
+        onClick={() => onDelete(plan)}
+      >
+        <img src={featuredTrashIcon} alt="" />
+      </button>
     </div>
   );
 }
@@ -294,7 +298,7 @@ export default function TripListPage() {
                 <FeaturedPlanCard
                   plan={upcoming[0]}
                   onOpen={openPlan}
-                  onDelete={onDelete}
+                  onDelete={startDelete}
                 />
               </section>
             ) : (
@@ -345,7 +349,7 @@ export default function TripListPage() {
                       aria-label={isEditing ? "여행목록 편집 완료" : "여행목록 편집"}
                       onClick={() => setIsEditing((editing) => !editing)}
                     >
-                      {isEditing ? "완료" : <img src={editIcon} alt="" />}
+                      {isEditing ? "완료" : "편집"}
                     </button>
                   )}
                 </div>
