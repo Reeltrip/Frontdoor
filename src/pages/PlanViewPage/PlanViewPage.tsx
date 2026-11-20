@@ -43,6 +43,21 @@ const getRouteCenter = (places: Place[]): MapPosition | undefined => {
   };
 };
 
+/** 구간 시트 위로 보이는 지도 크기(px). 사진 핀 높이만큼 여유를 뺐어요 */
+const LEG_VIEW = { width: 300, height: 220 };
+const LEG_ZOOM_RANGE = { min: 11, max: 16 };
+
+/** 두 장소가 지도에 다 들어오는 가장 큰 배율 (Google 지도 메르카토르 기준, 256px 타일) */
+const getLegZoom = (from: MapPosition, to: MapPosition): number => {
+  const mercatorY = (lat: number) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
+  const lngFraction = Math.abs(from.lng - to.lng) / 360;
+  const latFraction = Math.abs(mercatorY(from.lat) - mercatorY(to.lat)) / (2 * Math.PI);
+  const zoomFor = (px: number, fraction: number) =>
+    fraction === 0 ? LEG_ZOOM_RANGE.max : Math.log2(px / 256 / fraction);
+  const zoom = Math.floor(Math.min(zoomFor(LEG_VIEW.width, lngFraction), zoomFor(LEG_VIEW.height, latFraction)));
+  return Math.min(LEG_ZOOM_RANGE.max, Math.max(LEG_ZOOM_RANGE.min, zoom));
+};
+
 // 계획 완성 보기 (기능명세서 4-4). 일자를 바꿔 가며 그날 동선을 지도와 목록으로 봐요
 export default function PlanViewPage() {
   const { planId = '' } = useParams();
@@ -282,6 +297,8 @@ export default function PlanViewPage() {
           canFetchRoutes={isLoggedIn}
           className={styles.map}
           center={(leg && getRouteCenter([leg.from, leg.to])) || mapCenter}
+          // 긴 구간은 지금 배율로는 두 장소가 화면 밖이라, 구간을 보는 동안만 둘 다 보이게 맞춰요 (#206)
+          zoom={leg?.from.location && leg.to.location ? getLegZoom(leg.from.location, leg.to.location) : undefined}
           nodes={shownNodes}
           selectedNodeId={selectedId}
           route={leg ? [{ nodeId: leg.from.id }, { nodeId: leg.to.id }] : route}
