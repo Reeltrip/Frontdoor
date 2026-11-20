@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { formatDayDate, listDates } from './planDays';
 import { chooseDestination, getConfirmedDestination, startDestination, typeDestination } from './planDestination';
+import type { MapPosition } from '@/shared/components/Map/map.types';
+import { rememberDestinationCenter } from '../lib/planMapCenter';
 import type { CreatePlanRequest } from './plan.types';
 
 /** 기능명세서 4-1: 종료일이 시작일보다 앞일 때 */
@@ -80,8 +82,12 @@ export function usePlanCreateForm(initial?: PlanFormInitialValues) {
     /** 검색 결과에서 골라 확정했는지 */
     isDestinationConfirmed: confirmedDestination !== undefined,
     typeDestination: (text: string) => setDestination((current) => typeDestination(current, text)),
-    chooseDestination: (searchedQuery: string, resultName: string) =>
-      setDestination(chooseDestination(searchedQuery, resultName)),
+    chooseDestination: (searchedQuery: string, resultName: string, center?: MapPosition) => {
+      const chosen = chooseDestination(searchedQuery, resultName);
+      // 계획 지도가 이 도시에서 열리도록 고른 좌표를 적어 둬요 (서버는 이름만 저장해요)
+      if (center) rememberDestinationCenter(getConfirmedDestination(chosen), center);
+      setDestination(chosen);
+    },
     /** 달력에 초록 원으로 표시할 날짜 */
     selectedDates: [startDate, endDate].filter((date) => date !== undefined),
     selectDate,

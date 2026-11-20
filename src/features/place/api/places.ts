@@ -7,6 +7,8 @@ export const placeKeys = {
   list: (params: PlaceListParams = {}) => [...placeKeys.all, 'list', params] as const,
   deleted: () => [...placeKeys.all, 'deleted'] as const,
   search: (query: string) => ['place-search', query] as const,
+  /** 여행주소 이름 → 지도 중심 좌표. placeKeys.all을 무효화해도 다시 찾지 않게 따로 둬요 */
+  destinationCenter: (destination: string) => ['place-search', destination, 'center'] as const,
 };
 
 // ── BE 형식 (docs/api-spec.md 요약카드) ──

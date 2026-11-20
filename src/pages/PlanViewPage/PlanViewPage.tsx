@@ -15,6 +15,7 @@ import { hasAuthTokens } from '@/shared/lib/authToken';
 import { useSheetDrag } from '@/shared/hooks/useSheetDrag';
 import { getDayZone } from '@/features/plan/lib/planZones';
 import { mergePlanPlaces } from '@/features/plan/model/planPlaces';
+import { useDestinationCenter } from '@/features/plan/model/useDestinationCenter';
 import ShareSheet, { type ShareChannel } from '@/features/plan/ui/ShareSheet';
 import kebabIcon from '@/shared/assets/icons/kebab.svg';
 import { buildDayRoute } from '@/features/plan/model/planEdit';
@@ -49,6 +50,8 @@ export default function PlanViewPage() {
   const { plan, viewStatus, error, refetch } = usePlan(planId);
   // 공유 링크(/plan/{id})는 로그인 없이도 열려요. 그때는 보관함을 부르지 않고 계획에 든 카드로 그려요
   const isLoggedIn = hasAuthTokens();
+  // 장소 검색은 로그인해야 쓸 수 있어서, 로그인 없이 보는 공유 계획은 적어 둔 좌표만 써요
+  const destinationCenter = useDestinationCenter(plan?.destination, { canSearch: isLoggedIn });
   const { places: libraryPlaces } = usePlaces({}, { isEnabled: isLoggedIn });
   const places = mergePlanPlaces(libraryPlaces, plan);
   const shareLink = useCreateShareLink(planId);
@@ -177,7 +180,12 @@ export default function PlanViewPage() {
   }));
   const hasPlanB = day.nodes.some((node) => node.planB);
 
-  const mapCenter = getRouteCenter(stops.map((stop) => stop.place)) ?? getDayZone(day)?.center ?? DEFAULT_MAP_CENTER;
+  // 동선·구역이 없는 날은 여행주소에서 열어요
+  const mapCenter =
+    getRouteCenter(stops.map((stop) => stop.place)) ??
+    getDayZone(day)?.center ??
+    destinationCenter.center ??
+    DEFAULT_MAP_CENTER;
 
   const selectDay = (nextIndex: number) => {
     setSelectedDay(nextIndex);

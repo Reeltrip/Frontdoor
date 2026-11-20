@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import locationIcon from '@/shared/assets/icons/location-light.svg';
 import LabeledInput from '@/shared/components/LabeledInput';
 import { placeKeys, searchPlaces } from '@/features/place/api/places';
+import type { MapPosition } from '@/shared/components/Map/map.types';
 import styles from './DestinationField.module.css';
 
 type DestinationFieldProps = {
@@ -11,8 +12,8 @@ type DestinationFieldProps = {
   /** 검색 결과에서 골라 확정했는지. 확정 전에는 아래에 검색 결과를 보여줘요 */
   isConfirmed: boolean;
   onType: (text: string) => void;
-  /** searchedQuery: 결과를 찾을 때 쓴 검색어, resultName: 고른 장소 이름 */
-  onChoose: (searchedQuery: string, resultName: string) => void;
+  /** searchedQuery: 결과를 찾을 때 쓴 검색어, resultName: 고른 장소 이름, center: 고른 장소 좌표 */
+  onChoose: (searchedQuery: string, resultName: string, center: MapPosition) => void;
 };
 
 /** 글자를 멈추고 이만큼 지나면 검색해요. 칠 때마다 서버를 부르지 않아요 */
@@ -92,7 +93,7 @@ export default function DestinationField({ value, isConfirmed, onType, onChoose 
                     role="option"
                     aria-selected={false}
                     className={styles.result}
-                    onClick={() => onChoose(searchedQuery, place.name)}
+                    onClick={() => onChoose(searchedQuery, place.name, { lat: place.latitude, lng: place.longitude })}
                   >
                     <span className={styles.name}>{place.name}</span>
                     {place.address && <span className={styles.address}>{place.address}</span>}
