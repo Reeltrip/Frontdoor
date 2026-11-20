@@ -135,8 +135,19 @@ function MapRouteLines({ nodes, route, legPaths, legColors, isPlanning }: MapRou
         : mainPaths.map((path, index) => (
           <Polyline key={index} path={path} strokeColor={colors.main} strokeWeight={ROUTE_STROKE_WEIGHT} zIndex={2} clickable={false} />
         ))}
+      {/* 고르는 중인 플랜 B 갈래. 저장한 플랜 B처럼 점선이고, 원래 동선 위에 보이게 올려요 */}
       {previewPath && (
-        <Polyline path={previewPath} strokeColor={colors.main} strokeWeight={ROUTE_STROKE_WEIGHT} zIndex={4} clickable={false} />
+        <Polyline
+          path={previewPath}
+          strokeColor={colors.dash}
+          strokeOpacity={0}
+          icons={[
+            { icon: { ...dash, strokeColor: colors.shadow, strokeWeight: 6, strokeOpacity: 0.28 }, offset: '0', repeat },
+            { icon: dash, offset: '0', repeat },
+          ]}
+          zIndex={4}
+          clickable={false}
+        />
       )}
     </>
   );
@@ -158,8 +169,9 @@ function MapContent({
 }: Omit<MapViewProps, 'className'>) {
   const loadingStatus = useApiLoadingStatus();
   const hasAuthFailed = useMapAuthFailure();
-  const routeIds = new Set(route?.map((stop) => stop.isPlanBPreview ? stop.planBNodeId : stop.nodeId));
-  const inactiveIds = new Set(route?.map((stop) => stop.isPlanBPreview ? stop.nodeId : stop.planBNodeId));
+  // 플랜 B를 고르는 중에도 원래 장소는 동선에 남아요. 고르는 플랜 B는 강조 표시로 보여줘요
+  const routeIds = new Set(route?.map((stop) => stop.nodeId));
+  const inactiveIds = new Set(route?.map((stop) => stop.isPlanBPreview ? undefined : stop.planBNodeId));
   const previewId = route?.find((stop) => stop.isPlanBPreview)?.planBNodeId;
 
   if (hasAuthFailed || loadingStatus === APILoadingStatus.FAILED) {

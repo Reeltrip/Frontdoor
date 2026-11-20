@@ -18,7 +18,7 @@ export const getLegKey = (fromNodeId: string, toNodeId: string) => `${fromNodeId
 
 type RoutePoint = { id: string; position: MapPosition };
 
-/** 미리보기는 고른 장소만 대체하고, 다른 구간은 기존 경로를 따라가요. */
+/** 플랜 B는 앞 장소에서 갈라져 다음 장소에서 합쳐져요. 고르는 중(미리보기)에도 원래 동선은 그대로 둬요. */
 export function buildRoutePaths(nodes: MapNode[], route: MapRouteStop[], legPaths: MapLegPaths = {}): MapRoutePaths {
   const positionById = new Map(nodes.map((node) => [node.id, node.position]));
   const toPoint = (id: string | undefined): RoutePoint | undefined => {
@@ -48,19 +48,12 @@ export function buildRoutePaths(nodes: MapNode[], route: MapRouteStop[], legPath
     const before = main[index - 1];
     const after = main[index + 1];
     const alternativePath = join([before, alternative, after]);
-    if (index === previewIndex) {
-      previewPath = alternativePath;
-      inactivePaths.push(join([before, stop.point, after]));
-    } else {
-      inactivePaths.push(alternativePath);
-    }
+    if (index === previewIndex) previewPath = alternativePath;
+    else inactivePaths.push(alternativePath);
   });
 
-  const mainGroups = previewIndex < 0 ? [main] : [main.slice(0, previewIndex), main.slice(previewIndex + 1)];
-  const mainPaths = mainGroups.map(join);
-  const mainLegs = mainGroups.flatMap((group) =>
-    group.slice(1).map((point, index) => ({ key: getLegKey(group[index].id, point.id), path: join([group[index], point]) })),
-  );
+  const mainPaths = [join(main)];
+  const mainLegs = main.slice(1).map((point, index) => ({ key: getLegKey(main[index].id, point.id), path: join([main[index], point]) }));
   return {
     mainPaths: mainPaths.filter((path) => path.length > 1),
     mainLegs,
