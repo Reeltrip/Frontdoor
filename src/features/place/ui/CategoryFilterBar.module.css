@@ -1,3 +1,4 @@
+/* 좌우 페이드 색은 바탕에 맞춰 --filter-fade-color로 바꿀 수 있어요 (기본 var(--color-bg)) */
 .wrapper {
   position: relative;
 }
@@ -8,8 +9,8 @@
   top: 0;
   right: 0;
   bottom: 0;
-  width: 56px;
-  background: linear-gradient(to right, rgba(255, 255, 255, 0), var(--color-bg));
+  width: 67px;
+  background: linear-gradient(to right, transparent, var(--filter-fade-color, var(--color-bg)));
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
@@ -27,7 +28,7 @@
   left: 0;
   z-index: 1;
   width: 40px;
-  background: linear-gradient(to left, rgba(255, 255, 255, 0), var(--color-bg));
+  background: linear-gradient(to left, transparent, var(--filter-fade-color, var(--color-bg)));
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;

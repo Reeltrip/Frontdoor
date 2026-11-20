@@ -19,6 +19,7 @@ import CategoryChip from "@/features/place/ui/CategoryChip";
 import type { Place } from "@/features/place/model/place.types";
 import {
   CalendarDemo,
+  CategoryFilterBarDemo,
   CategoryFilterDemo,
   CategoryDialDemo,
   CategoryWheelDemo,
@@ -565,6 +566,10 @@ export const componentDemos: ComponentDemo[] = [
       {
         label: "전체 필터 (눌러서 바꾸기)",
         render: () => <CategoryFilterDemo />,
+      },
+      {
+        label: "가로 스크롤 필터 바 (보관함 헤더, 오른쪽 끝 페이드)",
+        render: () => <CategoryFilterBarDemo />,
       },
       {
         label: "아이콘 없는 카테고리 (교통)",

@@ -7,12 +7,22 @@
   background: var(--color-bg);
 }
 
+/* 피그마 3-1(236:10018): 높이 229 그라데이션. 칩 아래 16px 위부터 풀리기 시작해
+   칩 아래 48px에서 끝나요(103.51% 지점이 완전 투명이라 끝에서도 살짝 남아요) */
 .top {
+  --filter-fade-color: var(--color-white);
   position: relative;
   z-index: 3;
   flex-shrink: 0;
-  padding-bottom: 12px;
-  background: var(--color-bg);
+}
+
+.top::before {
+  position: absolute;
+  inset: 0 0 -48px;
+  z-index: -1;
+  background: linear-gradient(var(--color-white) calc(100% - 64px), transparent calc(100% + 8px));
+  pointer-events: none;
+  content: '';
 }
 
 .titleRow {
@@ -83,10 +93,12 @@
   height: 24px;
 }
 
+/* 지도가 칩 뒤까지 깔려야 그라데이션 사이로 비쳐요 */
 .mapArea {
   position: relative;
   flex: 1;
   min-height: 0;
+  margin-top: -16px;
 }
 
 .map {
@@ -124,7 +136,7 @@
 
 .notice {
   position: absolute;
-  top: 12px;
+  top: 72px;
   left: 50%;
   margin: 0;
   padding: 8px 14px;
@@ -173,8 +185,23 @@
   height: 56px;
 }
 
+/* 피그마 3-2(236:10723): 카드 위 55px부터 #fafafa가 올라와 카드 위쪽 21px 아래로는 단색이에요.
+   아래로는 화면 끝까지 덮어요(.page가 넘치는 부분을 잘라요) */
 .strip {
+  position: relative;
   width: 100%;
+}
+
+.strip::before {
+  position: absolute;
+  top: -55px;
+  right: 0;
+  bottom: -100dvh;
+  left: 0;
+  z-index: -1;
+  background: linear-gradient(transparent -13px, var(--color-white) 76px);
+  pointer-events: none;
+  content: '';
 }
 
 .tabBar {
